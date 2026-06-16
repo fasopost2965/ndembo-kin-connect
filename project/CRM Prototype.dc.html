@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #0F172A; }
+    * { box-sizing: border-box; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(252,209,22,0.12); border-radius: 3px; }
+  </style>
+</helmet>
+
+<div style="display: flex; height: 100vh; font-family: Plus Jakarta Sans, sans-serif; overflow: hidden; background: #F0F2F5;">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <div style="width: 248px; background: #07101A; display: flex; flex-direction: column; flex-shrink: 0; border-right: 1px solid rgba(252,209,22,0.07);">
+    <div style="padding: 18px 16px; border-bottom: 1px solid rgba(252,209,22,0.07);">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="background: #fff; border-radius: 9px; padding: 4px 5px; flex-shrink: 0;">
+          <img src="assets/logo.png" style="height: 26px; width: auto; display: block;" />
+        </div>
+        <div>
+          <div style="font-size: 13px; font-weight: 800; color: #fff; line-height: 1.15;">Ndembo Kin</div>
+          <div style="font-size: 8px; color: rgba(252,209,22,0.5); font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 1px;">CONNECT SARL</div>
+        </div>
+      </div>
+    </div>
+    <div style="flex: 1; padding: 12px 8px; overflow-y: auto;">
+      <sc-for list="{{ navGroups }}" as="group" hint-placeholder-count="4">
+        <div style="margin-bottom: 18px;">
+          <div style="font-size: 9px; font-weight: 700; color: #CBD5E1; letter-spacing: 2px; text-transform: uppercase; padding: 0 10px; margin-bottom: 4px;">{{ group.label }}</div>
+          <sc-for list="{{ group.items }}" as="item" hint-placeholder-count="3">
+            <div style="{{ item.style }}" style-hover="{{ item.hover }}" onClick="{{ item.onClick }}">
+              <span style="{{ item.iStyle }}">{{ item.iGlyph }}</span>
+              <span style="flex: 1; font-size: 13px;">{{ item.text }}</span>
+              <sc-if value="{{ item.badge }}" hint-placeholder-val="{{ false }}">
+                <span style="{{ item.badgeStyle }}">{{ item.badge }}</span>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+    <div style="padding: 0 8px 6px;">
+      <div style="height: 1px; background: rgba(252,209,22,0.07); margin: 0 10px 8px;"></div>
+      <div style="{{ settingsItem.style }}" style-hover="{{ settingsItem.hover }}" onClick="{{ settingsItem.onClick }}">
+        <span style="{{ settingsItem.iStyle }}">{{ settingsItem.iGlyph }}</span>
+        <span style="flex: 1; font-size: 13px;">{{ settingsItem.text }}</span>
+      </div>
+    </div>
+    <div style="padding: 10px 16px 14px; border-top: 1px solid rgba(252,209,22,0.07);">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg,#DAA520,#FCD116); display: flex; align-items: center; justify-content: center; color: #07101A; font-size: 10px; font-weight: 800; flex-shrink: 0;">AD</div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.65);">Administrateur</div>
+          <div style="font-size: 10px; color: rgba(255,255,255,0.22); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">admin@ndembokin.cd</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MAIN ═══ -->
+  <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+
+    <!-- TOPBAR -->
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 26px; background: #FFFFFF; border-bottom: 1px solid #E8ECF1; flex-shrink: 0;">
+      <div>
+        <div style="font-size: 19px; font-weight: 800; color: #0F172A; letter-spacing: -0.3px;">{{ pageTitle }}</div>
+        <div style="font-size: 11px; color: #94A3B8; margin-top: 1px;">{{ pageSubtitle }}</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); border-radius: 9px; padding: 7px 13px; cursor: pointer;" style-hover="background: rgba(255,255,255,0.08);">
+          <span style="font-family: Material Icons Outlined; font-size: 15px; color: #94A3B8; display: inline-flex; line-height: 1;">search</span>
+          <span style="font-size: 12px; color: #94A3B8;">Rechercher...</span>
+        </div>
+        <div style="{{ quickAction.style }}" onClick="{{ quickAction.onClick }}" style-hover="opacity: 0.88;">
+          <span style="font-family: Material Icons Outlined; font-size: 14px; display: inline-flex; line-height: 1;">{{ quickAction.icon }}</span>
+          {{ quickAction.label }}
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div style="flex: 1; overflow-y: auto; padding: 20px 26px; background: #F0F2F5;">
+
+      <!-- ── DASHBOARD ── -->
+      <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+        <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 13px; margin-bottom: 18px;">
+          <sc-for list="{{ kpiCards }}" as="k" hint-placeholder-count="4">
+            <div style="{{ k.cardStyle }}">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                <div style="font-size: 10px; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;">{{ k.label }}</div>
+                <div style="{{ k.iconBox }}"><span style="{{ k.iStyle }}">{{ k.iGlyph }}</span></div>
+              </div>
+              <div style="font-size: 26px; font-weight: 800; color: #0F172A; letter-spacing: -0.6px; line-height: 1; margin-bottom: 8px;">{{ k.value }}</div>
+              <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div style="{{ k.changeStyle }}">{{ k.change }}</div>
+                <div style="display: flex; align-items: flex-end; gap: 3px; height: 22px; width: 42px;">
+                  <sc-for list="{{ k.sparks }}" as="s" hint-placeholder-count="5">
+                    <div style="{{ s.style }}"></div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: grid; grid-template-columns: 5fr 2fr; gap: 13px; margin-bottom: 18px;">
+          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 20px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+              <div>
+                <div style="font-size: 14px; font-weight: 700; color: #0F172A;">Chiffre d'affaires mensuel</div>
+                <div style="font-size: 11px; color: #94A3B8; margin-top: 2px;">2026</div>
+              </div>
+              <div style="display: flex; gap: 3px; background: #F1F5F9; border-radius: 7px; padding: 3px;">
+                <div style="padding: 4px 11px; background: linear-gradient(135deg,#DAA520,#F4C430); color: #07101A; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">Mensuel</div>
+                <div style="padding: 4px 11px; color: #94A3B8; font-size: 11px; cursor: pointer;">Trimestriel</div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: flex-end; gap: 12px; height: 120px;">
+              <sc-for list="{{ chartBars }}" as="bar" hint-placeholder-count="6">
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                  <div style="font-size: 9px; color: #94A3B8;">{{ bar.fmt }}</div>
+                  <div style="{{ bar.style }}" style-hover="opacity: 0.8; cursor: pointer;"></div>
+                  <div style="font-size: 10px; color: #94A3B8; font-weight: 600;">{{ bar.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">Pipeline</div>
+            <div style="font-size: 11px; color: #94A3B8; margin-bottom: 14px;">Devis en attente</div>
+            <div style="font-size: 26px; font-weight: 800; color: #B45309; letter-spacing: -0.5px;">89 200 €</div>
+            <div style="font-size: 11px; color: #B45309; margin-top: 3px; margin-bottom: 12px;">en cours de validation</div>
+            <div style="flex: 1;"></div>
+            <div style="display: flex; flex-direction: column; gap: 9px; padding-top: 12px; border-top: 1px solid #E8ECF1;">
+              <div style="display: flex; justify-content: space-between;"><span style="font-size: 11px; color: #94A3B8;">Délai moyen</span><span style="font-size: 12px; font-weight: 700; color: #fff;">18 jours</span></div>
+              <div style="display: flex; justify-content: space-between;"><span style="font-size: 11px; color: #94A3B8;">Conversion</span><span style="font-size: 12px; font-weight: 700; color: #10B981;">34%</span></div>
+              <div style="display: flex; justify-content: space-between;"><span style="font-size: 11px; color: #94A3B8;">Devis actifs</span><span style="font-size: 12px; font-weight: 700; color: #fff;">12</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 13px;">
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A;">Projets en cours</div>
+            <div style="font-size: 11px; color: #B45309; font-weight: 600; cursor: pointer;" onClick="{{ goToProjets }}">Voir tout →</div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <sc-for list="{{ kanbanCols }}" as="col" hint-placeholder-count="4">
+              <div style="{{ col.colStyle }}">
+                <div style="{{ col.headStyle }}">{{ col.title }} · {{ col.count }}</div>
+                <sc-for list="{{ col.tasks }}" as="task" hint-placeholder-count="2">
+                  <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px; margin-bottom: 6px; cursor: pointer;" style-hover="border-color: rgba(252,209,22,0.25);">
+                    <div style="font-size: 12px; color: #334155; font-weight: 600; line-height: 1.35;">{{ task.title }}</div>
+                    <div style="margin-top: 6px;"><span style="{{ task.tagStyle }}">{{ task.tag }}</span></div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 13px;">
+          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 13px;">
+              <div style="font-size: 14px; font-weight: 700; color: #0F172A;">Événements prochains</div>
+              <div style="font-size: 11px; color: #FCD116; font-weight: 600; cursor: pointer;">+ Ajouter</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <sc-for list="{{ dashEvents }}" as="ev" hint-placeholder-count="3">
+                <div style="{{ ev.style }}">
+                  <div style="flex: 1;">
+                    <div style="font-size: 13px; font-weight: 700; color: #0F172A;">{{ ev.nom }}</div>
+                    <div style="font-size: 11px; color: #94A3B8; margin-top: 2px;">{{ ev.date }}</div>
+                  </div>
+                  <span style="{{ ev.dayStyle }}">{{ ev.days }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 13px;">
+              <div style="font-size: 14px; font-weight: 700; color: #0F172A;">Activités récentes</div>
+              <div style="font-size: 11px; color: #B45309; font-weight: 600; cursor: pointer;" onClick="{{ goToActivites }}">Voir tout →</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 11px;">
+              <sc-for list="{{ dashActs }}" as="a" hint-placeholder-count="4">
+                <div style="display: flex; gap: 10px; align-items: flex-start;">
+                  <div style="{{ a.iBox }}"><span style="{{ a.iStyle }}">{{ a.iGlyph }}</span></div>
+                  <div style="flex: 1;">
+                    <div style="font-size: 12px; color: #334155; font-weight: 600;">{{ a.desc }}</div>
+                    <div style="font-size: 10px; color: #94A3B8; margin-top: 1px;">{{ a.time }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── ATHLÈTES ── -->
+      <sc-if value="{{ isAthletes }}" hint-placeholder-val="{{ false }}">
+        <div style="display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 18px;">
+          <sc-for list="{{ athleteStats }}" as="s" hint-placeholder-count="3">
+            <div style="background: #132130; border: 1px solid rgba(252,209,22,0.1); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 12px;">
+              <div style="{{ s.iBox }}"><span style="{{ s.iStyle }}">{{ s.iGlyph }}</span></div>
+              <div>
+                <div style="font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.4px; line-height: 1;">{{ s.value }}</div>
+                <div style="font-size: 11px; color: #94A3B8; margin-top: 2px;">{{ s.label }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; gap: 13px;">
+          <div style="flex: 1; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+            <div style="display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid #E8ECF1;">
+              <div style="flex: 1; display: flex; align-items: center; gap: 7px; background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 8px; padding: 7px 11px;">
+                <span style="font-family: Material Icons Outlined; font-size: 15px; color: #94A3B8; display: inline-flex; line-height: 1;">search</span>
+                <span style="font-size: 12px; color: #94A3B8;">Rechercher un athlète...</span>
+              </div>
+              <div style="display: flex; gap: 5px;">
+                <div style="padding: 6px 12px; border: 1px solid #DAA520; border-radius: 7px; font-size: 11px; font-weight: 700; color: #B45309; cursor: pointer;">Tous</div>
+                <div style="padding: 6px 12px; border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; font-size: 11px; color: #94A3B8; cursor: pointer;" style-hover="background: rgba(255,255,255,0.04);">Football</div>
+                <div style="padding: 6px 12px; border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; font-size: 11px; color: #94A3B8; cursor: pointer;" style-hover="background: rgba(255,255,255,0.04);">Basket</div>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 2.5fr 1fr 1fr 1fr 1.8fr 1fr; padding: 9px 18px; border-bottom: 1px solid #E8ECF1;">
+              <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Athlète</div>
+              <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Sport</div>
+              <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Poste</div>
+              <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Niveau</div>
+              <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Club</div>
+              <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Valeur</div>
+            </div>
+            <sc-for list="{{ athletes }}" as="a" hint-placeholder-count="5">
+              <div style="{{ a.rowStyle }}" style-hover="{{ a.rowHover }}" onClick="{{ a.onClick }}">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="{{ a.avStyle }}">{{ a.initials }}</div>
+                  <div>
+                    <div style="font-size: 13px; font-weight: 700; color: #0F172A;">{{ a.nom }}</div>
+                    <div style="font-size: 10px; color: #94A3B8;">{{ a.nationalite }} · {{ a.age }} ans</div>
+                  </div>
+                </div>
+                <div style="font-size: 12px; color: rgba(255,255,255,0.65);">{{ a.sport }}</div>
+                <div style="font-size: 12px; color: #64748B;">{{ a.poste }}</div>
+                <div><span style="{{ a.niveauStyle }}">{{ a.niveau }}</span></div>
+                <div style="font-size: 12px; color: #64748B;">{{ a.club }}</div>
+                <div style="font-size: 13px; font-weight: 700; color: #FCD116;">{{ a.valeur }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ hasSelAthlete }}" hint-placeholder-val="{{ false }}">
+            <div style="width: 288px; background: #FFFFFF; border: 1px solid #DAA520; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 18px; flex-shrink: 0; overflow-y: auto; max-height: calc(100vh - 148px);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="font-size: 11px; font-weight: 700; color: #94A3B8;">Fiche athlète</div>
+                <div onClick="{{ closeAthlete }}" style="width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background: rgba(255,255,255,0.12);">
+                  <span style="font-family: Material Icons Outlined; font-size: 13px; color: #94A3B8; display: inline-flex; line-height: 1;">close</span>
+                </div>
+              </div>
+              <div style="text-align: center; margin-bottom: 16px;">
+                <div style="{{ selAthlete.avLg }}">{{ selAthlete.initials }}</div>
+                <div style="font-size: 16px; font-weight: 800; color: #0F172A; margin-top: 10px;">{{ selAthlete.nom }}</div>
+                <div style="font-size: 11px; color: #94A3B8; margin-top: 2px;">{{ selAthlete.sport }} · {{ selAthlete.poste }}</div>
+                <div style="margin-top: 8px;"><span style="{{ selAthlete.niveauStyle }}">{{ selAthlete.niveau }}</span></div>
+              </div>
+              <div style="display: flex; gap: 7px; margin-bottom: 16px;">
+                <div style="flex: 1; background: #FEF9EE; border: 1px solid #FDE68A; border-radius: 9px; padding: 9px; text-align: center;">
+                  <div style="font-size: 17px; font-weight: 800; color: #FCD116;">{{ selAthlete.contrats }}</div>
+                  <div style="font-size: 9px; color: #94A3B8; margin-top: 2px;">Contrats</div>
+                </div>
+                <div style="flex: 1; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 9px; padding: 9px; text-align: center;">
+                  <div style="font-size: 17px; font-weight: 800; color: #7CC8E8;">{{ selAthlete.projets }}</div>
+                  <div style="font-size: 9px; color: #94A3B8; margin-top: 2px;">Projets</div>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; padding-bottom: 9px; border-bottom: 1px solid #E8ECF1;">
+                  <span style="font-size: 10px; color: #94A3B8;">Club actuel</span>
+                  <span style="font-size: 12px; color: #fff; font-weight: 600;">{{ selAthlete.club }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding-bottom: 9px; border-bottom: 1px solid #E8ECF1;">
+                  <span style="font-size: 10px; color: #94A3B8;">Valeur marchande</span>
+                  <span style="font-size: 12px; color: #FCD116; font-weight: 700;">{{ selAthlete.valeur }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding-bottom: 9px; border-bottom: 1px solid #E8ECF1;">
+                  <span style="font-size: 10px; color: #94A3B8;">Téléphone</span>
+                  <span style="font-size: 11px; color: #64748B;">{{ selAthlete.tel }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="font-size: 10px; color: #94A3B8;">Email</span>
+                  <span style="font-size: 11px; color: #7CC8E8;">{{ selAthlete.email }}</span>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 7px;">
+                <div style="padding: 9px; background: linear-gradient(135deg,#DAA520,#F4C430); border-radius: 8px; text-align: center; font-size: 12px; font-weight: 700; color: #07101A; cursor: pointer;" style-hover="opacity: 0.9;">Créer un contrat</div>
+                <div style="padding: 9px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; text-align: center; font-size: 12px; color: #64748B; cursor: pointer;" style-hover="background: rgba(255,255,255,0.07);">Voir le projet</div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ── CLIENTS ── -->
+      <sc-if value="{{ isClients }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 13px;">
+          <div style="display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid #E8ECF1;">
+            <div style="flex: 1; display: flex; align-items: center; gap: 7px; background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 8px; padding: 7px 11px;">
+              <span style="font-family: Material Icons Outlined; font-size: 15px; color: #94A3B8; display: inline-flex; line-height: 1;">search</span>
+              <span style="font-size: 12px; color: #94A3B8;">Rechercher un client...</span>
+            </div>
+            <div style="display: flex; gap: 5px;">
+              <div style="padding: 6px 12px; border: 1px solid #DAA520; border-radius: 7px; font-size: 11px; font-weight: 700; color: #B45309; cursor: pointer;">Tous</div>
+              <div style="padding: 6px 12px; border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; font-size: 11px; color: #94A3B8; cursor: pointer;" style-hover="background: rgba(255,255,255,0.04);">Clubs</div>
+              <div style="padding: 6px 12px; border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; font-size: 11px; color: #94A3B8; cursor: pointer;" style-hover="background: rgba(255,255,255,0.04);">Sponsors</div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 3fr 1fr 2fr 1.5fr 0.8fr 1fr; padding: 9px 18px; border-bottom: 1px solid #E8ECF1;">
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Client</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Type</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Contact</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">CA Total</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Projets</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Statut</div>
+          </div>
+          <sc-for list="{{ clients }}" as="c" hint-placeholder-count="5">
+            <div style="{{ c.rowStyle }}" style-hover="{{ c.rowHover }}" onClick="{{ c.onClick }}">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="{{ c.avStyle }}">{{ c.initials }}</div>
+                <div>
+                  <div style="font-size: 13px; font-weight: 700; color: #0F172A;">{{ c.nom }}</div>
+                  <div style="font-size: 10px; color: #94A3B8;">{{ c.ville }}</div>
+                </div>
+              </div>
+              <div><span style="{{ c.typeStyle }}">{{ c.type }}</span></div>
+              <div>
+                <div style="font-size: 12px; color: #475569;">{{ c.contact }}</div>
+                <div style="font-size: 10px; color: #94A3B8;">{{ c.email }}</div>
+              </div>
+              <div style="font-size: 13px; font-weight: 700; color: #FCD116;">{{ c.ca }}</div>
+              <div style="font-size: 12px; color: #64748B;">{{ c.projets }}</div>
+              <div><span style="{{ c.statutStyle }}">{{ c.statut }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ hasSelClient }}" hint-placeholder-val="{{ false }}">
+          <div style="background: #FFFFFF; border: 1px solid #DAA520; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 18px 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <div>
+                <div style="font-size: 16px; font-weight: 800; color: #0F172A;">{{ selClient.nom }}</div>
+                <div style="font-size: 11px; color: #94A3B8; margin-top: 2px;">{{ selClient.type }} · {{ selClient.secteur }}</div>
+              </div>
+              <div onClick="{{ closeClient }}" style="padding: 5px 13px; background: rgba(255,255,255,0.06); border-radius: 7px; font-size: 11px; color: #94A3B8; cursor: pointer;" style-hover="background: rgba(255,255,255,0.1);">Fermer ✕</div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 10px;">
+              <div style="padding: 13px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 9px;">
+                <div style="font-size: 10px; color: #94A3B8;">CA Total</div>
+                <div style="font-size: 19px; font-weight: 800; color: #FCD116; margin-top: 4px;">{{ selClient.ca }}</div>
+              </div>
+              <div style="padding: 13px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 9px;">
+                <div style="font-size: 10px; color: #94A3B8;">Projets actifs</div>
+                <div style="font-size: 19px; font-weight: 800; color: #7CC8E8; margin-top: 4px;">{{ selClient.projets }}</div>
+              </div>
+              <div style="padding: 13px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 9px;">
+                <div style="font-size: 10px; color: #94A3B8;">Contact</div>
+                <div style="font-size: 13px; font-weight: 600; color: #fff; margin-top: 4px;">{{ selClient.contact }}</div>
+              </div>
+              <div style="padding: 13px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 9px;">
+                <div style="font-size: 10px; color: #94A3B8;">Téléphone</div>
+                <div style="font-size: 12px; font-weight: 600; color: #fff; margin-top: 4px;">{{ selClient.tel }}</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 14px;">
+              <div style="padding: 9px 18px; background: linear-gradient(135deg,#DAA520,#F4C430); border-radius: 8px; font-size: 12px; font-weight: 700; color: #07101A; cursor: pointer;" style-hover="opacity: 0.9;">Créer un devis</div>
+              <div style="padding: 9px 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; font-size: 12px; color: #64748B; cursor: pointer;" style-hover="background: rgba(255,255,255,0.08);">Voir les projets</div>
+            </div>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <!-- ── PRESTATIONS ── -->
+      <sc-if value="{{ isPrestations }}" hint-placeholder-val="{{ false }}">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 13px;">
+          <sc-for list="{{ prestations }}" as="p" hint-placeholder-count="4">
+            <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <div>
+                  <div style="font-size: 15px; font-weight: 700; color: #0F172A;">{{ p.nom }}</div>
+                  <div style="font-size: 11px; color: #94A3B8; margin-top: 3px;">{{ p.type }}</div>
+                </div>
+                <span style="{{ p.actifStyle }}">{{ p.actifLabel }}</span>
+              </div>
+              <div style="font-size: 24px; font-weight: 800; color: #FCD116; letter-spacing: -0.4px; margin: 12px 0;">{{ p.prix }}</div>
+              <div style="font-size: 11px; color: #94A3B8; margin-bottom: 14px;">Durée : {{ p.duree }}</div>
+              <div style="display: flex; gap: 7px;">
+                <div style="flex: 1; padding: 8px; background: linear-gradient(135deg,#DAA520,#F4C430); border-radius: 7px; text-align: center; font-size: 12px; font-weight: 700; color: #07101A; cursor: pointer;" style-hover="opacity: 0.9;">Créer devis</div>
+                <div style="padding: 8px 13px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; font-size: 12px; color: #94A3B8; cursor: pointer;" style-hover="background: rgba(255,255,255,0.07);">Modifier</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ── DEVIS ── -->
+      <sc-if value="{{ isDevis }}" hint-placeholder-val="{{ false }}">
+        <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 18px;">
+          <sc-for list="{{ devisStats }}" as="ds" hint-placeholder-count="4">
+            <div style="{{ ds.cardStyle }}">
+              <div style="font-size: 10px; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">{{ ds.label }}</div>
+              <div style="{{ ds.valueStyle }}">{{ ds.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+          <div style="display: grid; grid-template-columns: 1.5fr 2.5fr 1.5fr 1.5fr 1.5fr 1fr; padding: 9px 18px; border-bottom: 1px solid #E8ECF1;">
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Numéro</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Client</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Montant</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Statut</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Date</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">PDF</div>
+          </div>
+          <sc-for list="{{ devisList }}" as="d" hint-placeholder-count="5">
+            <div style="display: grid; grid-template-columns: 1.5fr 2.5fr 1.5fr 1.5fr 1.5fr 1fr; padding: 13px 18px; border-bottom: 1px solid #F1F5F9; align-items: center; cursor: pointer;" style-hover="background: rgba(255,255,255,0.02);">
+              <div style="font-size: 12px; font-weight: 700; color: #3A6B84; font-family: monospace;">{{ d.id }}</div>
+              <div style="font-size: 12px; color: #334155;">{{ d.client }}</div>
+              <div style="font-size: 13px; font-weight: 700; color: #FCD116;">{{ d.montant }}</div>
+              <div><span style="{{ d.statutStyle }}">{{ d.statut }}</span></div>
+              <div style="font-size: 11px; color: #94A3B8;">{{ d.date }}</div>
+              <div style="width: 26px; height: 26px; border-radius: 6px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background: rgba(255,255,255,0.1);">
+                <span style="font-family: Material Icons Outlined; font-size: 13px; color: #94A3B8; display: inline-flex; line-height: 1;">picture_as_pdf</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ── FACTURES ── -->
+      <sc-if value="{{ isFactures }}" hint-placeholder-val="{{ false }}">
+        <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 18px;">
+          <sc-for list="{{ factureStats }}" as="fs" hint-placeholder-count="4">
+            <div style="{{ fs.cardStyle }}">
+              <div style="font-size: 10px; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">{{ fs.label }}</div>
+              <div style="font-size: 22px; font-weight: 800; color: #fff;">{{ fs.value }}</div>
+              <div style="{{ fs.subStyle }}">{{ fs.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+          <div style="display: grid; grid-template-columns: 1.5fr 2fr 1.5fr 1.5fr 1.5fr 1.5fr; padding: 9px 18px; border-bottom: 1px solid #E8ECF1;">
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">N° Facture</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Client</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Montant</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Statut</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Échéance</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Source</div>
+          </div>
+          <sc-for list="{{ facturesList }}" as="f" hint-placeholder-count="4">
+            <div style="display: grid; grid-template-columns: 1.5fr 2fr 1.5fr 1.5fr 1.5fr 1.5fr; padding: 13px 18px; border-bottom: 1px solid #F1F5F9; align-items: center; cursor: pointer;" style-hover="background: rgba(255,255,255,0.02);">
+              <div style="font-size: 12px; font-weight: 700; color: #3A6B84; font-family: monospace;">{{ f.id }}</div>
+              <div style="font-size: 12px; color: #334155;">{{ f.client }}</div>
+              <div style="font-size: 13px; font-weight: 700; color: #FCD116;">{{ f.montant }}</div>
+              <div><span style="{{ f.statutStyle }}">{{ f.statut }}</span></div>
+              <div style="{{ f.echeStyle }}">{{ f.echeance }}</div>
+              <div style="font-size: 11px; color: rgba(58,107,132,0.7); font-family: monospace;">{{ f.devis }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ── RÈGLEMENTS ── -->
+      <sc-if value="{{ isReglements }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+          <div style="padding: 14px 18px; border-bottom: 1px solid #E8ECF1; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A;">Historique des encaissements</div>
+            <div style="font-size: 13px; font-weight: 700; color: #B45309;">Total encaissé : 22 750 €</div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1.5fr 2fr 1.5fr 1.5fr 1fr 1.5fr; padding: 9px 18px; border-bottom: 1px solid #E8ECF1;">
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Facture</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Client</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Montant</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Date</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Moyen</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Référence</div>
+          </div>
+          <sc-for list="{{ reglements }}" as="r" hint-placeholder-count="3">
+            <div style="display: grid; grid-template-columns: 1.5fr 2fr 1.5fr 1.5fr 1fr 1.5fr; padding: 13px 18px; border-bottom: 1px solid #F1F5F9; align-items: center;">
+              <div style="font-size: 12px; font-weight: 700; color: #3A6B84; font-family: monospace;">{{ r.facture }}</div>
+              <div style="font-size: 12px; color: #334155;">{{ r.client }}</div>
+              <div style="font-size: 13px; font-weight: 700; color: #10B981;">{{ r.montant }}</div>
+              <div style="font-size: 11px; color: #94A3B8;">{{ r.date }}</div>
+              <div><span style="{{ r.moyenStyle }}">{{ r.moyen }}</span></div>
+              <div style="font-size: 11px; color: #94A3B8; font-family: monospace;">{{ r.ref }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ── PROJETS ── -->
+      <sc-if value="{{ isProjets }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A;">Kanban Projets</div>
+            <div style="display: flex; gap: 7px;">
+              <div style="padding: 5px 13px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; font-size: 11px; color: #94A3B8; cursor: pointer;" style-hover="background: rgba(255,255,255,0.07);">Liste</div>
+              <div style="padding: 5px 13px; background: linear-gradient(135deg,#DAA520,#F4C430); border-radius: 7px; font-size: 11px; font-weight: 700; color: #07101A; cursor: pointer;">Kanban</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <sc-for list="{{ projetsCols }}" as="col" hint-placeholder-count="4">
+              <div style="{{ col.colStyle }}">
+                <div style="{{ col.headStyle }}">{{ col.title }} <span style="opacity: 0.45;">{{ col.count }}</span></div>
+                <sc-for list="{{ col.tasks }}" as="t" hint-placeholder-count="2">
+                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 9px; padding: 11px; margin-bottom: 8px; cursor: pointer;" style-hover="border-color: rgba(252,209,22,0.28);">
+                    <div style="font-size: 12px; color: #1E293B; font-weight: 600; line-height: 1.35; margin-bottom: 8px;">{{ t.title }}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="{{ t.tagStyle }}">{{ t.tag }}</span>
+                      <div style="width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg,#DAA520,#FCD116); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; color: #07101A;">AD</div>
+                    </div>
+                  </div>
+                </sc-for>
+                <div style="padding: 8px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px; text-align: center; font-size: 11px; color: #CBD5E1; cursor: pointer;" style-hover="border-color: rgba(252,209,22,0.2); color: rgba(252,209,22,0.4);">+ Ajouter</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── TÂCHES ── -->
+      <sc-if value="{{ isTaches }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+          <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 14px;">Kanban des tâches</div>
+          <div style="display: flex; gap: 10px;">
+            <sc-for list="{{ tachesCols }}" as="col" hint-placeholder-count="4">
+              <div style="{{ col.colStyle }}">
+                <div style="{{ col.headStyle }}">{{ col.title }} <span style="opacity: 0.45;">{{ col.count }}</span></div>
+                <sc-for list="{{ col.tasks }}" as="t" hint-placeholder-count="2">
+                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 9px; padding: 11px; margin-bottom: 7px; cursor: pointer;" style-hover="border-color: rgba(252,209,22,0.28);">
+                    <div style="font-size: 12px; color: #1E293B; font-weight: 600; line-height: 1.35; margin-bottom: 7px;">{{ t.title }}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="{{ t.tagStyle }}">{{ t.tag }}</span>
+                      <span style="font-size: 10px; color: #94A3B8;">{{ t.assignee }}</span>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── JALONS ── -->
+      <sc-if value="{{ isJalons }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+          <div style="padding: 14px 18px; border-bottom: 1px solid #E8ECF1;">
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A;">Milestones & jalons</div>
+            <div style="font-size: 11px; color: #94A3B8; margin-top: 2px;">Points clés de tous les projets actifs</div>
+          </div>
+          <div style="padding: 14px 18px; display: flex; flex-direction: column; gap: 10px;">
+            <sc-for list="{{ jalonsList }}" as="j" hint-placeholder-count="5">
+              <div style="display: flex; align-items: center; gap: 14px; padding: 12px; background: #F8FAFC; border-radius: 9px;">
+                <div style="{{ j.iBox }}"><span style="{{ j.iStyle }}">{{ j.iGlyph }}</span></div>
+                <div style="flex: 1;">
+                  <div style="font-size: 13px; font-weight: 700; color: #0F172A;">{{ j.nom }}</div>
+                  <div style="font-size: 10px; color: #94A3B8; margin-top: 2px;">{{ j.projet }}</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 11px; color: #94A3B8;">{{ j.date }}</div>
+                  <span style="{{ j.statutStyle }}">{{ j.statut }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── CONTRATS ── -->
+      <sc-if value="{{ isContrats }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+          <div style="display: grid; grid-template-columns: 1.5fr 2fr 1.5fr 1.5fr 1.5fr 1fr; padding: 9px 18px; border-bottom: 1px solid #E8ECF1;">
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">N° Contrat</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Client</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Type</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Statut</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Échéance</div>
+            <div style="font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Actions</div>
+          </div>
+          <sc-for list="{{ contratsList }}" as="c" hint-placeholder-count="4">
+            <div style="display: grid; grid-template-columns: 1.5fr 2fr 1.5fr 1.5fr 1.5fr 1fr; padding: 13px 18px; border-bottom: 1px solid #F1F5F9; align-items: center; cursor: pointer;" style-hover="background: rgba(255,255,255,0.02);">
+              <div style="font-size: 12px; font-weight: 700; color: #3A6B84; font-family: monospace;">{{ c.id }}</div>
+              <div style="font-size: 12px; color: #334155;">{{ c.client }}</div>
+              <div style="font-size: 11px; color: #64748B;">{{ c.type }}</div>
+              <div><span style="{{ c.statutStyle }}">{{ c.statut }}</span></div>
+              <div style="font-size: 11px; color: #94A3B8;">{{ c.echeance }}</div>
+              <div style="display: flex; gap: 4px;">
+                <div style="width: 24px; height: 24px; border-radius: 6px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background: rgba(255,255,255,0.1);">
+                  <span style="font-family: Material Icons Outlined; font-size: 13px; color: #94A3B8; display: inline-flex; line-height: 1;">edit</span>
+                </div>
+                <div style="width: 24px; height: 24px; border-radius: 6px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background: rgba(255,255,255,0.1);">
+                  <span style="font-family: Material Icons Outlined; font-size: 13px; color: #94A3B8; display: inline-flex; line-height: 1;">picture_as_pdf</span>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ── ACTIVITÉS ── -->
+      <sc-if value="{{ isActivites }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+          <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 16px;">Journal des activités commerciales</div>
+          <div style="display: flex; flex-direction: column;">
+            <sc-for list="{{ activitesList }}" as="a" hint-placeholder-count="5">
+              <div style="display: flex; gap: 14px; padding: 13px 0; border-bottom: 1px solid #E8ECF1; align-items: flex-start;">
+                <div style="{{ a.iBox }}"><span style="{{ a.iStyle }}">{{ a.iGlyph }}</span></div>
+                <div style="flex: 1;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                      <div style="font-size: 13px; font-weight: 700; color: #0F172A;">{{ a.desc }}</div>
+                      <div style="font-size: 10px; color: #94A3B8; margin-top: 2px;">{{ a.user }} · {{ a.time }}</div>
+                    </div>
+                    <span style="{{ a.resultStyle }}">{{ a.resultat }}</span>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── RAPPORTS ── -->
+      <sc-if value="{{ isRapports }}" hint-placeholder-val="{{ false }}">
+        <div style="display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 18px;">
+          <sc-for list="{{ rapportKpis }}" as="rk" hint-placeholder-count="6">
+            <div style="{{ rk.cardStyle }}">
+              <div style="font-size: 10px; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">{{ rk.label }}</div>
+              <div style="font-size: 24px; font-weight: 800; color: #fff; letter-spacing: -0.4px;">{{ rk.value }}</div>
+              <div style="{{ rk.changeStyle }}">{{ rk.change }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 20px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+          <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 18px;">CA Mensuel 2026</div>
+          <div style="display: flex; align-items: flex-end; gap: 12px; height: 120px;">
+            <sc-for list="{{ chartBars }}" as="bar" hint-placeholder-count="6">
+              <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                <div style="font-size: 9px; color: #94A3B8;">{{ bar.fmt }}</div>
+                <div style="{{ bar.style }}" style-hover="opacity: 0.8;"></div>
+                <div style="font-size: 10px; color: #94A3B8; font-weight: 600;">{{ bar.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── PARAMÈTRES ── -->
+      <sc-if value="{{ isParametres }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; gap: 18px; align-items: flex-start;">
+          <div style="width: 196px; flex-shrink: 0; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+            <sc-for list="{{ settingsTabs }}" as="tab" hint-placeholder-count="4">
+              <div style="{{ tab.style }}" onClick="{{ tab.onClick }}" style-hover="{{ tab.hover }}">
+                <span style="{{ tab.iStyle }}">{{ tab.iGlyph }}</span>
+                <span style="font-size: 13px;">{{ tab.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="flex: 1;">
+            <!-- GÉNÉRAL -->
+            <sc-if value="{{ isSetGeneral }}" hint-placeholder-val="{{ true }}">
+              <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 22px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+                <div style="font-size: 15px; font-weight: 800; color: #0F172A; margin-bottom: 3px;">Informations générales</div>
+                <div style="font-size: 11px; color: #94A3B8; margin-bottom: 20px;">Identité légale et coordonnées de l'entreprise</div>
+                <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 20px; padding: 14px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px;">
+                  <div style="width: 72px; height: 72px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                    <img src="assets/logo.png" style="width: 64px; height: auto;" />
+                  </div>
+                  <div>
+                    <div style="padding: 7px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 12px; color: #64748B; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" style-hover="background: rgba(255,255,255,0.1);">
+                      <span style="font-family: Material Icons Outlined; font-size: 14px; display: inline-flex; line-height: 1;">upload</span>
+                      Changer le logo
+                    </div>
+                    <div style="font-size: 10px; color: rgba(255,255,255,0.22); margin-top: 5px;">PNG, SVG · Fond transparent recommandé</div>
+                  </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                  <div>
+                    <div style="font-size: 10px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px;">Raison sociale</div>
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 9px 13px; font-size: 13px; color: #0F172A;">Ndembo Kin Connect SARL</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 10px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px;">RCCM</div>
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 9px 13px; font-size: 12px; color: #0F172A; font-family: monospace;">KN/RCM/18-B-12345</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 10px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px;">Numéro NIF</div>
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 9px 13px; font-size: 12px; color: #0F172A; font-family: monospace;">A1234567B</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 10px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px;">Email</div>
+                    <div style="background: #FFFFFF; border: 1px solid #DAA520; border-radius: 8px; padding: 9px 13px; font-size: 13px; color: #0F172A; box-shadow: 0 0 0 3px rgba(218,165,32,0.1);">contact@ndembokin.cd</div>
+                  </div>
+                  <div style="grid-column: 1 / -1;">
+                    <div style="font-size: 10px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px;">Adresse siège</div>
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 9px 13px; font-size: 13px; color: #0F172A;">45 Avenue de la Justice, Gombe, Kinshasa, RDC</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 10px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px;">Téléphone</div>
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 9px 13px; font-size: 13px; color: #0F172A;">+243 81 234 5678</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 10px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px;">Site web</div>
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 9px 13px; font-size: 13px; color: #3A6B84;">www.ndembokin.cd</div>
+                  </div>
+                  <div style="grid-column: 1 / -1;">
+                    <div style="font-size: 10px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px;">Slogan</div>
+                    <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 9px 13px; font-size: 13px; color: #64748B; font-style: italic;">"Le talent, notre capital"</div>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 18px;">
+                  <div style="padding: 9px 20px; background: linear-gradient(135deg,#DAA520,#F4C430); border-radius: 8px; font-size: 12px; font-weight: 700; color: #07101A; cursor: pointer;" style-hover="opacity: 0.9;">Enregistrer</div>
+                  <div style="padding: 9px 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; font-size: 12px; color: #94A3B8; cursor: pointer;" style-hover="background: rgba(255,255,255,0.07);">Annuler</div>
+                </div>
+              </div>
+            </sc-if>
+            <!-- UTILISATEURS -->
+            <sc-if value="{{ isSetUsers }}" hint-placeholder-val="{{ false }}">
+              <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 22px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                  <div>
+                    <div style="font-size: 15px; font-weight: 800; color: #0F172A;">Utilisateurs et rôles RBAC</div>
+                    <div style="font-size: 11px; color: #94A3B8; margin-top: 2px;">Gestion des accès par module</div>
+                  </div>
+                  <div style="padding: 8px 16px; background: linear-gradient(135deg,#DAA520,#F4C430); border-radius: 8px; font-size: 12px; font-weight: 700; color: #07101A; cursor: pointer;" style-hover="opacity: 0.9;">+ Inviter</div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 9px;">
+                  <sc-for list="{{ usersRBAC }}" as="u" hint-placeholder-count="5">
+                    <div style="display: flex; align-items: center; gap: 12px; padding: 13px 15px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px;">
+                      <div style="{{ u.avStyle }}">{{ u.initials }}</div>
+                      <div style="flex: 1;">
+                        <div style="font-size: 13px; font-weight: 700; color: #0F172A;">{{ u.nom }}</div>
+                        <div style="font-size: 10px; color: #94A3B8;">{{ u.email }}</div>
+                      </div>
+                      <span style="{{ u.roleStyle }}">{{ u.role }}</span>
+                      <span style="{{ u.statStyle }}">{{ u.statut }}</span>
+                      <div style="width: 26px; height: 26px; border-radius: 7px; background: rgba(255,255,255,0.04); display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background: rgba(255,255,255,0.08);">
+                        <span style="font-family: Material Icons Outlined; font-size: 14px; color: #94A3B8; display: inline-flex; line-height: 1;">more_horiz</span>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+            <!-- NUMÉROTATION -->
+            <sc-if value="{{ isSetNumbering }}" hint-placeholder-val="{{ false }}">
+              <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 22px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+                <div style="font-size: 15px; font-weight: 800; color: #0F172A; margin-bottom: 3px;">Numérotation automatique</div>
+                <div style="font-size: 11px; color: #94A3B8; margin-bottom: 20px;">Préfixes et compteurs pour chaque type de document</div>
+                <div style="display: flex; flex-direction: column; gap: 13px;">
+                  <sc-for list="{{ numberingRules }}" as="nr" hint-placeholder-count="4">
+                    <div style="padding: 16px 18px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 11px; display: flex; align-items: center; gap: 14px;">
+                      <div style="{{ nr.iBox }}"><span style="{{ nr.iStyle }}">{{ nr.iGlyph }}</span></div>
+                      <div style="flex: 1;">
+                        <div style="font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 10px;">{{ nr.label }}</div>
+                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                          <div>
+                            <div style="font-size: 9px; color: #94A3B8; margin-bottom: 4px;">Préfixe</div>
+                            <div style="background: #FEF9EE; border: 1px solid #FDE68A; border-radius: 6px; padding: 6px 11px; font-size: 12px; font-weight: 700; color: #B45309; font-family: monospace;">{{ nr.prefix }}</div>
+                          </div>
+                          <div style="font-size: 16px; color: #CBD5E1; margin-top: 12px;">-</div>
+                          <div>
+                            <div style="font-size: 9px; color: #94A3B8; margin-bottom: 4px;">Année</div>
+                            <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 11px; font-size: 12px; color: #64748B; font-family: monospace;">2026</div>
+                          </div>
+                          <div style="font-size: 16px; color: #CBD5E1; margin-top: 12px;">-</div>
+                          <div>
+                            <div style="font-size: 9px; color: #94A3B8; margin-bottom: 4px;">N° courant</div>
+                            <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 11px; font-size: 12px; color: #64748B; font-family: monospace;">{{ nr.current }}</div>
+                          </div>
+                          <div style="margin-top: 12px;">
+                            <div style="font-size: 9px; color: #94A3B8; margin-bottom: 4px;">Prochain</div>
+                            <div style="font-size: 12px; font-weight: 700; color: #10B981; font-family: monospace;">{{ nr.next }}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+            <!-- PAIEMENTS -->
+            <sc-if value="{{ isSetPayments }}" hint-placeholder-val="{{ false }}">
+              <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 22px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+                <div style="font-size: 15px; font-weight: 800; color: #0F172A; margin-bottom: 3px;">Devises et paiements</div>
+                <div style="font-size: 11px; color: #94A3B8; margin-bottom: 18px;">Configuration RDC — Mobile Money inclus</div>
+                <div style="margin-bottom: 20px;">
+                  <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Devise principale</div>
+                  <div style="display: flex; gap: 9px; margin-bottom: 10px;">
+                    <div style="flex: 1; padding: 12px 14px; background: rgba(252,209,22,0.07); border: 1.5px solid rgba(252,209,22,0.4); border-radius: 9px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                      <div style="width: 26px; height: 26px; border-radius: 7px; background: rgba(252,209,22,0.15); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #FCD116;">$</div>
+                      <div><div style="font-size: 12px; font-weight: 700; color: #fff;">USD</div><div style="font-size: 10px; color: #94A3B8;">Dollar américain</div></div>
+                      <span style="font-family: Material Icons Outlined; font-size: 15px; color: #FCD116; display: inline-flex; line-height: 1; margin-left: auto;">check_circle</span>
+                    </div>
+                    <div style="flex: 1; padding: 12px 14px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 9px; cursor: pointer; display: flex; align-items: center; gap: 10px;" style-hover="background: rgba(255,255,255,0.05);">
+                      <div style="width: 26px; height: 26px; border-radius: 7px; background: rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #94A3B8;">FC</div>
+                      <div><div style="font-size: 12px; color: #64748B;">CDF</div><div style="font-size: 10px; color: #94A3B8;">Franc congolais</div></div>
+                    </div>
+                    <div style="flex: 1; padding: 12px 14px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 9px; cursor: pointer; display: flex; align-items: center; gap: 10px;" style-hover="background: rgba(255,255,255,0.05);">
+                      <div style="width: 26px; height: 26px; border-radius: 7px; background: rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #94A3B8;">€</div>
+                      <div><div style="font-size: 12px; color: #64748B;">EUR</div><div style="font-size: 10px; color: #94A3B8;">Euro</div></div>
+                    </div>
+                  </div>
+                  <div style="padding: 11px 14px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 9px; display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 12px; color: #94A3B8;">Taux de change USD → CDF</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 13px; font-weight: 700; color: #FCD116;">1 USD = 2 850 CDF</span>
+                      <div style="padding: 4px 9px; background: rgba(255,255,255,0.05); border-radius: 5px; font-size: 10px; color: #94A3B8; cursor: pointer;" style-hover="background: rgba(255,255,255,0.09);">Mettre à jour</div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Mobile Money (RDC)</div>
+                  <div style="display: flex; flex-direction: column; gap: 9px;">
+                    <sc-for list="{{ mobileMoney }}" as="mm" hint-placeholder-count="3">
+                      <div style="padding: 12px 14px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 9px; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                          <div style="{{ mm.iBox }}"><span style="{{ mm.iStyle }}">{{ mm.iGlyph }}</span></div>
+                          <div>
+                            <div style="font-size: 13px; font-weight: 700; color: #0F172A;">{{ mm.nom }}</div>
+                            <div style="font-size: 10px; color: #94A3B8;">{{ mm.numero }}</div>
+                          </div>
+                        </div>
+                        <div style="{{ mm.toggleStyle }}">{{ mm.toggle }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <!-- ═══ DEVIS MODAL ═══ -->
+  <sc-if value="{{ showModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; background: rgba(15,23,42,0.45); display: flex; align-items: center; justify-content: center; z-index: 1000;" onClick="{{ closeModal }}">
+      <div style="background: #132130; border: 1px solid rgba(252,209,22,0.22); border-radius: 16px; width: 540px; max-height: 82vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,0.55);" onClick="{{ stopProp }}">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid #E8ECF1;">
+          <div>
+            <div style="font-size: 16px; font-weight: 800; color: #0F172A;">Nouveau devis</div>
+            <div style="font-size: 11px; color: #94A3B8; margin-top: 1px;">DEV-2026-006 · auto-généré</div>
+          </div>
+          <div onClick="{{ closeModal }}" style="width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background: rgba(255,255,255,0.12);">
+            <span style="font-family: Material Icons Outlined; font-size: 15px; color: #94A3B8; display: inline-flex; line-height: 1;">close</span>
+          </div>
+        </div>
+        <div style="padding: 18px 22px; display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <div style="font-size: 10px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px;">Client *</div>
+            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 13px; font-size: 13px; color: #94A3B8; display: flex; justify-content: space-between; cursor: pointer;" style-hover="border-color: rgba(252,209,22,0.35);">
+              Sélectionner un client...
+              <span style="font-family: Material Icons Outlined; font-size: 15px; color: #94A3B8; display: inline-flex; line-height: 1;">expand_more</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 10px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px;">Lignes de prestations</div>
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 9px; overflow: hidden;">
+              <div style="display: grid; grid-template-columns: 3fr 1fr 1fr; padding: 8px 13px; border-bottom: 1px solid #E8ECF1;">
+                <div style="font-size: 9px; color: rgba(255,255,255,0.22); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;">Prestation</div>
+                <div style="font-size: 9px; color: rgba(255,255,255,0.22); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;">Qté</div>
+                <div style="font-size: 9px; color: rgba(255,255,255,0.22); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;">Prix unit.</div>
+              </div>
+              <div style="display: grid; grid-template-columns: 3fr 1fr 1fr; padding: 10px 13px; border-bottom: 1px solid #F1F5F9; align-items: center;">
+                <div style="font-size: 13px; color: #475569;">Gestion de carrière</div>
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 5px; padding: 4px 9px; font-size: 12px; color: #0F172A; width: 44px; text-align: center;">1</div>
+                <div style="font-size: 13px; font-weight: 700; color: #FCD116;">3 500 €</div>
+              </div>
+              <div style="padding: 9px 13px; cursor: pointer;" style-hover="background: rgba(255,255,255,0.02);">
+                <span style="font-size: 11px; color: rgba(252,209,22,0.55);">+ Ajouter une ligne</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 10px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px;">Notes / conditions</div>
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 10px 13px; font-size: 12px; color: #94A3B8; min-height: 52px;">Paiement à 30 jours...</div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 13px 15px; background: #FEF9EE; border: 1px solid #DAA520; border-radius: 9px;">
+            <span style="font-size: 13px; color: #64748B;">TOTAL HT</span>
+            <span style="font-size: 20px; font-weight: 800; color: #FCD116; letter-spacing: -0.4px;">3 500 €</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 9px; padding: 14px 22px; border-top: 1px solid #E8ECF1;">
+          <div style="flex: 1; padding: 11px; background: linear-gradient(135deg,#DAA520,#F4C430); border-radius: 9px; text-align: center; font-size: 13px; font-weight: 700; color: #07101A; cursor: pointer;" style-hover="opacity: 0.9;">Créer le devis</div>
+          <div onClick="{{ closeModal }}" style="padding: 11px 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); border-radius: 9px; font-size: 13px; color: #94A3B8; cursor: pointer;" style-hover="background: rgba(255,255,255,0.08);">Annuler</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+class Component extends DCLogic {
+  state = { page: 'dashboard', selAthlete: null, selClient: null, setTab: 'general', showModal: false };
+
+  ATHLETES = [
+    { id:1, nom:'Cédric Diabase', initials:'CD', sport:'Football', poste:'Attaquant', niveau:'Pro', club:'AS Vita Club', valeur:'850 000 €', nationalite:'RDC', age:24, tel:'+243 81 234 5678', email:'c.diabase@gmail.com', contrats:2, projets:3, color:'#7CC8E8' },
+    { id:2, nom:'Marie Kongo', initials:'MK', sport:'Basketball', poste:'Pivot', niveau:'Semi-pro', club:'BBC Kinshasa', valeur:'120 000 €', nationalite:'RDC', age:21, tel:'+243 89 876 5432', email:'m.kongo@gmail.com', contrats:1, projets:1, color:'#FCD116' },
+    { id:3, nom:'Junior Lukoki', initials:'JL', sport:'Football', poste:'Milieu', niveau:'Pro', club:'TP Mazembe', valeur:'1 200 000 €', nationalite:'RDC', age:27, tel:'+243 82 345 6789', email:'j.lukoki@gmail.com', contrats:3, projets:2, color:'#10B981' },
+    { id:4, nom:'Rachel Ilunga', initials:'RI', sport:'Basketball', poste:'Meneur', niveau:'Amateur', club:'Academia Basket', valeur:'45 000 €', nationalite:'RDC', age:18, tel:'+243 99 654 3210', email:'r.ilunga@gmail.com', contrats:0, projets:1, color:'#EF4444' },
+    { id:5, nom:'Patrick Mbo', initials:'PM', sport:'Football', poste:'Défenseur', niveau:'Semi-pro', club:'Renaissance FC', valeur:'280 000 €', nationalite:'RDC', age:22, tel:'+243 81 111 2222', email:'p.mbo@gmail.com', contrats:1, projets:1, color:'#DAA520' },
+  ];
+  CLIENTS = [
+    { id:1, nom:'Sporting Club Kinshasa', initials:'SC', type:'Club', secteur:'Football', contact:'Jean Ntumba', email:'j.ntumba@sporting.cd', tel:'+243 81 500 0001', ville:'Kinshasa', ca:'45 000 €', projets:3, statut:'Actif', color:'#7CC8E8' },
+    { id:2, nom:'Nike Congo SARL', initials:'NK', type:'Sponsor', secteur:'Équipementier', contact:'Sophie Muanda', email:'s.muanda@nike.cd', tel:'+243 89 500 0002', ville:'Kinshasa', ca:'28 000 €', projets:1, statut:'Actif', color:'#FCD116' },
+    { id:3, nom:'MTN Foundation RDC', initials:'MT', type:'Partenaire', secteur:'Télécoms', contact:'Richard Kabila', email:'r.kabila@mtn.cd', tel:'+243 82 500 0003', ville:'Lubumbashi', ca:'15 000 €', projets:1, statut:'Actif', color:'#10B981' },
+    { id:4, nom:'Académie Foot RDC', initials:'AF', type:'Académie', secteur:'Formation', contact:'Paul Luzolo', email:'p.luzolo@academie.cd', tel:'+243 99 500 0004', ville:'Kinshasa', ca:'8 500 €', projets:2, statut:'Nouveau', color:'#DAA520' },
+    { id:5, nom:'FC Renaissance', initials:'FR', type:'Club', secteur:'Football', contact:'Marc Bondo', email:'m.bondo@renaissance.cd', tel:'+243 81 500 0005', ville:'Lubumbashi', ca:'22 000 €', projets:1, statut:'Actif', color:'#EF4444' },
+  ];
+
+  renderVals() {
+    const S = this.state;
+    const pg = S.page;
+
+    // helpers
+    const mi = (g, color, sz=16) => ({
+      iGlyph: g,
+      iStyle: { fontFamily:'Material Icons Outlined', fontSize:sz, lineHeight:1, display:'inline-flex', alignItems:'center', justifyContent:'center', width:sz, height:sz, overflow:'hidden', color, flexShrink:0 },
+    });
+    const iBox = (bg, bd) => ({ width:32, height:32, borderRadius:8, background:bg, border:`1px solid ${bd}`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 });
+    const bdg = (text, color) => ({ display:'inline-block', fontSize:10, fontWeight:700, padding:'3px 9px', borderRadius:6, color, background:color+'18', border:`1px solid ${color}28` });
+
+    // nav
+    const mkItem = item => {
+      const on = item.id === pg;
+      return {
+        ...item, ...mi(item.ic, on ? '#FCD116' : 'rgba(255,255,255,0.32)'),
+        style: on
+          ? { padding:'7px 10px', paddingLeft:12, borderRadius:8, display:'flex', alignItems:'center', gap:9, cursor:'pointer', marginBottom:2, background:'rgba(252,209,22,0.08)', color:'#FCD116', fontWeight:600, borderLeft:'2px solid #DAA520' }
+          : { padding:'7px 10px', paddingLeft:12, borderRadius:8, display:'flex', alignItems:'center', gap:9, cursor:'pointer', marginBottom:2, color:'rgba(255,255,255,0.42)', fontWeight:500 },
+        hover: on ? { background:'rgba(252,209,22,0.12)' } : { background:'rgba(255,255,255,0.04)' },
+        badgeStyle: { fontSize:9, fontWeight:700, background:'rgba(252,209,22,0.1)', color:'rgba(252,209,22,0.6)', padding:'2px 7px', borderRadius:8 },
+        onClick: () => this.setState({ page:item.id, selAthlete:null, selClient:null }),
+      };
+    };
+    const navGroups = [
+      { label:'PRINCIPAL', items:[mkItem({id:'dashboard',ic:'dashboard',text:'Dashboard'}),mkItem({id:'athletes',ic:'directions_run',text:'Athlètes',badge:'45'}),mkItem({id:'clients',ic:'business',text:'Clients',badge:'28'})] },
+      { label:'COMMERCIAL', items:[mkItem({id:'prestations',ic:'category',text:'Prestations'}),mkItem({id:'devis',ic:'request_quote',text:'Devis',badge:'12'}),mkItem({id:'factures',ic:'receipt_long',text:'Factures'}),mkItem({id:'reglements',ic:'payments',text:'Règlements'})] },
+      { label:'OPÉRATIONS', items:[mkItem({id:'projets',ic:'work',text:'Projets',badge:'8'}),mkItem({id:'taches',ic:'task_alt',text:'Tâches'}),mkItem({id:'jalons',ic:'flag',text:'Jalons'}),mkItem({id:'contrats',ic:'gavel',text:'Contrats'})] },
+      { label:'SUIVI', items:[mkItem({id:'activites',ic:'history',text:'Activités'}),mkItem({id:'rapports',ic:'bar_chart',text:'Rapports'})] },
+    ];
+    const settingsItem = mkItem({id:'parametres',ic:'settings',text:'Paramètres'});
+
+    // page meta
+    const META = {
+      dashboard:{t:'Dashboard',s:'Vue d\'ensemble · Juin 2026',ql:'Rapport mensuel',qi:'bar_chart'},
+      athletes:{t:'Athlètes',s:'45 sportifs gérés par l\'agence',ql:'Ajouter un athlète',qi:'add'},
+      clients:{t:'Clients',s:'28 clients B2B actifs',ql:'Ajouter un client',qi:'add'},
+      prestations:{t:'Prestations',s:'Catalogue de services',ql:'Nouveau service',qi:'add'},
+      devis:{t:'Devis',s:'12 devis en cours · Pipeline 89 200 €',ql:'Nouveau devis',qi:'add'},
+      factures:{t:'Factures',s:'Suivi des encaissements',ql:'Nouvelle facture',qi:'add'},
+      reglements:{t:'Règlements',s:'Historique des paiements',ql:'Enregistrer',qi:'add'},
+      projets:{t:'Projets',s:'8 projets actifs',ql:'Nouveau projet',qi:'add'},
+      taches:{t:'Tâches',s:'Kanban de l\'équipe',ql:'Nouvelle tâche',qi:'add'},
+      jalons:{t:'Jalons',s:'Milestones des projets',ql:'Nouveau jalon',qi:'add'},
+      contrats:{t:'Contrats',s:'Gestion légale et signatures',ql:'Nouveau contrat',qi:'add'},
+      activites:{t:'Activités',s:'Journal commercial',ql:'Enregistrer',qi:'add'},
+      rapports:{t:'Rapports',s:'KPIs et tableaux de bord',ql:'Exporter PDF',qi:'picture_as_pdf'},
+      parametres:{t:'Paramètres',s:'Configuration du CRM',ql:'Enregistrer',qi:'save'},
+    };
+    const m = META[pg] || META.dashboard;
+    const qaStyle = { padding:'8px 16px', background:'linear-gradient(135deg,#DAA520,#F4C430)', borderRadius:9, fontSize:12, fontWeight:700, color:'#07101A', cursor:'pointer', display:'flex', alignItems:'center', gap:5 };
+    const quickAction = { label:m.ql, icon:m.qi, style:qaStyle, onClick: pg==='devis' ? ()=>this.setState({showModal:true}) : ()=>{} };
+
+    // dashboard KPIs
+    const sp = (data) => { const mx=Math.max(...data); return data.map((v,i)=>({ style:{ flex:1, borderRadius:2, height:Math.round((v/mx)*20)+'px', background:i===data.length-1?'#FCD116':'rgba(255,255,255,0.1)' } })); };
+    const kpiCards = [
+      { label:'Athlètes', value:'45', change:'+3 sem.', changeStyle:{fontSize:11,color:'#FCD116',fontWeight:600}, cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.12)',borderRadius:13,padding:'16px 18px'}, iconBox:iBox('rgba(252,209,22,0.08)','rgba(252,209,22,0.15)'), ...mi('directions_run','#FCD116'), sparks:sp([30,35,38,42,45]) },
+      { label:'Clients', value:'28', change:'+2 sem.', changeStyle:{fontSize:11,color:'#FCD116',fontWeight:600}, cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.12)',borderRadius:13,padding:'16px 18px'}, iconBox:iBox('rgba(124,200,232,0.08)','rgba(124,200,232,0.15)'), ...mi('business','#7CC8E8'), sparks:sp([20,22,24,26,28]) },
+      { label:'CA 2026', value:'125k €', change:'+15% vs N-1', changeStyle:{fontSize:11,color:'#10B981',fontWeight:600}, cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.12)',borderRadius:13,padding:'16px 18px'}, iconBox:iBox('rgba(16,185,129,0.08)','rgba(16,185,129,0.15)'), ...mi('trending_up','#10B981'), sparks:sp([14,18,16,21,23,25]) },
+      { label:'Pipeline', value:'89k €', change:'18j délai moyen', changeStyle:{fontSize:11,color:'rgba(255,255,255,0.32)',fontWeight:500}, cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.12)',borderRadius:13,padding:'16px 18px'}, iconBox:iBox('rgba(218,165,32,0.08)','rgba(218,165,32,0.15)'), ...mi('show_chart','#DAA520'), sparks:sp([58,70,78,84,89]) },
+    ];
+    const rawC=[{l:'Jan',v:15200},{l:'Fév',v:20100},{l:'Mar',v:18400},{l:'Avr',v:22300},{l:'Mai',v:24800},{l:'Juin',v:24600}];
+    const mx=Math.max(...rawC.map(d=>d.v));
+    const chartBars=rawC.map(d=>({ label:d.l, fmt:(d.v/1000).toFixed(0)+'k', style:{width:'100%',borderRadius:'5px 5px 0 0',height:Math.round((d.v/mx)*108)+'px',background:'linear-gradient(180deg,#F4C430 0%,#8B5E04 100%)'} }));
+    const kt=(t,c)=>({ tag:t, tagStyle:{ fontSize:9,color:c,fontWeight:700,background:c+'18',padding:'2px 7px',borderRadius:4,display:'inline-block',border:`1px solid ${c}28` } });
+    const kanbanCols = [
+      { title:'TODO', count:'3', colStyle:{flex:1,background:'rgba(255,255,255,0.03)',borderRadius:9,padding:10,minWidth:0}, headStyle:{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.28)',textTransform:'uppercase',letterSpacing:'1px',marginBottom:9}, tasks:[{title:'Signature contrat joueur',...kt('Urgent','#EF4444')},{title:'Prép. match amical',...kt('Moyen','#F59E0B')}] },
+      { title:'EN COURS', count:'5', colStyle:{flex:1,background:'rgba(124,200,232,0.04)',border:'1px solid rgba(124,200,232,0.1)',borderRadius:9,padding:10,minWidth:0}, headStyle:{fontSize:9,fontWeight:700,color:'#7CC8E8',textTransform:'uppercase',letterSpacing:'1px',marginBottom:9}, tasks:[{title:'Scouting Europe 2026',...kt('Actif','#10B981')},{title:'Négociation club EU',...kt('Urgent','#EF4444')}] },
+      { title:'ATTENTE', count:'2', colStyle:{flex:1,background:'rgba(218,165,32,0.04)',border:'1px solid rgba(218,165,32,0.12)',borderRadius:9,padding:10,minWidth:0}, headStyle:{fontSize:9,fontWeight:700,color:'#DAA520',textTransform:'uppercase',letterSpacing:'1px',marginBottom:9}, tasks:[{title:'Contrat Diabase',...kt('Bloqué','#DAA520')}] },
+      { title:'TERMINÉ', count:'12', colStyle:{flex:1,background:'rgba(16,185,129,0.04)',border:'1px solid rgba(16,185,129,0.1)',borderRadius:9,padding:10,minWidth:0}, headStyle:{fontSize:9,fontWeight:700,color:'#10B981',textTransform:'uppercase',letterSpacing:'1px',marginBottom:9}, tasks:[{title:'Init. projet Diabase',...kt('Fait','#10B981')},{title:'Scouting EU Round 1',...kt('Fait','#10B981')}] },
+    ];
+    const dashEvents=[
+      { nom:'Camp Football', date:'20 Juin 2026', days:'4j', style:{display:'flex',alignItems:'center',gap:10,padding:'11px 13px',background:'rgba(58,107,132,0.1)',border:'1px solid rgba(58,107,132,0.28)',borderLeft:'3px solid #3A6B84',borderRadius:9}, dayStyle:{fontSize:10,color:'#7CC8E8',fontWeight:700,background:'rgba(124,200,232,0.1)',padding:'2px 8px',borderRadius:5} },
+      { nom:'Stage Basket', date:'25 Juin 2026', days:'9j', style:{display:'flex',alignItems:'center',gap:10,padding:'11px 13px',background:'rgba(218,165,32,0.06)',border:'1px solid rgba(218,165,32,0.2)',borderLeft:'3px solid #DAA520',borderRadius:9}, dayStyle:{fontSize:10,color:'#FCD116',fontWeight:700,background:'rgba(252,209,22,0.08)',padding:'2px 8px',borderRadius:5} },
+      { nom:'Signature Athlète Z', date:'1 Juillet 2026', days:'15j', style:{display:'flex',alignItems:'center',gap:10,padding:'11px 13px',background:'rgba(16,185,129,0.06)',border:'1px solid rgba(16,185,129,0.15)',borderLeft:'3px solid #10B981',borderRadius:9}, dayStyle:{fontSize:10,color:'#10B981',fontWeight:700,background:'rgba(16,185,129,0.1)',padding:'2px 8px',borderRadius:5} },
+    ];
+    const mkAct=(g,c,desc,time)=>({ desc, time, iGlyph:g, iBox:iBox(c+'15',c+'30'), iStyle:{ fontFamily:'Material Icons Outlined',fontSize:14,lineHeight:1,display:'inline-flex',alignItems:'center',justifyContent:'center',width:14,height:14,overflow:'hidden',color:c } });
+    const dashActs=[mkAct('call','#7CC8E8','Appel — Club Kinshasa','Auj. 14:30'),mkAct('handshake','#10B981','RDV — Sponsor Nike Congo','Auj. 13:00'),mkAct('mail','#DAA520','Email — Academy Kimbanguiste','Auj. 11:30'),mkAct('task_alt','rgba(255,255,255,0.35)','Tâche — Init. Diabase','Hier 16:00')];
+
+    // athletes
+    const athleteStats=[
+      { value:'45', label:'Athlètes gérés', iBox:iBox('rgba(252,209,22,0.1)','rgba(252,209,22,0.2)'), ...mi('directions_run','#FCD116',17) },
+      { value:'32', label:'Actifs (contrat)', iBox:iBox('rgba(16,185,129,0.1)','rgba(16,185,129,0.2)'), ...mi('check_circle','#10B981',17) },
+      { value:'13', label:'En prospect', iBox:iBox('rgba(124,200,232,0.1)','rgba(124,200,232,0.2)'), ...mi('person_search','#7CC8E8',17) },
+    ];
+    const nC={'Pro':'#A78BFA','Semi-pro':'#60A5FA','Amateur':'#94A3B8'};
+    const rBase={display:'grid',gridTemplateColumns:'2.5fr 1fr 1fr 1fr 1.8fr 1fr',padding:'12px 18px',borderBottom:'1px solid rgba(255,255,255,0.04)',cursor:'pointer',alignItems:'center'};
+    const athletes=this.ATHLETES.map(a=>{
+      const sel=a.id===S.selAthlete;
+      return { ...a, rowStyle:{...rBase,background:sel?'rgba(252,209,22,0.04)':'transparent'}, rowHover:{background:sel?'rgba(252,209,22,0.06)':'rgba(255,255,255,0.02)'},
+        avStyle:{width:32,height:32,borderRadius:'50%',background:`linear-gradient(135deg,${a.color}88,${a.color})`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:800,color:'#07101A',flexShrink:0},
+        niveauStyle:bdg(a.niveau,nC[a.niveau]||'#94A3B8'),
+        onClick:()=>this.setState({selAthlete:sel?null:a.id}) };
+    });
+    const rawSA=this.ATHLETES.find(a=>a.id===S.selAthlete);
+    const selAthlete=rawSA ? {...rawSA, niveauStyle:bdg(rawSA.niveau,nC[rawSA.niveau]||'#94A3B8'), avLg:{width:58,height:58,borderRadius:'50%',background:`linear-gradient(135deg,${rawSA.color}88,${rawSA.color})`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,fontWeight:800,color:'#07101A',margin:'0 auto'} } : {};
+
+    // clients
+    const tC={'Club':'#7CC8E8','Sponsor':'#FCD116','Partenaire':'#10B981','Académie':'#DAA520'};
+    const sC={'Actif':'#10B981','Prospect':'#FCD116','Nouveau':'#7CC8E8','Inactif':'#64748B'};
+    const cBase={display:'grid',gridTemplateColumns:'3fr 1fr 2fr 1.5fr 0.8fr 1fr',padding:'12px 18px',borderBottom:'1px solid rgba(255,255,255,0.04)',cursor:'pointer',alignItems:'center'};
+    const clients=this.CLIENTS.map(c=>{
+      const sel=c.id===S.selClient;
+      return { ...c, rowStyle:{...cBase,background:sel?'rgba(252,209,22,0.04)':'transparent'}, rowHover:{background:sel?'rgba(252,209,22,0.06)':'rgba(255,255,255,0.02)'},
+        avStyle:{width:32,height:32,borderRadius:9,background:`linear-gradient(135deg,${c.color}88,${c.color})`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:800,color:'#07101A',flexShrink:0},
+        typeStyle:bdg(c.type,tC[c.type]||'#94A3B8'), statutStyle:bdg(c.statut,sC[c.statut]||'#94A3B8'),
+        onClick:()=>this.setState({selClient:sel?null:c.id}) };
+    });
+    const selClient=this.CLIENTS.find(c=>c.id===S.selClient)||{};
+
+    // prestations
+    const prestations=[
+      {nom:'Gestion de carrière',type:'Conseil',prix:'3 500 €/mois',duree:'12 mois',actif:true},
+      {nom:'Camp de détection',type:'Événement',prix:'8 000 €',duree:'5 jours',actif:true},
+      {nom:'Stage de formation',type:'Événement',prix:'12 000 €',duree:'10 jours',actif:true},
+      {nom:'Conseil scouting',type:'Conseil',prix:'2 500 €',duree:'1 rapport',actif:false},
+    ].map(p=>({...p, actifStyle:bdg(p.actif?'Actif':'Inactif',p.actif?'#10B981':'#64748B'), actifLabel:p.actif?'Actif':'Inactif' }));
+
+    // devis
+    const dC={'Converti':'#10B981','Validé':'#10B981','En attente':'#FCD116','Refusé':'#EF4444'};
+    const devisStats=[
+      {label:'Total pipeline',value:'44 200 €',cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.1)',borderRadius:11,padding:'14px 17px'},valueStyle:{fontSize:22,fontWeight:800,color:'#fff'}},
+      {label:'En attente',value:'13 500 €',cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.1)',borderRadius:11,padding:'14px 17px'},valueStyle:{fontSize:22,fontWeight:800,color:'#FCD116'}},
+      {label:'Validé/Converti',value:'27 500 €',cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.1)',borderRadius:11,padding:'14px 17px'},valueStyle:{fontSize:22,fontWeight:800,color:'#10B981'}},
+      {label:'Refusé',value:'3 200 €',cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.1)',borderRadius:11,padding:'14px 17px'},valueStyle:{fontSize:22,fontWeight:800,color:'#EF4444'}},
+    ];
+    const devisList=[
+      {id:'DEV-2026-001',client:'Sporting Club Kinshasa',montant:'12 500 €',statut:'Converti',date:'10/06/2026'},
+      {id:'DEV-2026-002',client:'Nike Congo SARL',montant:'8 000 €',statut:'En attente',date:'14/06/2026'},
+      {id:'DEV-2026-003',client:'MTN Foundation RDC',montant:'5 500 €',statut:'En attente',date:'15/06/2026'},
+      {id:'DEV-2026-004',client:'Académie Foot RDC',montant:'3 200 €',statut:'Refusé',date:'08/06/2026'},
+      {id:'DEV-2026-005',client:'FC Renaissance',montant:'15 000 €',statut:'Validé',date:'16/06/2026'},
+    ].map(d=>({...d,statutStyle:bdg(d.statut,dC[d.statut]||'#94A3B8')}));
+
+    // factures
+    const fC={'Payée':'#10B981','Acompte':'#FCD116','En cours':'#7CC8E8','Impayée':'#EF4444'};
+    const factureStats=[
+      {label:'Total émis',value:'41 000 €',sub:'4 factures',cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.1)',borderRadius:11,padding:'14px 17px',borderLeft:'3px solid #fff'},subStyle:{fontSize:11,marginTop:4,color:'rgba(255,255,255,0.4)'}},
+      {label:'Payées',value:'12 500 €',sub:'1 facture',cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.1)',borderRadius:11,padding:'14px 17px',borderLeft:'3px solid #10B981'},subStyle:{fontSize:11,marginTop:4,color:'#10B981'}},
+      {label:'Impayées',value:'8 000 €',sub:'1 facture',cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.1)',borderRadius:11,padding:'14px 17px',borderLeft:'3px solid #EF4444'},subStyle:{fontSize:11,marginTop:4,color:'#EF4444'}},
+      {label:'En cours',value:'20 500 €',sub:'2 factures',cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.1)',borderRadius:11,padding:'14px 17px',borderLeft:'3px solid #FCD116'},subStyle:{fontSize:11,marginTop:4,color:'#FCD116'}},
+    ];
+    const facturesList=[
+      {id:'FACT-2026-001',client:'Sporting Club Kinshasa',montant:'12 500 €',statut:'Payée',echeance:'11/07/2026',devis:'DEV-2026-001'},
+      {id:'FACT-2026-002',client:'Nike Congo SARL',montant:'8 000 €',statut:'Impayée',echeance:'01/07/2026',devis:'—'},
+      {id:'FACT-2026-003',client:'FC Renaissance',montant:'15 000 €',statut:'Acompte',echeance:'16/07/2026',devis:'DEV-2026-005'},
+      {id:'FACT-2026-004',client:'MTN Foundation RDC',montant:'5 500 €',statut:'En cours',echeance:'05/07/2026',devis:'—'},
+    ].map(f=>({...f,statutStyle:bdg(f.statut,fC[f.statut]||'#94A3B8'),echeStyle:{fontSize:11,color:f.statut==='Impayée'?'#EF4444':'rgba(255,255,255,0.42)',fontWeight:f.statut==='Impayée'?700:400}}));
+
+    // règlements
+    const mC={'Virement':'#7CC8E8','MTN Money':'#FCD116','Orange Money':'#F97316','Airtel Money':'#EF4444'};
+    const reglements=[
+      {facture:'FACT-2026-001',client:'Sporting Club Kinshasa',montant:'12 500 €',date:'12/06/2026',moyen:'Virement',ref:'VIR-2026-001'},
+      {facture:'FACT-2026-003',client:'FC Renaissance',montant:'7 500 €',date:'16/06/2026',moyen:'MTN Money',ref:'MTN-2026-001'},
+      {facture:'FACT-2026-004',client:'MTN Foundation RDC',montant:'2 750 €',date:'08/06/2026',moyen:'Orange Money',ref:'ORA-2026-001'},
+    ].map(r=>({...r,moyenStyle:bdg(r.moyen,mC[r.moyen]||'#94A3B8')}));
+
+    // projets + tâches kanban
+    const mkKan=(cols)=>cols.map(c=>({...c,colStyle:{flex:1,background:c.bg,border:c.border||'none',borderRadius:9,padding:10,minWidth:0},headStyle:{fontSize:9,fontWeight:700,color:c.hc,textTransform:'uppercase',letterSpacing:'1px',marginBottom:9}}));
+    const projetsCols=mkKan([
+      {title:'TODO',count:'3',bg:'rgba(255,255,255,0.03)',hc:'rgba(255,255,255,0.28)',tasks:[{title:'Signature contrat joueur Diabase',...kt('Urgent','#EF4444')},{title:'Préparation match amical RC Kinshasa',...kt('Moyen','#F59E0B')}]},
+      {title:'EN COURS',count:'5',bg:'rgba(124,200,232,0.04)',border:'1px solid rgba(124,200,232,0.1)',hc:'#7CC8E8',tasks:[{title:'Scouting Europe 2026',...kt('Actif','#10B981')},{title:'Négociation club EU',...kt('Urgent','#EF4444')},{title:'Camp Football Juin',...kt('En cours','#7CC8E8')}]},
+      {title:'ATTENTE',count:'2',bg:'rgba(218,165,32,0.04)',border:'1px solid rgba(218,165,32,0.12)',hc:'#DAA520',tasks:[{title:'Contrat gestion Diabase',...kt('Bloqué','#DAA520')},{title:'Validation académie',...kt('Bloqué','#DAA520')}]},
+      {title:'TERMINÉ',count:'12',bg:'rgba(16,185,129,0.04)',border:'1px solid rgba(16,185,129,0.1)',hc:'#10B981',tasks:[{title:'Init. projet Diabase',...kt('Fait','#10B981')},{title:'Scouting EU Round 1',...kt('Fait','#10B981')}]},
+    ]);
+    const tachesCols=mkKan([
+      {title:'TODO',count:'4',bg:'rgba(255,255,255,0.03)',hc:'rgba(255,255,255,0.28)',tasks:[{title:'Préparer dossier médical Lukoki',...kt('Normal','#64748B'),assignee:'Coach'},{title:'Contacter académie Lyon',...kt('Normal','#64748B'),assignee:'Comm.'}]},
+      {title:'EN COURS',count:'3',bg:'rgba(124,200,232,0.04)',border:'1px solid rgba(124,200,232,0.1)',hc:'#7CC8E8',tasks:[{title:'Rédiger contrat Diabase',...kt('Urgent','#EF4444'),assignee:'Admin'},{title:'Finaliser devis Nike',...kt('Actif','#10B981'),assignee:'Comm.'}]},
+      {title:'ATTENTE',count:'2',bg:'rgba(218,165,32,0.04)',border:'1px solid rgba(218,165,32,0.12)',hc:'#DAA520',tasks:[{title:'Validation direction contrat',...kt('Bloqué','#DAA520'),assignee:'Admin'}]},
+      {title:'TERMINÉ',count:'8',bg:'rgba(16,185,129,0.04)',border:'1px solid rgba(16,185,129,0.1)',hc:'#10B981',tasks:[{title:'Onboarding Lukoki',...kt('Fait','#10B981'),assignee:'Coach'},{title:'Rapport scouting R1',...kt('Fait','#10B981'),assignee:'Manager'}]},
+    ]);
+
+    // jalons
+    const jS={terminé:{c:'#10B981',i:'check_circle'},en_cours:{c:'#7CC8E8',i:'radio_button_checked'},planifié:{c:'rgba(255,255,255,0.38)',i:'radio_button_unchecked'},retard:{c:'#EF4444',i:'warning'}};
+    const jalonsList=[
+      {nom:'Camp Football',date:'20/06/2026',projet:'PROJ-2026-002',statut:'en_cours'},
+      {nom:'Rapport scouting Q2',date:'30/06/2026',projet:'PROJ-2026-003',statut:'en_cours'},
+      {nom:'Signature Diabase',date:'01/07/2026',projet:'PROJ-2026-001',statut:'planifié'},
+      {nom:'Contrat Nike renouvelé',date:'15/07/2026',projet:'PROJ-2026-001',statut:'planifié'},
+      {nom:'Stage basket terminé',date:'31/05/2026',projet:'PROJ-2026-004',statut:'terminé'},
+    ].map(j=>{const js=jS[j.statut]||jS.planifié; return{...j,iGlyph:js.i,iBox:iBox(js.c+'15',js.c+'30'),iStyle:{fontFamily:'Material Icons Outlined',fontSize:15,lineHeight:1,display:'inline-flex',alignItems:'center',justifyContent:'center',width:15,height:15,overflow:'hidden',color:js.c},statutStyle:bdg(j.statut.replace('_',' '),js.c)};});
+
+    // contrats
+    const ccC={'Signé':'#10B981','En préparation':'#FCD116','En cours':'#7CC8E8'};
+    const contratsList=[
+      {id:'CONT-2026-001',client:'Sporting Club Kinshasa',type:'Gestion carrière',statut:'Signé',echeance:'11/06/2027'},
+      {id:'CONT-2026-002',client:'Nike Congo SARL',type:'Sponsoring',statut:'En préparation',echeance:'16/06/2027'},
+      {id:'CONT-2026-003',client:'FC Renaissance',type:'Camp',statut:'En cours',echeance:'30/06/2026'},
+      {id:'CONT-2026-004',client:'MTN Foundation RDC',type:'Partenariat',statut:'Signé',echeance:'05/06/2027'},
+    ].map(c=>({...c,statutStyle:bdg(c.statut,ccC[c.statut]||'#94A3B8')}));
+
+    // activités
+    const aIC={appel:{i:'call',c:'#7CC8E8'},rdv:{i:'handshake',c:'#10B981'},email:{i:'mail',c:'#DAA520'},tache:{i:'task_alt',c:'rgba(255,255,255,0.35)'}};
+    const rC={Positif:'#10B981','Devis envoyé':'#7CC8E8','En attente':'#FCD116',Terminé:'#10B981','RDV planifié':'#7CC8E8'};
+    const activitesList=[
+      {type:'appel',desc:'Appel avec Club Kinshasa',user:'Admin',time:'Auj. 14:30',resultat:'Positif'},
+      {type:'rdv',desc:'RDV Sponsor Nike Congo',user:'Admin',time:'Auj. 13:00',resultat:'Devis envoyé'},
+      {type:'email',desc:'Email Academy Kimbanguiste',user:'Manager',time:'Auj. 11:30',resultat:'En attente'},
+      {type:'tache',desc:'Tâche terminée — Init. Diabase',user:'Coach',time:'Hier 16:00',resultat:'Terminé'},
+      {type:'appel',desc:'Appel FC Renaissance Lubumbashi',user:'Commercial',time:'Hier 10:00',resultat:'RDV planifié'},
+    ].map(a=>{const ac=aIC[a.type]||{i:'circle',c:'#94A3B8'}; return{...a,iGlyph:ac.i,iBox:iBox(ac.c+'15',ac.c+'30'),iStyle:{fontFamily:'Material Icons Outlined',fontSize:14,lineHeight:1,display:'inline-flex',alignItems:'center',justifyContent:'center',width:14,height:14,overflow:'hidden',color:ac.c},resultStyle:bdg(a.resultat,rC[a.resultat]||'#94A3B8')};});
+
+    // rapports
+    const rapportKpis=[
+      {label:'CA Total 2026',value:'125 400 €',change:'+15% vs N-1',cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.1)',borderRadius:13,padding:18,borderTop:'3px solid #FCD116'},changeStyle:{fontSize:11,marginTop:4,color:'#FCD116',fontWeight:600}},
+      {label:'Factures émises',value:'41 000 €',change:'4 documents',cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.1)',borderRadius:13,padding:18,borderTop:'3px solid #7CC8E8'},changeStyle:{fontSize:11,marginTop:4,color:'#7CC8E8',fontWeight:500}},
+      {label:'Athlètes actifs',value:'45',change:'+3 cette semaine',cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.1)',borderRadius:13,padding:18,borderTop:'3px solid #10B981'},changeStyle:{fontSize:11,marginTop:4,color:'#10B981',fontWeight:600}},
+      {label:'Taux conversion',value:'34%',change:'Devis → Facture',cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.1)',borderRadius:13,padding:18,borderTop:'3px solid #DAA520'},changeStyle:{fontSize:11,marginTop:4,color:'#DAA520',fontWeight:500}},
+      {label:'Projets terminés',value:'12',change:'sur 20 créés',cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.1)',borderRadius:13,padding:18,borderTop:'3px solid #10B981'},changeStyle:{fontSize:11,marginTop:4,color:'#10B981',fontWeight:500}},
+      {label:'Contrats signés',value:'8',change:'+2 ce mois',cardStyle:{background:'#132130',border:'1px solid rgba(252,209,22,0.1)',borderRadius:13,padding:18,borderTop:'3px solid #A78BFA'},changeStyle:{fontSize:11,marginTop:4,color:'#A78BFA',fontWeight:500}},
+    ];
+
+    // paramètres
+    const at=S.setTab||'general';
+    const settingsTabs=[
+      {id:'general',ic:'business',label:'Général'},
+      {id:'users',ic:'group',label:'Utilisateurs'},
+      {id:'numbering',ic:'numbers',label:'Numérotation'},
+      {id:'payments',ic:'payments',label:'Paiements'},
+    ].map(t=>({
+      ...t, iGlyph:t.ic,
+      iStyle:{fontFamily:'Material Icons Outlined',fontSize:16,lineHeight:1,display:'inline-flex',alignItems:'center',justifyContent:'center',width:16,height:16,overflow:'hidden',flexShrink:0,color:at===t.id?'#FCD116':'rgba(255,255,255,0.28)'},
+      style:at===t.id?{padding:'12px 14px',display:'flex',alignItems:'center',gap:9,cursor:'pointer',borderBottom:'1px solid rgba(255,255,255,0.06)',background:'rgba(252,209,22,0.07)',borderLeft:'3px solid #DAA520',color:'#FCD116',fontWeight:700}:{padding:'12px 14px',display:'flex',alignItems:'center',gap:9,cursor:'pointer',borderBottom:'1px solid rgba(255,255,255,0.06)',color:'rgba(255,255,255,0.45)'},
+      hover:{background:'rgba(255,255,255,0.04)'},
+      onClick:()=>this.setState({setTab:t.id}),
+    }));
+    const usersRBAC=[
+      {nom:'Administrateur',email:'admin@ndembokin.cd',initials:'AD',role:'Admin',statut:'Actif',color:'#FCD116'},
+      {nom:'Jean Ntumba',email:'j.ntumba@ndembokin.cd',initials:'JN',role:'Manager',statut:'Actif',color:'#7CC8E8'},
+      {nom:'Sophie Mbala',email:'s.mbala@ndembokin.cd',initials:'SM',role:'Commercial',statut:'Actif',color:'#10B981'},
+      {nom:'Patrick Coach',email:'p.coach@ndembokin.cd',initials:'PC',role:'Coach',statut:'Actif',color:'#DAA520'},
+      {nom:'Marie Finance',email:'m.finance@ndembokin.cd',initials:'MF',role:'Comptable',statut:'Inactif',color:'#EF4444'},
+    ].map(u=>({...u,avStyle:{width:34,height:34,borderRadius:'50%',background:`linear-gradient(135deg,${u.color}60,${u.color})`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:800,color:'#07101A',flexShrink:0},roleStyle:bdg(u.role,'#7CC8E8'),statStyle:bdg(u.statut,u.statut==='Actif'?'#10B981':'#EF4444')}));
+    const numberingRules=[
+      {label:'Devis',prefix:'DEV',current:'005',next:'DEV-2026-006',ic:'request_quote',color:'#7CC8E8'},
+      {label:'Factures',prefix:'FACT',current:'004',next:'FACT-2026-005',ic:'receipt_long',color:'#FCD116'},
+      {label:'Projets',prefix:'PROJ',current:'004',next:'PROJ-2026-005',ic:'work',color:'#10B981'},
+      {label:'Contrats',prefix:'CONT',current:'004',next:'CONT-2026-005',ic:'gavel',color:'#DAA520'},
+    ].map(n=>({...n,iGlyph:n.ic,iBox:iBox(n.color+'15',n.color+'30'),iStyle:{fontFamily:'Material Icons Outlined',fontSize:15,lineHeight:1,display:'inline-flex',alignItems:'center',justifyContent:'center',width:15,height:15,overflow:'hidden',color:n.color}}));
+    const mobileMoney=[
+      {nom:'MTN Money',numero:'+243 81 234 5678',ic:'smartphone',color:'#FCD116',enabled:true},
+      {nom:'Airtel Money',numero:'+243 99 234 5678',ic:'smartphone',color:'#EF4444',enabled:true},
+      {nom:'Orange Money',numero:'+243 84 234 5678',ic:'smartphone',color:'#F97316',enabled:false},
+    ].map(mm=>({...mm,iGlyph:mm.ic,iBox:iBox(mm.color+'15',mm.color+'30'),iStyle:{fontFamily:'Material Icons Outlined',fontSize:14,lineHeight:1,display:'inline-flex',alignItems:'center',justifyContent:'center',width:14,height:14,overflow:'hidden',color:mm.color},toggle:mm.enabled?'Activé':'Désactivé',toggleStyle:{fontSize:10,fontWeight:700,padding:'3px 10px',borderRadius:20,color:mm.enabled?'#10B981':'rgba(255,255,255,0.28)',background:mm.enabled?'rgba(16,185,129,0.1)':'rgba(255,255,255,0.04)',border:mm.enabled?'1px solid rgba(16,185,129,0.22)':'1px solid rgba(255,255,255,0.07)',cursor:'pointer'}}));
+
+    return {
+      navGroups, settingsItem, pageTitle:m.t, pageSubtitle:m.s, quickAction,
+      isDashboard:pg==='dashboard', isAthletes:pg==='athletes', isClients:pg==='clients',
+      isPrestations:pg==='prestations', isDevis:pg==='devis', isFactures:pg==='factures',
+      isReglements:pg==='reglements', isProjets:pg==='projets', isTaches:pg==='taches',
+      isJalons:pg==='jalons', isContrats:pg==='contrats', isActivites:pg==='activites',
+      isRapports:pg==='rapports', isParametres:pg==='parametres',
+      kpiCards, chartBars, kanbanCols, dashEvents, dashActs,
+      goToProjets:()=>this.setState({page:'projets'}),
+      goToActivites:()=>this.setState({page:'activites'}),
+      athleteStats, athletes, selAthlete, hasSelAthlete:S.selAthlete!==null,
+      closeAthlete:()=>this.setState({selAthlete:null}),
+      clients, selClient, hasSelClient:S.selClient!==null,
+      closeClient:()=>this.setState({selClient:null}),
+      prestations, devisStats, devisList, factureStats, facturesList, reglements,
+      projetsCols, tachesCols, jalonsList, contratsList, activitesList, rapportKpis,
+      settingsTabs, usersRBAC, numberingRules, mobileMoney,
+      isSetGeneral:at==='general', isSetUsers:at==='users',
+      isSetNumbering:at==='numbering', isSetPayments:at==='payments',
+      showModal:S.showModal,
+      closeModal:()=>this.setState({showModal:false}),
+      stopProp:(e)=>e.stopPropagation(),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

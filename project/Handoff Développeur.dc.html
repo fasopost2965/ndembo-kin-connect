@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F0F2F5; }
+    * { box-sizing: border-box; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; max-width: 1020px; margin: 0 auto; padding: 48px 32px 100px; color: #0F172A;">
+
+  <!-- HEADER -->
+  <div style="display: flex; align-items: center; gap: 18px; padding-bottom: 28px; border-bottom: 2px solid #E2E8F0; margin-bottom: 40px;">
+    <div style="background: #fff; border-radius: 14px; padding: 8px 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.07);">
+      <img src="assets/logo.png" style="height: 52px; width: auto; display: block;" />
+    </div>
+    <div>
+      <div style="font-size: 11px; font-weight: 700; color: #3A6B84; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">Developer Handoff — v1.0 · Juin 2026</div>
+      <div style="font-size: 32px; font-weight: 800; letter-spacing: -0.8px; line-height: 1.1;">Ndembo Kin Connect CRM</div>
+      <div style="font-size: 14px; color: #64748B; margin-top: 5px;">Spécifications techniques complètes — 14 modules — Prêt pour Claude Code</div>
+    </div>
+  </div>
+
+  <!-- NAV PILLS -->
+  <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 40px;">
+    <sc-for list="{{ pills }}" as="p" hint-placeholder-count="7">
+      <a href="{{ p.href }}" style="{{ p.style }}">{{ p.label }}</a>
+    </sc-for>
+  </div>
+
+  <!-- ═══ 1. STACK ═══ -->
+  <div id="stack" style="margin-bottom: 48px;">
+    <div style="font-size: 11px; font-weight: 700; color: #94A3B8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">01</div>
+    <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 18px;">Stack technique recommandé</div>
+    <div style="background: #FEF9EE; border: 1px solid #FDE68A; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; display: flex; gap: 10px; align-items: flex-start;">
+      <div style="font-size: 18px; flex-shrink: 0;">⚠️</div>
+      <div style="font-size: 13px; color: #92400E; line-height: 1.6;"><strong>Contraintes RDC :</strong> internet instable → PWA obligatoire (offline-first). Mobile Money (MTN/Airtel/Orange) au lieu de Stripe. Hébergement africain ou CDN proche pour la latence.</div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3,1fr); gap: 13px;">
+      <sc-for list="{{ stackCards }}" as="s" hint-placeholder-count="6">
+        <div style="{{ s.cardStyle }}">
+          <div style="{{ s.badgeStyle }}">{{ s.layer }}</div>
+          <div style="font-size: 15px; font-weight: 700; margin: 10px 0 5px;">{{ s.tech }}</div>
+          <div style="font-size: 12px; color: #64748B; line-height: 1.5;">{{ s.why }}</div>
+          <sc-if value="{{ s.alt }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size: 11px; color: #94A3B8; margin-top: 8px;">Alt: {{ s.alt }}</div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- ═══ 2. ARCHITECTURE ═══ -->
+  <div id="archi" style="margin-bottom: 48px;">
+    <div style="font-size: 11px; font-weight: 700; color: #94A3B8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">02</div>
+    <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 6px;">Architecture des modules</div>
+    <div style="font-size: 14px; color: #64748B; margin-bottom: 18px;">Flux de conversion : <strong>Devis → Facture → Projet → Contrat</strong></div>
+    <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+      <!-- header -->
+      <div style="display: grid; grid-template-columns: 0.5fr 2fr 2fr 1.5fr 0.8fr 0.8fr; padding: 10px 18px; border-bottom: 1px solid #E8ECF1; background: #F8FAFC;">
+        <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">#</div>
+        <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Module</div>
+        <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Route API (base)</div>
+        <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Table DB</div>
+        <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Phase</div>
+        <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Priorité</div>
+      </div>
+      <sc-for list="{{ modules }}" as="mod" hint-placeholder-count="14">
+        <div style="{{ mod.rowStyle }}">
+          <div style="font-size: 12px; color: #94A3B8; font-family: JetBrains Mono, monospace;">{{ mod.num }}</div>
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: #0F172A;">{{ mod.name }}</div>
+            <div style="font-size: 11px; color: #94A3B8; margin-top: 1px;">{{ mod.desc }}</div>
+          </div>
+          <div style="font-size: 12px; color: #3A6B84; font-family: JetBrains Mono, monospace; background: #F0F7FF; padding: 3px 8px; border-radius: 5px; display: inline-block;">/api/{{ mod.route }}</div>
+          <div style="font-size: 12px; color: #475569; font-family: JetBrains Mono, monospace;">{{ mod.table }}</div>
+          <div><span style="{{ mod.phaseStyle }}">Phase {{ mod.phase }}</span></div>
+          <div style="font-size: 14px;">{{ mod.stars }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- ═══ 3. SCHÉMA DB ═══ -->
+  <div id="schema" style="margin-bottom: 48px;">
+    <div style="font-size: 11px; font-weight: 700; color: #94A3B8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">03</div>
+    <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 6px;">Schéma Prisma (PostgreSQL)</div>
+    <div style="font-size: 14px; color: #64748B; margin-bottom: 18px;">Tables essentielles Phase 1 — copiez directement dans <code style="background: #F1F5F9; padding: 2px 6px; border-radius: 4px; font-size: 13px;">schema.prisma</code></div>
+    <div style="background: #1E293B; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.1);">
+      <div style="padding: 10px 18px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 8px;">
+        <div style="width: 10px; height: 10px; border-radius: 50%; background: #EF4444;"></div>
+        <div style="width: 10px; height: 10px; border-radius: 50%; background: #F59E0B;"></div>
+        <div style="width: 10px; height: 10px; border-radius: 50%; background: #10B981;"></div>
+        <div style="font-size: 11px; color: rgba(255,255,255,0.35); margin-left: 6px; font-family: JetBrains Mono, monospace;">schema.prisma</div>
+      </div>
+      <div style="padding: 20px 24px; font-family: JetBrains Mono, monospace; font-size: 12px; line-height: 1.8; overflow-x: auto;">
+        <sc-for list="{{ schemaLines }}" as="line" hint-placeholder-count="60">
+          <div style="{{ line.style }}">{{ line.text }}</div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 4. API ═══ -->
+  <div id="api" style="margin-bottom: 48px;">
+    <div style="font-size: 11px; font-weight: 700; color: #94A3B8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">04</div>
+    <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 18px;">Endpoints API critiques</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 13px;">
+      <sc-for list="{{ endpoints }}" as="ep" hint-placeholder-count="8">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+          <div style="font-size: 12px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px;">{{ ep.module }}</div>
+          <sc-for list="{{ ep.routes }}" as="r" hint-placeholder-count="4">
+            <div style="display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid #F1F5F9;">
+              <span style="{{ r.methodStyle }}">{{ r.method }}</span>
+              <span style="font-size: 12px; color: #334155; font-family: JetBrains Mono, monospace;">{{ r.path }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- ═══ 5. AUTH RBAC ═══ -->
+  <div id="auth" style="margin-bottom: 48px;">
+    <div style="font-size: 11px; font-weight: 700; color: #94A3B8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">05</div>
+    <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 18px;">Auth + RBAC</div>
+    <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+      <div style="display: grid; grid-template-columns: 1.5fr repeat(5,1fr); padding: 10px 18px; border-bottom: 1px solid #E8ECF1; background: #F8FAFC;">
+        <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Module</div>
+        <sc-for list="{{ roles }}" as="r" hint-placeholder-count="5">
+          <div style="{{ r.headerStyle }}">{{ r.name }}</div>
+        </sc-for>
+      </div>
+      <sc-for list="{{ rbacRows }}" as="row" hint-placeholder-count="8">
+        <div style="display: grid; grid-template-columns: 1.5fr repeat(5,1fr); padding: 10px 18px; border-bottom: 1px solid #F1F5F9; align-items: center;">
+          <div style="font-size: 13px; font-weight: 600; color: #334155;">{{ row.module }}</div>
+          <sc-for list="{{ row.perms }}" as="perm" hint-placeholder-count="5">
+            <div style="text-align: center; font-size: 16px;">{{ perm }}</div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+    <div style="background: #F0F7FF; border: 1px solid #BFDBFE; border-radius: 10px; padding: 14px 18px; margin-top: 14px; font-size: 13px; color: #1E40AF; line-height: 1.6;">
+      <strong>JWT + Middleware :</strong> chaque requête API vérifie le token et le rôle. Utilisez <code style="background: rgba(255,255,255,0.7); padding: 1px 5px; border-radius: 3px;">@nestjs/jwt</code> ou un middleware Express custom. Le token inclut <code style="background: rgba(255,255,255,0.7); padding: 1px 5px; border-radius: 3px;">userId</code>, <code style="background: rgba(255,255,255,0.7); padding: 1px 5px; border-radius: 3px;">role</code>, <code style="background: rgba(255,255,255,0.7); padding: 1px 5px; border-radius: 3px;">agenceId</code>.
+    </div>
+  </div>
+
+  <!-- ═══ 6. CLAUDE CODE ═══ -->
+  <div id="claudecode" style="margin-bottom: 48px;">
+    <div style="font-size: 11px; font-weight: 700; color: #94A3B8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">06</div>
+    <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 6px;">Guide Claude Code — Étape par étape</div>
+    <div style="font-size: 14px; color: #64748B; margin-bottom: 20px;">Comment passer du prototype au code de production avec Claude Code</div>
+    <div style="display: flex; flex-direction: column; gap: 13px;">
+      <sc-for list="{{ claudeSteps }}" as="step" hint-placeholder-count="8">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 20px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <div style="{{ step.numStyle }}">{{ step.num }}</div>
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                <div style="font-size: 15px; font-weight: 700; color: #0F172A;">{{ step.title }}</div>
+                <span style="{{ step.tagStyle }}">{{ step.tag }}</span>
+              </div>
+              <div style="font-size: 13px; color: #475569; line-height: 1.6; margin-bottom: 12px;">{{ step.desc }}</div>
+              <div style="background: #1E293B; border-radius: 9px; padding: 13px 16px; font-family: JetBrains Mono, monospace; font-size: 12px; color: #E2E8F0; line-height: 1.7; white-space: pre-wrap;">{{ step.prompt }}</div>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- ═══ 7. DÉPLOIEMENT ═══ -->
+  <div id="deploy" style="margin-bottom: 48px;">
+    <div style="font-size: 11px; font-weight: 700; color: #94A3B8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">07</div>
+    <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 18px;">Déploiement</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 13px; margin-bottom: 18px;">
+      <sc-for list="{{ deployCards }}" as="d" hint-placeholder-count="4">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 13px; padding: 18px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="{{ d.iconBox }}"><span style="{{ d.iconStyle }}">{{ d.iconGlyph }}</span></div>
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A;">{{ d.title }}</div>
+          </div>
+          <div style="font-size: 13px; color: #64748B; line-height: 1.6; margin-bottom: 10px;">{{ d.desc }}</div>
+          <div style="font-size: 12px; font-family: JetBrains Mono, monospace; color: #3A6B84; background: #F0F7FF; padding: 4px 10px; border-radius: 6px; display: inline-block;">{{ d.cmd }}</div>
+        </div>
+      </sc-for>
+    </div>
+    <!-- Checklist launch -->
+    <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 20px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+      <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 14px;">Checklist avant mise en production</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <sc-for list="{{ checklist }}" as="item" hint-placeholder-count="10">
+          <div style="display: flex; align-items: center; gap: 9px; padding: 7px 0; border-bottom: 1px solid #F8FAFC;">
+            <div style="width: 18px; height: 18px; border-radius: 5px; border: 2px solid #E2E8F0; flex-shrink: 0;"></div>
+            <div style="font-size: 13px; color: #334155;">{{ item }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 8. RISQUES ═══ -->
+  <div id="risques">
+    <div style="font-size: 11px; font-weight: 700; color: #94A3B8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">08</div>
+    <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 18px;">Risques techniques RDC</div>
+    <div style="display: grid; grid-template-columns: repeat(3,1fr); gap: 13px;">
+      <sc-for list="{{ risks }}" as="risk" hint-placeholder-count="6">
+        <div style="{{ risk.cardStyle }}">
+          <div style="font-size: 20px; margin-bottom: 8px;">{{ risk.icon }}</div>
+          <div style="font-size: 13px; font-weight: 700; color: #0F172A; margin-bottom: 5px;">{{ risk.title }}</div>
+          <div style="font-size: 12px; color: #64748B; line-height: 1.5;">{{ risk.desc }}</div>
+          <div style="{{ risk.solStyle }}">→ {{ risk.solution }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+class Component extends DCLogic {
+  renderVals() {
+
+    const mi = (g, color, sz=16) => ({
+      iconGlyph: g,
+      iconStyle: { fontFamily:'Material Icons Outlined', fontSize:sz, lineHeight:1, display:'inline-flex', alignItems:'center', justifyContent:'center', width:sz, height:sz, overflow:'hidden', color, flexShrink:0 },
+    });
+
+    const pills = [
+      {label:'01 Stack', href:'#stack'},
+      {label:'02 Architecture', href:'#archi'},
+      {label:'03 Schéma DB', href:'#schema'},
+      {label:'04 API', href:'#api'},
+      {label:'05 Auth RBAC', href:'#auth'},
+      {label:'06 Claude Code', href:'#claudecode'},
+      {label:'07 Déploiement', href:'#deploy'},
+    ].map(p => ({ ...p, style: { padding: '7px 16px', background: '#fff', border: '1.5px solid #E2E8F0', borderRadius: 20, fontSize: 12, fontWeight: 600, color: '#475569', textDecoration: 'none', cursor: 'pointer', display: 'inline-block' } }));
+
+    const stackCards = [
+      { layer:'Frontend', tech:'Next.js 14 (App Router)', why:'SSR + SSG + PWA. React Server Components. Le prototype DC est le guide UI exact.', alt:'Nuxt.js 3', cardStyle:{ background:'#fff', border:'1px solid #E2E8F0', borderRadius:12, padding:18, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }, badgeStyle:{ fontSize:9, fontWeight:700, background:'#EFF6FF', color:'#1D4ED8', padding:'3px 9px', borderRadius:20, textTransform:'uppercase', letterSpacing:'0.8px', display:'inline-block' } },
+      { layer:'CSS', tech:'TailwindCSS + shadcn/ui', why:'Classes utilitaires. shadcn/ui donne les composants (Dialog, Table, Form) prêts à l\'emploi, accessibles.', alt:'MUI / Mantine', cardStyle:{ background:'#fff', border:'1px solid #E2E8F0', borderRadius:12, padding:18, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }, badgeStyle:{ fontSize:9, fontWeight:700, background:'#F0FDF4', color:'#166534', padding:'3px 9px', borderRadius:20, textTransform:'uppercase', letterSpacing:'0.8px', display:'inline-block' } },
+      { layer:'Backend', tech:'Node.js + Fastify', why:'API REST rapide. Léger en mémoire (important sur serveurs bon marché). Plugins natifs pour auth, validation.', alt:'Express.js', cardStyle:{ background:'#fff', border:'1px solid #E2E8F0', borderRadius:12, padding:18, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }, badgeStyle:{ fontSize:9, fontWeight:700, background:'#FEF9EE', color:'#92400E', padding:'3px 9px', borderRadius:20, textTransform:'uppercase', letterSpacing:'0.8px', display:'inline-block' } },
+      { layer:'Base de données', tech:'PostgreSQL + Prisma ORM', why:'Relationnelle → parfait pour les 13 modules liés. Prisma génère les types TypeScript auto.', alt:'MySQL / Supabase', cardStyle:{ background:'#fff', border:'1px solid #E2E8F0', borderRadius:12, padding:18, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }, badgeStyle:{ fontSize:9, fontWeight:700, background:'#F5F3FF', color:'#6D28D9', padding:'3px 9px', borderRadius:20, textTransform:'uppercase', letterSpacing:'0.8px', display:'inline-block' } },
+      { layer:'Auth', tech:'JWT + bcrypt', why:'Simple, sans dépendance externe. Le RBAC (5 rôles) se gère manuellement dans un middleware léger.', alt:'NextAuth.js', cardStyle:{ background:'#fff', border:'1px solid #E2E8F0', borderRadius:12, padding:18, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }, badgeStyle:{ fontSize:9, fontWeight:700, background:'#FFF1F2', color:'#BE123C', padding:'3px 9px', borderRadius:20, textTransform:'uppercase', letterSpacing:'0.8px', display:'inline-block' } },
+      { layer:'Paiements RDC', tech:'FlexPay API (Kinshasa)', why:'MTN Money, Airtel Money, Orange Money. API locale RDC, documentation en français, sandbox disponible.', alt:'CinetPay', cardStyle:{ background:'#FEF9EE', border:'1.5px solid #FDE68A', borderRadius:12, padding:18, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }, badgeStyle:{ fontSize:9, fontWeight:700, background:'#FFFBEB', color:'#B45309', padding:'3px 9px', borderRadius:20, textTransform:'uppercase', letterSpacing:'0.8px', border:'1px solid #FDE68A', display:'inline-block' } },
+      { layer:'PDF', tech:'React-PDF / Puppeteer', why:'Génération devis, factures, contrats. React-PDF = côté serveur léger. Puppeteer = rendu fidèle HTML.', alt:'PDFKit', cardStyle:{ background:'#fff', border:'1px solid #E2E8F0', borderRadius:12, padding:18, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }, badgeStyle:{ fontSize:9, fontWeight:700, background:'#F0F7FF', color:'#1E40AF', padding:'3px 9px', borderRadius:20, textTransform:'uppercase', letterSpacing:'0.8px', display:'inline-block' } },
+      { layer:'Déploiement', tech:'Railway.app ou Render.com', why:'Hébergement Node + PostgreSQL tout-en-un. CI/CD depuis GitHub. Gratuit pour commencer, pay-as-you-grow.', alt:'DigitalOcean / VPS', cardStyle:{ background:'#fff', border:'1px solid #E2E8F0', borderRadius:12, padding:18, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }, badgeStyle:{ fontSize:9, fontWeight:700, background:'#F0FDF4', color:'#166534', padding:'3px 9px', borderRadius:20, textTransform:'uppercase', letterSpacing:'0.8px', display:'inline-block' } },
+      { layer:'PWA / Offline', tech:'next-pwa + IndexedDB', why:'Cache des listes (athlètes, clients) pour usage sans internet. Sync différée quand connexion rétablie.', alt:'Workbox', cardStyle:{ background:'#fff', border:'1px solid #E2E8F0', borderRadius:12, padding:18, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }, badgeStyle:{ fontSize:9, fontWeight:700, background:'#FFF1F2', color:'#BE123C', padding:'3px 9px', borderRadius:20, textTransform:'uppercase', letterSpacing:'0.8px', display:'inline-block' } },
+    ];
+
+    const phaseC = { '1':'#059669','2':'#2563EB','3':'#94A3B8' };
+    const modules = [
+      {num:'01',name:'Utilisateurs',desc:'Auth + RBAC 5 rôles',route:'users',table:'users',phase:'1',stars:'⭐⭐⭐'},
+      {num:'02',name:'Athlètes',desc:'Scouting + fiche carrière',route:'athletes',table:'athletes',phase:'1',stars:'⭐⭐⭐'},
+      {num:'03',name:'Clients',desc:'B2B Clubs, Sponsors, Académies',route:'clients',table:'clients',phase:'1',stars:'⭐⭐⭐'},
+      {num:'04',name:'Prestations',desc:'Catalogue services',route:'prestations',table:'prestations',phase:'1',stars:'⭐⭐'},
+      {num:'05',name:'Devis',desc:'Propositions commerciales + PDF',route:'devis',table:'devis',phase:'1',stars:'⭐⭐⭐'},
+      {num:'06',name:'Factures',desc:'Encaissement + suivi paiements',route:'factures',table:'factures',phase:'1',stars:'⭐⭐⭐'},
+      {num:'07',name:'Règlements',desc:'Mobile Money + virements',route:'reglements',table:'reglements',phase:'2',stars:'⭐⭐'},
+      {num:'08',name:'Projets',desc:'Gestion opérationnelle + Kanban',route:'projets',table:'projets',phase:'2',stars:'⭐⭐⭐'},
+      {num:'09',name:'Tâches',desc:'Kanban drag & drop',route:'taches',table:'taches',phase:'2',stars:'⭐⭐⭐'},
+      {num:'10',name:'Jalons',desc:'Milestones projets',route:'jalons',table:'jalons',phase:'2',stars:'⭐⭐'},
+      {num:'11',name:'Contrats',desc:'Génération + signature électronique',route:'contrats',table:'contrats',phase:'2',stars:'⭐⭐⭐'},
+      {num:'12',name:'Activités',desc:'Journal CRM (appels, RDV, emails)',route:'activites',table:'activites',phase:'3',stars:'⭐⭐'},
+      {num:'13',name:'Rapports',desc:'KPIs + exports',route:'rapports',table:'rapports',phase:'3',stars:'⭐⭐'},
+      {num:'14',name:'Paramètres',desc:'Config + RBAC + Mobile Money',route:'settings',table:'settings',phase:'1',stars:'⭐⭐⭐'},
+    ].map((m,i) => ({
+      ...m,
+      rowStyle: { display:'grid', gridTemplateColumns:'0.5fr 2fr 2fr 1.5fr 0.8fr 0.8fr', padding:'12px 18px', borderBottom:'1px solid #F1F5F9', alignItems:'center', background: i%2===0 ? '#fff' : '#FAFAFA' },
+      phaseStyle: { fontSize:11, fontWeight:700, color: phaseC[m.phase]||'#94A3B8', background: phaseC[m.phase]+'15', padding:'3px 9px', borderRadius:6, display:'inline-block' },
+    }));
+
+    // Schema lines
+    const schema = [
+      { t: '// ─── UTILISATEURS ───────────────────────────────────', c: '#64748B' },
+      { t: 'model User {', c: '#FCD116' },
+      { t: '  id         String   @id @default(cuid())', c: '#E2E8F0' },
+      { t: '  email      String   @unique', c: '#E2E8F0' },
+      { t: '  password   String', c: '#E2E8F0' },
+      { t: '  name       String', c: '#E2E8F0' },
+      { t: '  role       Role     @default(COMMERCIAL)  // ADMIN | MANAGER | COACH | COMPTABLE | COMMERCIAL', c: '#7CC8E8' },
+      { t: '  isActive   Boolean  @default(true)', c: '#E2E8F0' },
+      { t: '  createdAt  DateTime @default(now())', c: '#E2E8F0' },
+      { t: '}', c: '#FCD116' },
+      { t: '', c: '#E2E8F0' },
+      { t: '// ─── ATHLÈTES ────────────────────────────────────────', c: '#64748B' },
+      { t: 'model Athlete {', c: '#FCD116' },
+      { t: '  id              String  @id @default(cuid())', c: '#E2E8F0' },
+      { t: '  nom             String', c: '#E2E8F0' },
+      { t: '  sport           String  // football | basketball | athletisme', c: '#7CC8E8' },
+      { t: '  poste           String', c: '#E2E8F0' },
+      { t: '  niveau          Niveau  // AMATEUR | SEMI_PRO | PRO', c: '#7CC8E8' },
+      { t: '  clubActuel      String?', c: '#E2E8F0' },
+      { t: '  valeurMarchande Float?', c: '#E2E8F0' },
+      { t: '  nationalite     String  @default("RDC")', c: '#E2E8F0' },
+      { t: '  statut          String  @default("Actif")', c: '#E2E8F0' },
+      { t: '  contrats        Contrat[]', c: '#10B981' },
+      { t: '}', c: '#FCD116' },
+      { t: '', c: '#E2E8F0' },
+      { t: '// ─── CLIENTS ─────────────────────────────────────────', c: '#64748B' },
+      { t: 'model Client {', c: '#FCD116' },
+      { t: '  id         String   @id @default(cuid())', c: '#E2E8F0' },
+      { t: '  nom        String', c: '#E2E8F0' },
+      { t: '  type       String   // Club | Academie | Sponsor | Partenaire', c: '#7CC8E8' },
+      { t: '  rccm       String?', c: '#E2E8F0' },
+      { t: '  nif        String?', c: '#E2E8F0' },
+      { t: '  email      String', c: '#E2E8F0' },
+      { t: '  telephone  String', c: '#E2E8F0' },
+      { t: '  ville      String', c: '#E2E8F0' },
+      { t: '  devis      Devis[]', c: '#10B981' },
+      { t: '  factures   Facture[]', c: '#10B981' },
+      { t: '  projets    Projet[]', c: '#10B981' },
+      { t: '}', c: '#FCD116' },
+      { t: '', c: '#E2E8F0' },
+      { t: '// ─── DEVIS ───────────────────────────────────────────', c: '#64748B' },
+      { t: 'model Devis {', c: '#FCD116' },
+      { t: '  id          String  @id @default(cuid())', c: '#E2E8F0' },
+      { t: '  numero      String  @unique  // DEV-2026-001', c: '#7CC8E8' },
+      { t: '  clientId    String', c: '#E2E8F0' },
+      { t: '  client      Client  @relation(fields:[clientId], references:[id])', c: '#10B981' },
+      { t: '  lignes      Json    // [{prestationId, quantite, prixUnit, total}]', c: '#7CC8E8' },
+      { t: '  montantHT   Float', c: '#E2E8F0' },
+      { t: '  statut      DevisStatut @default(EN_ATTENTE)', c: '#7CC8E8' },
+      { t: '  pdfUrl      String?', c: '#E2E8F0' },
+      { t: '  facture     Facture?', c: '#10B981' },
+      { t: '}', c: '#FCD116' },
+      { t: '', c: '#E2E8F0' },
+      { t: '// ─── ÉNUMÉRATIONS ────────────────────────────────────', c: '#64748B' },
+      { t: 'enum Role          { ADMIN MANAGER COMMERCIAL COACH COMPTABLE }', c: '#EF4444' },
+      { t: 'enum Niveau        { AMATEUR SEMI_PRO PRO }', c: '#EF4444' },
+      { t: 'enum DevisStatut   { EN_ATTENTE VALIDE REFUSE CONVERTI }', c: '#EF4444' },
+      { t: 'enum FactureStatut { IMPAYEE ACOMPTE_PERCU PARTIELLE PAYEE }', c: '#EF4444' },
+      { t: 'enum ProjetStatut  { TODO EN_COURS EN_ATTENTE TERMINE }', c: '#EF4444' },
+      { t: 'enum ContratStatut { EN_PREPARATION SIGNE EN_COURS EXPIRE }', c: '#EF4444' },
+    ];
+    const schemaLines = schema.map(s => ({
+      text: s.t,
+      style: { color: s.c, display: 'block', minHeight: s.t === '' ? '14px' : 'auto' }
+    }));
+
+    const methodColor = { GET:'#10B981', POST:'#2563EB', PUT:'#F59E0B', DELETE:'#EF4444', PATCH:'#8B5CF6' };
+    const mkRoute = (method, path) => ({
+      method, path,
+      methodStyle: { fontSize:10, fontWeight:700, color: methodColor[method]||'#94A3B8', background: (methodColor[method]||'#94A3B8')+'15', padding:'2px 7px', borderRadius:4, fontFamily:'JetBrains Mono, monospace', minWidth:52, textAlign:'center', display:'inline-block' }
+    });
+    const endpoints = [
+      { module:'Auth', routes:[mkRoute('POST','/auth/login'),mkRoute('POST','/auth/register'),mkRoute('GET','/auth/me'),mkRoute('POST','/auth/refresh')] },
+      { module:'Athlètes', routes:[mkRoute('GET','/athletes'),mkRoute('POST','/athletes'),mkRoute('GET','/athletes/:id'),mkRoute('PUT','/athletes/:id')] },
+      { module:'Clients', routes:[mkRoute('GET','/clients'),mkRoute('POST','/clients'),mkRoute('GET','/clients/:id'),mkRoute('GET','/clients/:id/timeline')] },
+      { module:'Devis', routes:[mkRoute('GET','/devis'),mkRoute('POST','/devis'),mkRoute('GET','/devis/:id/pdf'),mkRoute('POST','/devis/:id/convert')] },
+      { module:'Factures', routes:[mkRoute('GET','/factures'),mkRoute('POST','/factures'),mkRoute('PATCH','/factures/:id/paiement'),mkRoute('GET','/factures/:id/pdf')] },
+      { module:'Projets', routes:[mkRoute('GET','/projets'),mkRoute('POST','/projets'),mkRoute('GET','/projets/:id/kanban'),mkRoute('PATCH','/taches/:id/move')] },
+      { module:'Contrats', routes:[mkRoute('POST','/contrats/generate'),mkRoute('GET','/contrats/:id'),mkRoute('POST','/contrats/:id/sign'),mkRoute('GET','/contrats/:id/pdf')] },
+      { module:'Dashboard', routes:[mkRoute('GET','/dashboard/kpis'),mkRoute('GET','/dashboard/ca'),mkRoute('GET','/dashboard/pipeline'),mkRoute('GET','/dashboard/activites')] },
+    ];
+
+    const roles = [
+      {name:'Admin',color:'#B45309'},{name:'Manager',color:'#2563EB'},{name:'Commercial',color:'#059669'},
+      {name:'Coach',color:'#7C3AED'},{name:'Comptable',color:'#B91C1C'},
+    ].map(r => ({ ...r, headerStyle: { fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'1px', textAlign:'center', color:r.color } }));
+    const ok = '✅'; const no = '❌'; const ro = '👁';
+    const rbacRows = [
+      { module:'Utilisateurs', perms:[ok,ro,no,no,no] },
+      { module:'Athlètes', perms:[ok,ok,ro,ok,ro] },
+      { module:'Clients', perms:[ok,ok,ok,ro,ro] },
+      { module:'Devis / Factures', perms:[ok,ok,ok,no,ok] },
+      { module:'Projets / Tâches', perms:[ok,ok,ro,ok,ro] },
+      { module:'Contrats', perms:[ok,ok,no,no,ro] },
+      { module:'Règlements', perms:[ok,ok,no,no,ok] },
+      { module:'Paramètres', perms:[ok,no,no,no,no] },
+    ];
+
+    const phStyle = (c) => ({ fontSize:11, fontWeight:700, background:c+'18', color:c, padding:'3px 9px', borderRadius:6, display:'inline-block' });
+    const claudeSteps = [
+      {
+        num:'01', title:'Initialisation du projet', tag:'~30 min', tagStyle:phStyle('#059669'),
+        desc:'Créez la structure Next.js + backend Fastify. Claude Code génère l\'arborescence complète en un prompt.',
+        numStyle:{width:36,height:36,borderRadius:'50%',background:'#0F172A',color:'#FCD116',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,flexShrink:0},
+        prompt:`Crée un monorepo avec :
+apps/web   → Next.js 14 App Router + TailwindCSS + shadcn/ui
+apps/api   → Fastify + Prisma + PostgreSQL
+packages/types → types partagés TypeScript
+
+Structure apps/api : src/modules/{auth,athletes,clients,devis,factures,projets,contrats,settings}`
+      },
+      {
+        num:'02', title:'Schéma Prisma + seed', tag:'~45 min', tagStyle:phStyle('#2563EB'),
+        desc:'Collez le schéma Prisma de ce document dans schema.prisma. Claude Code génère les migrations et un seed réaliste.',
+        numStyle:{width:36,height:36,borderRadius:'50%',background:'#0F172A',color:'#FCD116',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,flexShrink:0},
+        prompt:`Voici le schéma Prisma (copie depuis handoff) :
+[coller le schéma complet]
+
+1. npx prisma migrate dev --name init
+2. Génère seed.ts avec 5 athlètes, 5 clients, 4 devis et 1 admin
+   (données réalistes RDC — football, basketball, Kinshasa)`
+      },
+      {
+        num:'03', title:'Module Auth + RBAC', tag:'~1h', tagStyle:phStyle('#7C3AED'),
+        desc:'JWT avec refresh tokens. Middleware de vérification de rôle. 5 rôles : ADMIN, MANAGER, COMMERCIAL, COACH, COMPTABLE.',
+        numStyle:{width:36,height:36,borderRadius:'50%',background:'#0F172A',color:'#FCD116',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,flexShrink:0},
+        prompt:`Crée le module auth Fastify :
+- POST /auth/login → JWT access (15min) + refresh (7j) HttpOnly cookie
+- Middleware checkRole(roles: Role[]) → 403 si non autorisé
+- Guard sur chaque route selon la matrice RBAC du handoff
+- bcrypt pour les mots de passe`
+      },
+      {
+        num:'04', title:'CRUD Athlètes + Clients', tag:'~2h', tagStyle:phStyle('#059669'),
+        desc:'Les deux modules cœur métier. Utilisez le prototype comme référence visuelle exacte pour les champs.',
+        numStyle:{width:36,height:36,borderRadius:'50%',background:'#0F172A',color:'#FCD116',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,flexShrink:0},
+        prompt:`Génère le module Athlètes complet :
+Backend : GET/POST/PUT/DELETE /api/athletes avec pagination, search, filter par sport
+Frontend : page /athletes avec :
+- Table (colonnes : nom, sport, poste, niveau, club, valeur_marchande)
+- Sheet/drawer latéral au clic → détail complet + actions
+- Formulaire création/édition
+
+Utilise le composant Table de shadcn/ui. Respecte la palette du design system.`
+      },
+      {
+        num:'05', title:'Pipeline commercial (Devis → Facture)', tag:'~3h', tagStyle:phStyle('#B45309'),
+        desc:'Le flux le plus complexe. Devis → conversion en Facture → Règlement. Numérotation auto DEV-YYYY-NNN.',
+        numStyle:{width:36,height:36,borderRadius:'50%',background:'#0F172A',color:'#FCD116',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,flexShrink:0},
+        prompt:`Implémente le flux Devis → Facture :
+1. Création devis avec lignes de prestations (JSON : [{prestationId, quantite, prixUnit}])
+2. Numérotation auto depuis Settings (préfixe + année + séquence)
+3. POST /devis/:id/convert → crée Facture liée, statut Devis = CONVERTI
+4. Génération PDF avec React-PDF (logo, infos légales de Settings, lignes, total)
+5. Page facture avec bouton "Enregistrer paiement" → POST /reglements`
+      },
+      {
+        num:'06', title:'Projets + Kanban drag & drop', tag:'~2h', tagStyle:phStyle('#7C3AED'),
+        desc:'Kanban 4 colonnes. Utiliser @dnd-kit/core pour le drag & drop. PATCH /taches/:id/move pour persister la position.',
+        numStyle:{width:36,height:36,borderRadius:'50%',background:'#0F172A',color:'#FCD116',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,flexShrink:0},
+        prompt:`Crée le Kanban Projets avec @dnd-kit/core :
+- 4 colonnes : TODO | EN_COURS | EN_ATTENTE | TERMINÉ
+- Drag & drop entre colonnes → PATCH /taches/:id/move {colonne, position}
+- Optimistic updates (UI immédiat, rollback si erreur API)
+- Filtre par projet dans le header`
+      },
+      {
+        num:'07', title:'Mobile Money (FlexPay)', tag:'~2h', tagStyle:phStyle('#B91C1C'),
+        desc:'Intégration FlexPay pour MTN Money, Airtel Money, Orange Money. Webhook pour confirmation de paiement.',
+        numStyle:{width:36,height:36,borderRadius:'50%',background:'#0F172A',color:'#FCD116',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,flexShrink:0},
+        prompt:`Intègre FlexPay API (flexpay.cd) :
+1. POST /reglements/initiate → appel FlexPay, retourne orderNumber
+2. GET /reglements/status/:orderNumber → vérifie statut
+3. POST /webhooks/flexpay → reçoit confirmation, met à jour Facture.statut
+
+Variables d'env : FLEXPAY_TOKEN, FLEXPAY_MERCHANT_CODE
+Sandbox URL : https://backend.flexpay.cd/api/rest/v1/paymentService`
+      },
+      {
+        num:'08', title:'Déploiement Railway.app', tag:'~1h', tagStyle:phStyle('#059669'),
+        desc:'CI/CD depuis GitHub. PostgreSQL géré par Railway. Variables d\'environnement sécurisées.',
+        numStyle:{width:36,height:36,borderRadius:'50%',background:'#0F172A',color:'#FCD116',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,flexShrink:0},
+        prompt:`Configure le déploiement Railway :
+1. railway.toml pour apps/api (build command + start command)
+2. next.config.js pour le frontend (output: standalone)
+3. Variables d'env nécessaires : DATABASE_URL, JWT_SECRET, FLEXPAY_TOKEN, NEXT_PUBLIC_API_URL
+4. Dockerfile multi-stage pour l'API (node:20-alpine)
+5. Script de migration auto au démarrage (prisma migrate deploy)`
+      },
+    ];
+
+    const iBox = (bg, bd) => ({ width:32, height:32, borderRadius:8, background:bg, border:`1px solid ${bd}`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 });
+    const deployCards = [
+      { title:'Railway.app (recommandé)', desc:'Node.js + PostgreSQL tout-en-un. Déploiement depuis GitHub en un clic. ~12$/mois pour un projet complet.', cmd:'railway up', iconBox:iBox('#F0FDF4','#BBF7D0'), ...mi('cloud_upload','#059669',16) },
+      { title:'Domaine personnalisé', desc:'Connectez ndembokin.cd ou crm.ndembokin.cd. SSL automatique via Let\'s Encrypt. DNS : CNAME vers Railway.', cmd:'railway domain', iconBox:iBox('#EFF6FF','#BFDBFE'), ...mi('language','#2563EB',16) },
+      { title:'Sauvegardes DB', desc:'pg_dump automatique quotidien. Railway inclut les backups point-in-time. Exportez vers Google Drive (RDC).', cmd:'railway pg dump', iconBox:iBox('#FEF9EE','#FDE68A'), ...mi('backup','#B45309',16) },
+      { title:'CDN Cloudflare', desc:'Mettez Cloudflare devant Railway pour les assets statiques. Réduit la latence depuis Kinshasa de ~40%.', cmd:'cloudflare tunnel', iconBox:iBox('#FFF1F2','#FECDD3'), ...mi('speed','#BE123C',16) },
+    ];
+
+    const checklist = [
+      'Variables d\'env en production (pas de .env)',
+      'HTTPS forcé + HSTS header',
+      'Rate limiting sur /auth/login (10 req/min)',
+      'Validation Zod sur tous les inputs API',
+      'Sauvegardes DB configurées et testées',
+      'Logs structurés (pino) sur l\'API',
+      'PWA manifest + service worker actif',
+      'Test Mobile Money en sandbox',
+      'CORS restreint au domaine production',
+      'PDF generation testé (caractères UTF-8 + logo)',
+      'Import CSV athlètes/clients testé',
+      'Session review avec équipe Ndembo Kin',
+    ];
+
+    const risks = [
+      { icon:'📶', title:'Internet instable', desc:'Coupures fréquentes à Kinshasa. Les pages doivent rester utilisables offline.', solution:'PWA + cache Athlètes/Clients en IndexedDB. Sync au retour réseau.', cardStyle:{background:'#fff',border:'1px solid #E2E8F0',borderRadius:12,padding:18,boxShadow:'0 1px 4px rgba(0,0,0,0.04)'}, solStyle:{fontSize:11,color:'#059669',marginTop:10,fontWeight:600} },
+      { icon:'📱', title:'Mobile-first', desc:'L\'équipe utilise principalement des téléphones Android sur le terrain.', solution:'Design responsive. Tester sur Chrome Android. Min 44px pour les zones cliquables.', cardStyle:{background:'#fff',border:'1px solid #E2E8F0',borderRadius:12,padding:18,boxShadow:'0 1px 4px rgba(0,0,0,0.04)'}, solStyle:{fontSize:11,color:'#059669',marginTop:10,fontWeight:600} },
+      { icon:'⚡', title:'Coupures de courant', desc:'Pannes d\'électricité fréquentes → risque perte de données non sauvegardées.', solution:'Auto-save formulaires toutes les 30s dans localStorage. Indicateur de sauvegarde visible.', cardStyle:{background:'#fff',border:'1px solid #E2E8F0',borderRadius:12,padding:18,boxShadow:'0 1px 4px rgba(0,0,0,0.04)'}, solStyle:{fontSize:11,color:'#059669',marginTop:10,fontWeight:600} },
+      { icon:'💰', title:'Mobile Money instable', desc:'Les APIs FlexPay/MTN ont des timeouts. Les paiements peuvent rester en état "pending".', solution:'Webhook de confirmation + polling de statut toutes les 2min. UI claire pour le statut en attente.', cardStyle:{background:'#fff',border:'1px solid #E2E8F0',borderRadius:12,padding:18,boxShadow:'0 1px 4px rgba(0,0,0,0.04)'}, solStyle:{fontSize:11,color:'#059669',marginTop:10,fontWeight:600} },
+      { icon:'🔐', title:'Données sensibles', desc:'Valeurs marchandes athlètes, contrats, données financières — données critiques.', solution:'Chiffrement DB au repos. Logs d\'audit sur actions sensibles. Accès Comptable en lecture seule.', cardStyle:{background:'#fff',border:'1px solid #E2E8F0',borderRadius:12,padding:18,boxShadow:'0 1px 4px rgba(0,0,0,0.04)'}, solStyle:{fontSize:11,color:'#059669',marginTop:10,fontWeight:600} },
+      { icon:'🌍', title:'Latence internationale', desc:'Serveurs US/EU → latence 200-400ms depuis Kinshasa sur API calls.', solution:'Railway région EU-West (Paris). Cloudflare CDN. Réduire le nombre de requêtes par page (React Query).', cardStyle:{background:'#FEF9EE',border:'1.5px solid #FDE68A',borderRadius:12,padding:18}, solStyle:{fontSize:11,color:'#B45309',marginTop:10,fontWeight:600} },
+    ];
+
+    return { pills, stackCards, modules, schemaLines, endpoints, roles, rbacRows, claudeSteps, deployCards, checklist, risks };
+  }
+}
+
+</script>
+</body>
+</html>
