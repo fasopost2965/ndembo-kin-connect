@@ -1,0 +1,21 @@
+# Railway config for the web service.
+# Configure the service Root Directory = repository root, then set
+# "Config-as-code path" to apps/web/railway.toml.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "apps/web/Dockerfile"
+
+# NEXT_PUBLIC_API_URL is inlined at build time, so it must be passed as a build
+# arg. In Railway, add it under the service's Variables (it is forwarded to the
+# Docker build automatically).
+
+[deploy]
+startCommand = "node apps/web/server.js"
+healthcheckPath = "/login"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
+
+# Required environment variable:
+#   NEXT_PUBLIC_API_URL   https://<api-service>.up.railway.app

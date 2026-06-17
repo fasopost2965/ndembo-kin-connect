@@ -1,0 +1,26 @@
+# Railway config for the API service.
+# Configure the service Root Directory = repository root, then set
+# "Config-as-code path" to apps/api/railway.toml.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "apps/api/Dockerfile"
+
+[deploy]
+# Run pending migrations before booting (idempotent). The Dockerfile CMD does
+# the same; this makes the intent explicit and overridable from Railway.
+startCommand = "pnpm exec prisma migrate deploy && node dist/index.js"
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
+
+# Required environment variables (set in the Railway dashboard / shared vars):
+#   DATABASE_URL          provided by the Railway PostgreSQL plugin
+#   JWT_SECRET            long random string
+#   FRONTEND_URL          https://<web-service>.up.railway.app  (CORS)
+#   API_PUBLIC_URL        https://<api-service>.up.railway.app  (FlexPay webhook)
+#   FLEXPAY_TOKEN         (optional — empty = mock mode)
+#   FLEXPAY_MERCHANT_CODE (optional)
+#   FLEXPAY_BASE_URL      https://backend.flexpay.cd/api/rest/v1/paymentService
+#   FLEXPAY_CURRENCY      USD | CDF
