@@ -5,29 +5,17 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 210 40% 96%;
-    --foreground: 222 47% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --primary: 213 51% 30%;
-    --primary-foreground: 0 0% 100%;
-    --accent: 43 74% 49%;
-    --accent-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --radius: 0.75rem;
+  html, body {
+    margin: 0;
+    background: #F0F2F5;
+    color: #0F172A;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
-
-  * { @apply border-border; }
-  body { @apply bg-background text-foreground font-sans antialiased; }
+  * { box-sizing: border-box; }
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-thumb { @apply bg-slate-300 rounded; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
