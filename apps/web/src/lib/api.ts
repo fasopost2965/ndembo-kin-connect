@@ -130,8 +130,16 @@ export const projetsApi = {
   get: (id: string) => api.get(`/projets/${id}`),
   kanban: (id: string) => api.get(`/projets/${id}/kanban`),
   create: (data: unknown) => api.post('/projets', data),
-  moveTask: (taskId: string, data: { colonne: string; position: number }) =>
-    api.patch(`/projets/taches/${taskId}/move`, data),
+};
+
+// ── Tâches (Kanban) ─────────────────────────────────────────────────────────────
+export type Colonne = 'TODO' | 'EN_COURS' | 'EN_ATTENTE' | 'TERMINE';
+export const tachesApi = {
+  create: (data: { projetId: string; titre: string; colonne?: Colonne; priorite?: string }) =>
+    api.post('/taches', data),
+  move: (id: string, data: { colonne: Colonne; position: number }) =>
+    api.patch(`/taches/${id}/move`, data),
+  remove: (id: string) => api.delete(`/taches/${id}`),
 };
 
 // ── Contrats ──────────────────────────────────────────────────────────────────

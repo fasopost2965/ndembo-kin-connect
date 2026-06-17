@@ -14,6 +14,7 @@ import { factureRoutes } from './modules/factures/factures.routes';
 import { reglementRoutes } from './modules/reglements/reglements.routes';
 import { prestationRoutes } from './modules/prestations/prestations.routes';
 import { projetRoutes } from './modules/projets/projets.routes';
+import { tacheRoutes } from './modules/taches/taches.routes';
 import { contratRoutes } from './modules/contrats/contrats.routes';
 import { settingsRoutes } from './modules/settings/settings.routes';
 import { dashboardRoutes } from './modules/dashboard/dashboard.routes';
@@ -82,6 +83,7 @@ async function main() {
   await server.register(reglementRoutes, { prefix: '/reglements' });
   await server.register(prestationRoutes, { prefix: '/prestations' });
   await server.register(projetRoutes, { prefix: '/projets' });
+  await server.register(tacheRoutes, { prefix: '/taches' });
   await server.register(contratRoutes, { prefix: '/contrats' });
   await server.register(settingsRoutes, { prefix: '/settings' });
   await server.register(dashboardRoutes, { prefix: '/dashboard' });

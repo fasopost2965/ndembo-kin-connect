@@ -258,6 +258,53 @@ async function main() {
   await prisma.sequence.updateMany({ where: { type: 'DEVIS' }, data: { valeur: 4 } });
   await prisma.sequence.updateMany({ where: { type: 'FACTURE' }, data: { valeur: 1 } });
 
+  // ── Projet + Tâches (Kanban) ───────────────────────────────────────────────
+  const projet = await prisma.projet.upsert({
+    where: { numero: 'PROJ-2026-001' },
+    update: {},
+    create: {
+      numero: 'PROJ-2026-001',
+      clientId: clients[0].id,
+      factureId: facture.id,
+      objet: 'Gestion de carrière — Joël Lukaku',
+      typeProjet: 'gestion_carriere',
+      dateDebut: new Date('2026-06-01'),
+      budgetTotal: 19000,
+      statut: 'EN_COURS',
+      tauxAvancement: 35,
+    },
+  });
+  await prisma.sequence.updateMany({ where: { type: 'PROJET' }, data: { valeur: 1 } });
+
+  const taches: {
+    id: string; titre: string; colonne: string; position: number;
+    priorite: string; assigneeId?: string; pourcentageAvancement?: number;
+  }[] = [
+    { id: 'tache-001', titre: 'Scouting Europe 2026', colonne: 'EN_COURS', position: 0, priorite: 'HAUTE', assigneeId: manager.id, pourcentageAvancement: 50 },
+    { id: 'tache-002', titre: 'Négociation club EU', colonne: 'EN_COURS', position: 1, priorite: 'URGENTE', assigneeId: admin.id, pourcentageAvancement: 20 },
+    { id: 'tache-003', titre: 'Préparer dossier médical', colonne: 'TODO', position: 0, priorite: 'NORMALE' },
+    { id: 'tache-004', titre: 'Camp de préparation juin', colonne: 'TODO', position: 1, priorite: 'NORMALE', assigneeId: manager.id },
+    { id: 'tache-005', titre: 'Validation visa & permis', colonne: 'EN_ATTENTE', position: 0, priorite: 'HAUTE' },
+    { id: 'tache-006', titre: 'Initialisation du projet', colonne: 'TERMINE', position: 0, priorite: 'NORMALE', assigneeId: admin.id, pourcentageAvancement: 100 },
+    { id: 'tache-007', titre: 'Signature contrat de gestion', colonne: 'TERMINE', position: 1, priorite: 'HAUTE', assigneeId: manager.id, pourcentageAvancement: 100 },
+  ];
+  for (const t of taches) {
+    await prisma.tache.upsert({
+      where: { id: t.id },
+      update: {},
+      create: {
+        id: t.id,
+        projetId: projet.id,
+        titre: t.titre,
+        colonne: t.colonne,
+        position: t.position,
+        priorite: t.priorite,
+        assigneeId: t.assigneeId,
+        pourcentageAvancement: t.pourcentageAvancement ?? 0,
+      },
+    });
+  }
+
   console.log('✅ Seed terminé avec succès');
   console.log('');
   console.log('Comptes créés :');

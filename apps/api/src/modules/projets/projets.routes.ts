@@ -68,16 +68,5 @@ export async function projetRoutes(server: FastifyInstance) {
     };
     return kanban;
   });
-
-  // PATCH /taches/:id/move
-  server.patch('/taches/:id/move', { preHandler: [can('projetsTaches', 'write')] }, async (req, reply) => {
-    const { id } = req.params as { id: string };
-    const { colonne, position } = z.object({
-      colonne: z.enum(['TODO', 'EN_COURS', 'EN_ATTENTE', 'TERMINE']),
-      position: z.number(),
-    }).parse(req.body);
-    const tache = await prisma.tache.update({ where: { id }, data: { colonne, position } });
-    return tache;
-  });
 }
 
