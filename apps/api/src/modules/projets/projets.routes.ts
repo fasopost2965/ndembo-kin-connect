@@ -1,12 +1,12 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { requireAuth, checkRole } from '../../lib/rbac';
+import { can } from '../../lib/rbac';
 import { prisma } from '../../lib/prisma';
 import { nextNumero } from '../../lib/sequences';
 
 export async function projetRoutes(server: FastifyInstance) {
   // GET /projets
-  server.get('/', { preHandler: [requireAuth()] }, async (req) => {
+  server.get('/', { preHandler: [can('projetsTaches', 'read')] }, async (req) => {
     const query = req.query as { clientId?: string; statut?: string; page?: string };
     const page = Number(query.page) || 1;
     const [data, total] = await Promise.all([
@@ -25,7 +25,7 @@ export async function projetRoutes(server: FastifyInstance) {
   });
 
   // POST /projets
-  server.post('/', { preHandler: [checkRole('ADMIN', 'MANAGER')] }, async (req, reply) => {
+  server.post('/', { preHandler: [can('projetsTaches', 'write')] }, async (req, reply) => {
     const body = z.object({
       clientId: z.string(),
       factureId: z.string().optional(),
@@ -42,7 +42,7 @@ export async function projetRoutes(server: FastifyInstance) {
   });
 
   // GET /projets/:id
-  server.get('/:id', { preHandler: [requireAuth()] }, async (req, reply) => {
+  server.get('/:id', { preHandler: [can('projetsTaches', 'read')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const projet = await prisma.projet.findUnique({
       where: { id },
@@ -53,7 +53,7 @@ export async function projetRoutes(server: FastifyInstance) {
   });
 
   // GET /projets/:id/kanban
-  server.get('/:id/kanban', { preHandler: [requireAuth()] }, async (req, reply) => {
+  server.get('/:id/kanban', { preHandler: [can('projetsTaches', 'read')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const taches = await prisma.tache.findMany({
       where: { projetId: id },
@@ -70,7 +70,7 @@ export async function projetRoutes(server: FastifyInstance) {
   });
 
   // PATCH /taches/:id/move
-  server.patch('/taches/:id/move', { preHandler: [requireAuth()] }, async (req, reply) => {
+  server.patch('/taches/:id/move', { preHandler: [can('projetsTaches', 'write')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const { colonne, position } = z.object({
       colonne: z.enum(['TODO', 'EN_COURS', 'EN_ATTENTE', 'TERMINE']),

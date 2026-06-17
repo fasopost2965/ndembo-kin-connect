@@ -4,7 +4,7 @@ import { prisma } from '../../lib/prisma';
 
 export async function dashboardRoutes(server: FastifyInstance) {
   // GET /dashboard/kpis
-  server.get('/kpis', { preHandler: [requireAuth()] }, async () => {
+  server.get('/kpis', { preHandler: [requireAuth] }, async () => {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -47,7 +47,7 @@ export async function dashboardRoutes(server: FastifyInstance) {
   });
 
   // GET /dashboard/ca — CA par mois (12 derniers mois)
-  server.get('/ca', { preHandler: [requireAuth()] }, async () => {
+  server.get('/ca', { preHandler: [requireAuth] }, async () => {
     const rows = await prisma.$queryRaw<{ mois: string; total: number }[]>`
       SELECT TO_CHAR(DATE_TRUNC('month', "createdAt"), 'Mon') as mois,
              COALESCE(SUM("montantTTC"), 0) as total
@@ -61,7 +61,7 @@ export async function dashboardRoutes(server: FastifyInstance) {
   });
 
   // GET /dashboard/pipeline — projets en cours
-  server.get('/pipeline', { preHandler: [requireAuth()] }, async () => {
+  server.get('/pipeline', { preHandler: [requireAuth] }, async () => {
     return prisma.projet.findMany({
       where: { statut: { in: ['TODO', 'EN_COURS', 'EN_ATTENTE'] } },
       include: { client: { select: { nom: true } } },
@@ -71,7 +71,7 @@ export async function dashboardRoutes(server: FastifyInstance) {
   });
 
   // GET /dashboard/activites — dernières activités
-  server.get('/activites', { preHandler: [requireAuth()] }, async () => {
+  server.get('/activites', { preHandler: [requireAuth] }, async () => {
     return prisma.activite.findMany({
       orderBy: { createdAt: 'desc' },
       take: 10,

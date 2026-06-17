@@ -1,16 +1,19 @@
 import { FastifyInstance } from 'fastify';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { prisma } from '../../lib/prisma';
+import { can, Role } from '../../lib/rbac';
 
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(1),
 });
 
 export async function authRoutes(server: FastifyInstance) {
-  // POST /auth/login
-  server.post('/login', async (req, reply) => {
+  // POST /auth/login — rate-limited to 10 req/min (handoff checklist)
+  server.post('/login', {
+    config: { rateLimit: { max: 10, timeWindow: '1 minute' } },
+  }, async (req, reply) => {
     const { email, password } = loginSchema.parse(req.body);
 
     const user = await prisma.user.findUnique({ where: { email } });
@@ -38,8 +41,8 @@ export async function authRoutes(server: FastifyInstance) {
     return { accessToken, user: { id: user.id, email: user.email, name: user.name, role: user.role } };
   });
 
-  // POST /auth/register  (Admin only after first setup)
-  server.post('/register', async (req, reply) => {
+  // POST /auth/register — Admin only (Utilisateurs = write in the RBAC matrix)
+  server.post('/register', { preHandler: [can('utilisateurs', 'write')] }, async (req, reply) => {
     const schema = z.object({
       email: z.string().email(),
       password: z.string().min(8),
@@ -70,7 +73,7 @@ export async function authRoutes(server: FastifyInstance) {
     const token = req.cookies['refresh_token'];
     if (!token) return reply.status(401).send({ message: 'No refresh token' });
     try {
-      const payload = server.jwt.verify<{ userId: string; role: string; agenceId: string }>(token);
+      const payload = server.jwt.verify<{ userId: string; role: Role; agenceId: string }>(token);
       const accessToken = server.jwt.sign(
         { userId: payload.userId, role: payload.role, agenceId: payload.agenceId },
         { expiresIn: '15m' }

@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { requireAuth, checkRole } from '../../lib/rbac';
+import { can } from '../../lib/rbac';
 import { prisma } from '../../lib/prisma';
 import { nextNumero } from '../../lib/sequences';
 
@@ -22,7 +22,7 @@ const devisCreateSchema = z.object({
 
 export async function devisRoutes(server: FastifyInstance) {
   // GET /devis
-  server.get('/', { preHandler: [requireAuth()] }, async (req) => {
+  server.get('/', { preHandler: [can('devisFactures', 'read')] }, async (req) => {
     const query = req.query as { clientId?: string; statut?: string; page?: string };
     const page = Number(query.page) || 1;
     const [data, total] = await Promise.all([
@@ -38,7 +38,7 @@ export async function devisRoutes(server: FastifyInstance) {
   });
 
   // POST /devis
-  server.post('/', { preHandler: [checkRole('ADMIN', 'MANAGER', 'COMMERCIAL')] }, async (req, reply) => {
+  server.post('/', { preHandler: [can('devisFactures', 'write')] }, async (req, reply) => {
     const body = devisCreateSchema.parse(req.body);
     const montantHT = body.lignes.reduce((s, l) => s + l.total, 0);
     const montantTTC = montantHT * (1 + body.tva / 100);
@@ -50,7 +50,7 @@ export async function devisRoutes(server: FastifyInstance) {
   });
 
   // GET /devis/:id
-  server.get('/:id', { preHandler: [requireAuth()] }, async (req, reply) => {
+  server.get('/:id', { preHandler: [can('devisFactures', 'read')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const devis = await prisma.devis.findUnique({ where: { id }, include: { client: true } });
     if (!devis) return reply.status(404).send({ message: 'Devis non trouvé' });
@@ -58,7 +58,7 @@ export async function devisRoutes(server: FastifyInstance) {
   });
 
   // GET /devis/:id/pdf  — returns PDF URL or triggers generation
-  server.get('/:id/pdf', { preHandler: [requireAuth()] }, async (req, reply) => {
+  server.get('/:id/pdf', { preHandler: [can('devisFactures', 'read')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const devis = await prisma.devis.findUnique({ where: { id }, include: { client: true } });
     if (!devis) return reply.status(404).send({ message: 'Devis non trouvé' });
@@ -67,7 +67,7 @@ export async function devisRoutes(server: FastifyInstance) {
   });
 
   // POST /devis/:id/convert — convert to facture
-  server.post('/:id/convert', { preHandler: [checkRole('ADMIN', 'MANAGER', 'COMMERCIAL')] }, async (req, reply) => {
+  server.post('/:id/convert', { preHandler: [can('devisFactures', 'write')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const devis = await prisma.devis.findUnique({ where: { id } });
     if (!devis) return reply.status(404).send({ message: 'Devis non trouvé' });
@@ -92,7 +92,7 @@ export async function devisRoutes(server: FastifyInstance) {
   });
 
   // PATCH /devis/:id/statut
-  server.patch('/:id/statut', { preHandler: [checkRole('ADMIN', 'MANAGER', 'COMMERCIAL')] }, async (req, reply) => {
+  server.patch('/:id/statut', { preHandler: [can('devisFactures', 'write')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const { statut } = z.object({ statut: z.enum(['EN_ATTENTE', 'VALIDE', 'REFUSE']) }).parse(req.body);
     const devis = await prisma.devis.update({ where: { id }, data: { statut } });

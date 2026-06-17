@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { requireAuth, checkRole } from '../../lib/rbac';
+import { can } from '../../lib/rbac';
 import { prisma } from '../../lib/prisma';
 
 const clientSchema = z.object({
@@ -20,7 +20,7 @@ const clientSchema = z.object({
 
 export async function clientRoutes(server: FastifyInstance) {
   // GET /clients
-  server.get('/', { preHandler: [requireAuth()] }, async (req) => {
+  server.get('/', { preHandler: [can('clients', 'read')] }, async (req) => {
     const query = req.query as { search?: string; type?: string; page?: string; limit?: string };
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 20;
@@ -36,14 +36,14 @@ export async function clientRoutes(server: FastifyInstance) {
   });
 
   // POST /clients
-  server.post('/', { preHandler: [checkRole('ADMIN', 'MANAGER', 'COMMERCIAL')] }, async (req, reply) => {
+  server.post('/', { preHandler: [can('clients', 'write')] }, async (req, reply) => {
     const data = clientSchema.parse(req.body);
     const client = await prisma.client.create({ data });
     return reply.status(201).send(client);
   });
 
   // GET /clients/:id
-  server.get('/:id', { preHandler: [requireAuth()] }, async (req, reply) => {
+  server.get('/:id', { preHandler: [can('clients', 'read')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const client = await prisma.client.findUnique({
       where: { id },
@@ -59,7 +59,7 @@ export async function clientRoutes(server: FastifyInstance) {
   });
 
   // GET /clients/:id/timeline
-  server.get('/:id/timeline', { preHandler: [requireAuth()] }, async (req, reply) => {
+  server.get('/:id/timeline', { preHandler: [can('clients', 'read')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const [devis, factures, activites] = await Promise.all([
       prisma.devis.findMany({ where: { clientId: id }, orderBy: { createdAt: 'desc' } }),
@@ -70,7 +70,7 @@ export async function clientRoutes(server: FastifyInstance) {
   });
 
   // PUT /clients/:id
-  server.put('/:id', { preHandler: [checkRole('ADMIN', 'MANAGER', 'COMMERCIAL')] }, async (req, reply) => {
+  server.put('/:id', { preHandler: [can('clients', 'write')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const data = clientSchema.partial().parse(req.body);
     const client = await prisma.client.update({ where: { id }, data });

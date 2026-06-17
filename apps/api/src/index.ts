@@ -1,4 +1,6 @@
-import Fastify from 'fastify';
+import './types/augmentations';
+import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
+import { ZodError } from 'zod';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import cookie from '@fastify/cookie';
@@ -32,6 +34,41 @@ async function main() {
   await server.register(rateLimit, {
     max: 100,
     timeWindow: '1 minute',
+  });
+
+  // `authenticate` decorator — verifies the JWT, used as a preHandler by routes
+  // that only need authentication (RBAC checks use `can()` from lib/rbac).
+  server.decorate('authenticate', async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      await req.jwtVerify();
+    } catch {
+      reply.status(401).send({ message: 'Non authentifié' });
+    }
+  });
+
+  // Global error handler — maps validation & known errors to clean responses
+  server.setErrorHandler((error, req, reply) => {
+    // Zod validation errors
+    if (error instanceof ZodError) {
+      return reply.status(400).send({
+        message: 'Données invalides',
+        errors: error.errors.map((e) => ({ path: e.path.join('.'), message: e.message })),
+      });
+    }
+    // Prisma "record not found" (P2025) → 404
+    if ((error as { code?: string }).code === 'P2025') {
+      return reply.status(404).send({ message: 'Ressource non trouvée' });
+    }
+    // Prisma unique constraint (P2002) → 409
+    if ((error as { code?: string }).code === 'P2002') {
+      return reply.status(409).send({ message: 'Conflit — valeur déjà existante' });
+    }
+    // Rate-limit (statusCode already set by plugin) and other tagged errors
+    if (error.statusCode && error.statusCode < 500) {
+      return reply.status(error.statusCode).send({ message: error.message });
+    }
+    req.log.error(error);
+    return reply.status(500).send({ message: 'Erreur interne du serveur' });
   });
 
   // Routes

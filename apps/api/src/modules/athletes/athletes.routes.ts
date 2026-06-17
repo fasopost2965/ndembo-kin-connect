@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { requireAuth, checkRole } from '../../lib/rbac';
+import { can } from '../../lib/rbac';
 import { prisma } from '../../lib/prisma';
 
 const athleteSchema = z.object({
@@ -19,7 +19,7 @@ const athleteSchema = z.object({
 
 export async function athleteRoutes(server: FastifyInstance) {
   // GET /athletes
-  server.get('/', { preHandler: [requireAuth()] }, async (req) => {
+  server.get('/', { preHandler: [can('athletes', 'read')] }, async (req) => {
     const query = req.query as { search?: string; sport?: string; niveau?: string; page?: string; limit?: string };
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 20;
@@ -45,14 +45,14 @@ export async function athleteRoutes(server: FastifyInstance) {
   });
 
   // POST /athletes
-  server.post('/', { preHandler: [checkRole('ADMIN', 'MANAGER', 'COACH')] }, async (req, reply) => {
+  server.post('/', { preHandler: [can('athletes', 'write')] }, async (req, reply) => {
     const data = athleteSchema.parse(req.body);
     const athlete = await prisma.athlete.create({ data });
     return reply.status(201).send(athlete);
   });
 
   // GET /athletes/:id
-  server.get('/:id', { preHandler: [requireAuth()] }, async (req, reply) => {
+  server.get('/:id', { preHandler: [can('athletes', 'read')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const athlete = await prisma.athlete.findUnique({
       where: { id },
@@ -63,7 +63,7 @@ export async function athleteRoutes(server: FastifyInstance) {
   });
 
   // PUT /athletes/:id
-  server.put('/:id', { preHandler: [checkRole('ADMIN', 'MANAGER', 'COACH')] }, async (req, reply) => {
+  server.put('/:id', { preHandler: [can('athletes', 'write')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const data = athleteSchema.partial().parse(req.body);
     const athlete = await prisma.athlete.update({ where: { id }, data });
@@ -71,7 +71,7 @@ export async function athleteRoutes(server: FastifyInstance) {
   });
 
   // DELETE /athletes/:id
-  server.delete('/:id', { preHandler: [checkRole('ADMIN')] }, async (req, reply) => {
+  server.delete('/:id', { preHandler: [can('athletes', 'write')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     await prisma.athlete.delete({ where: { id } });
     return reply.status(204).send();

@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { checkRole } from '../../lib/rbac';
+import { can } from '../../lib/rbac';
 import { prisma } from '../../lib/prisma';
 
 const DEFAULT_SETTINGS = {
@@ -21,7 +21,7 @@ const DEFAULT_SETTINGS = {
 
 export async function settingsRoutes(server: FastifyInstance) {
   // GET /settings — returns all settings as key-value object
-  server.get('/', { preHandler: [checkRole('ADMIN')] }, async () => {
+  server.get('/', { preHandler: [can('parametres', 'read')] }, async () => {
     const rows = await prisma.setting.findMany();
     const out: Record<string, string> = { ...DEFAULT_SETTINGS };
     for (const r of rows) out[r.key] = r.value;
@@ -29,7 +29,7 @@ export async function settingsRoutes(server: FastifyInstance) {
   });
 
   // PUT /settings — bulk upsert
-  server.put('/', { preHandler: [checkRole('ADMIN')] }, async (req) => {
+  server.put('/', { preHandler: [can('parametres', 'write')] }, async (req) => {
     const body = z.record(z.string()).parse(req.body);
     await prisma.$transaction(
       Object.entries(body).map(([key, value]) =>
@@ -40,7 +40,7 @@ export async function settingsRoutes(server: FastifyInstance) {
   });
 
   // GET /settings/users — list users (RBAC admin)
-  server.get('/users', { preHandler: [checkRole('ADMIN')] }, async () => {
+  server.get('/users', { preHandler: [can('parametres', 'read')] }, async () => {
     return prisma.user.findMany({
       select: { id: true, email: true, name: true, role: true, isActive: true, createdAt: true },
       orderBy: { createdAt: 'desc' },
@@ -48,7 +48,7 @@ export async function settingsRoutes(server: FastifyInstance) {
   });
 
   // PATCH /settings/users/:id — update role or active status
-  server.patch('/users/:id', { preHandler: [checkRole('ADMIN')] }, async (req, reply) => {
+  server.patch('/users/:id', { preHandler: [can('parametres', 'write')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const body = z.object({
       role: z.enum(['ADMIN', 'MANAGER', 'COMMERCIAL', 'COACH', 'COMPTABLE']).optional(),

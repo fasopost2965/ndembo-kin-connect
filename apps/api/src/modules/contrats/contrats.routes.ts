@@ -1,12 +1,12 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { requireAuth, checkRole } from '../../lib/rbac';
+import { can } from '../../lib/rbac';
 import { prisma } from '../../lib/prisma';
 import { nextNumero } from '../../lib/sequences';
 
 export async function contratRoutes(server: FastifyInstance) {
   // POST /contrats/generate
-  server.post('/generate', { preHandler: [checkRole('ADMIN', 'MANAGER')] }, async (req, reply) => {
+  server.post('/generate', { preHandler: [can('contrats', 'write')] }, async (req, reply) => {
     const body = z.object({
       clientId: z.string(),
       projetId: z.string().optional(),
@@ -39,7 +39,7 @@ export async function contratRoutes(server: FastifyInstance) {
   });
 
   // GET /contrats
-  server.get('/', { preHandler: [requireAuth()] }, async (req) => {
+  server.get('/', { preHandler: [can('contrats', 'read')] }, async (req) => {
     const query = req.query as { clientId?: string; statut?: string; page?: string };
     const page = Number(query.page) || 1;
     const [data, total] = await Promise.all([
@@ -58,7 +58,7 @@ export async function contratRoutes(server: FastifyInstance) {
   });
 
   // GET /contrats/:id
-  server.get('/:id', { preHandler: [requireAuth()] }, async (req, reply) => {
+  server.get('/:id', { preHandler: [can('contrats', 'read')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const contrat = await prisma.contrat.findUnique({
       where: { id },
@@ -69,7 +69,7 @@ export async function contratRoutes(server: FastifyInstance) {
   });
 
   // POST /contrats/:id/sign
-  server.post('/:id/sign', { preHandler: [checkRole('ADMIN', 'MANAGER')] }, async (req, reply) => {
+  server.post('/:id/sign', { preHandler: [can('contrats', 'write')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const { partie } = z.object({ partie: z.enum(['CLIENT', 'PRESTATAIRE']) }).parse(req.body);
 
@@ -90,7 +90,7 @@ export async function contratRoutes(server: FastifyInstance) {
   });
 
   // GET /contrats/:id/pdf
-  server.get('/:id/pdf', { preHandler: [requireAuth()] }, async (req, reply) => {
+  server.get('/:id/pdf', { preHandler: [can('contrats', 'read')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const contrat = await prisma.contrat.findUnique({ where: { id } });
     if (!contrat) return reply.status(404).send({ message: 'Contrat non trouvé' });

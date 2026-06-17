@@ -1,11 +1,11 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { requireAuth, checkRole } from '../../lib/rbac';
+import { can } from '../../lib/rbac';
 import { prisma } from '../../lib/prisma';
 
 export async function factureRoutes(server: FastifyInstance) {
   // GET /factures
-  server.get('/', { preHandler: [requireAuth()] }, async (req) => {
+  server.get('/', { preHandler: [can('devisFactures', 'read')] }, async (req) => {
     const query = req.query as { clientId?: string; statut?: string; page?: string };
     const page = Number(query.page) || 1;
     const [data, total] = await Promise.all([
@@ -24,7 +24,7 @@ export async function factureRoutes(server: FastifyInstance) {
   });
 
   // GET /factures/:id
-  server.get('/:id', { preHandler: [requireAuth()] }, async (req, reply) => {
+  server.get('/:id', { preHandler: [can('devisFactures', 'read')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const facture = await prisma.facture.findUnique({
       where: { id },
@@ -35,7 +35,7 @@ export async function factureRoutes(server: FastifyInstance) {
   });
 
   // PATCH /factures/:id/paiement — enregistrer un règlement
-  server.patch('/:id/paiement', { preHandler: [checkRole('ADMIN', 'MANAGER', 'COMPTABLE')] }, async (req, reply) => {
+  server.patch('/:id/paiement', { preHandler: [can('reglements', 'write')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const body = z.object({
       montant: z.number().positive(),
@@ -60,7 +60,7 @@ export async function factureRoutes(server: FastifyInstance) {
   });
 
   // GET /factures/:id/pdf
-  server.get('/:id/pdf', { preHandler: [requireAuth()] }, async (req, reply) => {
+  server.get('/:id/pdf', { preHandler: [can('devisFactures', 'read')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const facture = await prisma.facture.findUnique({ where: { id } });
     if (!facture) return reply.status(404).send({ message: 'Facture non trouvée' });
