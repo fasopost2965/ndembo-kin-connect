@@ -119,9 +119,20 @@ export interface ReglementInput {
   moyenPaiement: 'BANK' | 'CARTE' | 'MTN_MONEY' | 'AIRTEL_MONEY' | 'ORANGE_MONEY';
   reference?: string;
 }
+export interface MobileMoneyInput {
+  factureId: string;
+  montant: number;
+  moyenPaiement: 'MTN_MONEY' | 'AIRTEL_MONEY' | 'ORANGE_MONEY';
+  phone: string;
+}
 export const reglementsApi = {
   list: (factureId?: string) => api.get('/reglements', { params: factureId ? { factureId } : {} }),
   create: (data: ReglementInput) => api.post('/reglements', data),
+  // FlexPay Mobile Money
+  initiate: (data: MobileMoneyInput) =>
+    api.post<{ reglementId: string; orderNumber: string; statut: string; mock?: boolean; message?: string }>('/reglements/initiate', data),
+  status: (orderNumber: string) =>
+    api.get<{ orderNumber: string; statut: 'PENDING' | 'CONFIRME' | 'ECHEC' }>(`/reglements/status/${encodeURIComponent(orderNumber)}`),
 };
 
 // ── Projets ───────────────────────────────────────────────────────────────────

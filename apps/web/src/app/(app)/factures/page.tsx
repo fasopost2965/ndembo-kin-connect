@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { FileText, Wallet } from 'lucide-react';
+import { FileText, Wallet, Smartphone } from 'lucide-react';
 import { facturesApi } from '@/lib/api';
 import { formatMontant } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,9 @@ import {
 } from '@/components/ui/table';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { PaiementForm } from './PaiementForm';
+import { MobileMoneyForm } from './MobileMoneyForm';
+
+type PayMode = 'none' | 'manual' | 'momo';
 
 interface Reglement { id: string; montant: number; moyenPaiement: string; dateReglement: string; reference?: string }
 interface Ligne { designation: string; quantite: number; prixUnit: number; total: number }
@@ -42,7 +45,7 @@ function FacturesView() {
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<Facture | null>(null);
-  const [payOpen, setPayOpen] = useState(false);
+  const [payMode, setPayMode] = useState<PayMode>('none');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -64,7 +67,7 @@ function FacturesView() {
   }, []);
 
   useEffect(() => {
-    if (selectedId) { setDetail(null); setPayOpen(false); loadDetail(selectedId); }
+    if (selectedId) { setDetail(null); setPayMode('none'); loadDetail(selectedId); }
   }, [selectedId, loadDetail]);
 
   const restant = detail ? Math.max(0, detail.montantTTC - detail.acomptePercu) : 0;
@@ -162,19 +165,31 @@ function FacturesView() {
 
               {/* Actions */}
               <div className="mt-auto flex flex-col gap-2 pt-2">
-                {payOpen ? (
+                {payMode === 'manual' ? (
                   <PaiementForm
                     factureId={detail.id}
                     restant={restant}
-                    onCancel={() => setPayOpen(false)}
-                    onSaved={() => { setPayOpen(false); loadDetail(detail.id); load(); }}
+                    onCancel={() => setPayMode('none')}
+                    onSaved={() => { setPayMode('none'); loadDetail(detail.id); load(); }}
+                  />
+                ) : payMode === 'momo' ? (
+                  <MobileMoneyForm
+                    factureId={detail.id}
+                    restant={restant}
+                    onCancel={() => setPayMode('none')}
+                    onConfirmed={() => { setPayMode('none'); loadDetail(detail.id); load(); }}
                   />
                 ) : (
                   <>
                     {detail.statutPaiement !== 'PAYEE' && (
-                      <Button variant="gold" className="w-full" onClick={() => setPayOpen(true)}>
-                        <Wallet size={15} /> Enregistrer un paiement
-                      </Button>
+                      <>
+                        <Button variant="gold" className="w-full" onClick={() => setPayMode('momo')}>
+                          <Smartphone size={15} /> Payer par Mobile Money
+                        </Button>
+                        <Button variant="secondary" className="w-full" onClick={() => setPayMode('manual')}>
+                          <Wallet size={15} /> Enregistrer un paiement manuel
+                        </Button>
+                      </>
                     )}
                     <Button variant="outline" className="w-full" onClick={() => facturesApi.pdf(detail.id)}>
                       <FileText size={14} /> Aperçu PDF
