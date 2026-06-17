@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { can } from '../../lib/rbac';
 import { prisma } from '../../lib/prisma';
 import { nextNumero } from '../../lib/sequences';
+import { getSettingsMap } from '../../lib/settings';
+import { renderDocumentPdf, type PdfLigne } from '../../lib/pdf/documentPdf';
 
 // Input line: only prestationId + quantite are required; prixUnit is optional
 // and defaults to the prestation's catalogue price (prixBase).
@@ -106,13 +108,33 @@ export async function devisRoutes(server: FastifyInstance) {
     return devis;
   });
 
-  // GET /devis/:id/pdf  — returns PDF URL or triggers generation
+  // GET /devis/:id/pdf — generate the devis PDF on the fly
   server.get('/:id/pdf', { preHandler: [can('devisFactures', 'read')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const devis = await prisma.devis.findUnique({ where: { id }, include: { client: true } });
     if (!devis) return reply.status(404).send({ message: 'Devis non trouvé' });
-    // TODO: integrate React-PDF / Puppeteer for generation
-    return { pdfUrl: devis.pdfUrl || null, message: 'PDF generation à implémenter (Étape 05)' };
+
+    const settings = await getSettingsMap();
+    const pdf = await renderDocumentPdf(
+      {
+        kind: 'devis',
+        numero: devis.numero,
+        createdAt: devis.createdAt,
+        client: devis.client,
+        lignes: devis.lignes as unknown as PdfLigne[],
+        montantHT: devis.montantHT,
+        tva: devis.tva,
+        montantTTC: devis.montantTTC,
+        validiteJours: devis.validiteJours,
+        notes: devis.notes,
+      },
+      settings
+    );
+
+    return reply
+      .header('Content-Type', 'application/pdf')
+      .header('Content-Disposition', `inline; filename="${devis.numero}.pdf"`)
+      .send(pdf);
   });
 
   // POST /devis/:id/convert — convert to facture

@@ -2,6 +2,8 @@ import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { can } from '../../lib/rbac';
 import { prisma } from '../../lib/prisma';
+import { getSettingsMap } from '../../lib/settings';
+import { renderDocumentPdf, type PdfLigne } from '../../lib/pdf/documentPdf';
 
 export async function factureRoutes(server: FastifyInstance) {
   // GET /factures
@@ -59,12 +61,32 @@ export async function factureRoutes(server: FastifyInstance) {
     return reply.status(201).send(reglement);
   });
 
-  // GET /factures/:id/pdf
+  // GET /factures/:id/pdf — generate the facture PDF on the fly
   server.get('/:id/pdf', { preHandler: [can('devisFactures', 'read')] }, async (req, reply) => {
     const { id } = req.params as { id: string };
-    const facture = await prisma.facture.findUnique({ where: { id } });
+    const facture = await prisma.facture.findUnique({ where: { id }, include: { client: true } });
     if (!facture) return reply.status(404).send({ message: 'Facture non trouvée' });
-    return { pdfUrl: facture.pdfUrl || null, message: 'PDF generation à implémenter (Étape 05)' };
+
+    const settings = await getSettingsMap();
+    const pdf = await renderDocumentPdf(
+      {
+        kind: 'facture',
+        numero: facture.numero,
+        createdAt: facture.createdAt,
+        client: facture.client,
+        lignes: facture.lignes as unknown as PdfLigne[],
+        montantHT: facture.montantHT,
+        tva: facture.tva,
+        montantTTC: facture.montantTTC,
+        acomptePercu: facture.acomptePercu,
+      },
+      settings
+    );
+
+    return reply
+      .header('Content-Type', 'application/pdf')
+      .header('Content-Disposition', `inline; filename="${facture.numero}.pdf"`)
+      .send(pdf);
   });
 }
 

@@ -85,15 +85,32 @@ export const devisApi = {
   create: (data: DevisCreateInput) => api.post('/devis', data),
   updateStatut: (id: string, statut: string) => api.patch(`/devis/${id}/statut`, { statut }),
   convert: (id: string) => api.post(`/devis/${id}/convert`),
-  pdf: (id: string) => api.get(`/devis/${id}/pdf`),
+  pdf: (id: string) => openPdf(`/devis/${id}/pdf`),
 };
 
 // ── Factures ──────────────────────────────────────────────────────────────────
 export const facturesApi = {
   list: (params?: Record<string, string | number>) => api.get('/factures', { params }),
   get: (id: string) => api.get(`/factures/${id}`),
-  pdf: (id: string) => api.get(`/factures/${id}/pdf`),
+  pdf: (id: string) => openPdf(`/factures/${id}/pdf`),
 };
+
+/**
+ * Fetch a PDF endpoint as a blob (so the bearer token is sent) and open it in a
+ * new tab. Falls back to a download if the popup is blocked.
+ */
+export async function openPdf(path: string): Promise<void> {
+  const { data } = await api.get(path, { responseType: 'blob' });
+  const url = URL.createObjectURL(data as Blob);
+  const win = window.open(url, '_blank');
+  if (!win) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = path.split('/').slice(-2).join('-') + '.pdf';
+    a.click();
+  }
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
 
 // ── Règlements ────────────────────────────────────────────────────────────────
 export interface ReglementInput {
