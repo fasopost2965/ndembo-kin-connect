@@ -1,0 +1,363 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── UTILISATEURS ─────────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(COMMERCIAL)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  taches    Tache[]    @relation("AssigneeTaches")
+  activites Activite[]
+  rapports  Rapport[]
+
+  @@map("users")
+}
+
+// ─── ATHLÈTES ─────────────────────────────────────────────────────────────────
+
+model Athlete {
+  id              String   @id @default(cuid())
+  nom             String
+  prenom          String
+  sport           String   // football | basketball | athletisme
+  poste           String
+  niveau          Niveau
+  clubActuel      String?
+  valeurMarchande Float?
+  nationalite     String   @default("RDC")
+  dateNaissance   DateTime?
+  telephone       String?
+  email           String?
+  photo           String?
+  statut          String   @default("Actif")
+  priorityScouting String? // HAUTE | NORMALE | BASSE
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  contrats Contrat[]
+
+  @@map("athletes")
+}
+
+// ─── CLIENTS ──────────────────────────────────────────────────────────────────
+
+model Client {
+  id                  String   @id @default(cuid())
+  nom                 String
+  type                String   // Club | Academie | Sponsor | Partenaire
+  rccm                String?
+  nif                 String?
+  email               String
+  telephone           String
+  adresse             String?
+  ville               String
+  secteurActivite     String?
+  montantSponsorisation Float?
+  contactNom          String?
+  contactPoste        String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  devis     Devis[]
+  factures  Facture[]
+  projets   Projet[]
+  contrats  Contrat[]
+  activites Activite[]
+
+  @@map("clients")
+}
+
+// ─── PRESTATIONS ──────────────────────────────────────────────────────────────
+
+model Prestation {
+  id             String   @id @default(cuid())
+  nom            String
+  type           String   // Conseil | Gestion_carriere | Camp | Stage
+  prixBase       Float
+  dureeEstimee   String?
+  description    String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  @@map("prestations")
+}
+
+// ─── DEVIS ────────────────────────────────────────────────────────────────────
+
+model Devis {
+  id          String      @id @default(cuid())
+  numero      String      @unique // DEV-2026-001
+  clientId    String
+  client      Client      @relation(fields: [clientId], references: [id])
+  lignes      Json        // [{prestationId, designation, quantite, prixUnit, total}]
+  montantHT   Float
+  tva         Float       @default(16)
+  montantTTC  Float
+  statut      DevisStatut @default(EN_ATTENTE)
+  validiteJours Int       @default(30)
+  notes       String?
+  pdfUrl      String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  facture Facture?
+
+  @@map("devis")
+}
+
+// ─── FACTURES ─────────────────────────────────────────────────────────────────
+
+model Facture {
+  id              String         @id @default(cuid())
+  numero          String         @unique // FACT-2026-001
+  clientId        String
+  client          Client         @relation(fields: [clientId], references: [id])
+  devisId         String?        @unique
+  devis           Devis?         @relation(fields: [devisId], references: [id])
+  lignes          Json
+  montantHT       Float
+  tva             Float          @default(16)
+  montantTTC      Float
+  acomptePercu    Float          @default(0)
+  statutPaiement  FactureStatut  @default(IMPAYEE)
+  echeanceDate    DateTime?
+  pdfUrl          String?
+  lienPaiement    String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  reglements Reglement[]
+  projets    Projet[]
+
+  @@map("factures")
+}
+
+// ─── RÈGLEMENTS ───────────────────────────────────────────────────────────────
+
+model Reglement {
+  id              String         @id @default(cuid())
+  factureId       String
+  facture         Facture        @relation(fields: [factureId], references: [id])
+  montant         Float
+  dateReglement   DateTime       @default(now())
+  moyenPaiement   MoyenPaiement
+  reference       String?
+  orderNumber     String?        // FlexPay order number
+  statut          String         @default("CONFIRME") // PENDING | CONFIRME | ECHEC
+  createdAt       DateTime       @default(now())
+
+  @@map("reglements")
+}
+
+// ─── PROJETS ──────────────────────────────────────────────────────────────────
+
+model Projet {
+  id               String       @id @default(cuid())
+  numero           String       @unique // PROJ-2026-001
+  clientId         String
+  client           Client       @relation(fields: [clientId], references: [id])
+  factureId        String?
+  facture          Facture?     @relation(fields: [factureId], references: [id])
+  objet            String
+  typeProjet       String       // gestion_carriere | camp | stage
+  dateDebut        DateTime
+  dateFin          DateTime?
+  budgetTotal      Float
+  statut           ProjetStatut @default(TODO)
+  tauxAvancement   Int          @default(0)
+  notes            String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  taches   Tache[]
+  jalons   Jalon[]
+  contrats Contrat[]
+  activites Activite[]
+
+  @@map("projets")
+}
+
+// ─── TÂCHES ───────────────────────────────────────────────────────────────────
+
+model Tache {
+  id                   String   @id @default(cuid())
+  projetId             String
+  projet               Projet   @relation(fields: [projetId], references: [id])
+  titre                String
+  description          String?
+  colonne              String   @default("TODO") // TODO | EN_COURS | EN_ATTENTE | TERMINE
+  position             Int      @default(0)
+  assigneeId           String?
+  assignee             User?    @relation("AssigneeTaches", fields: [assigneeId], references: [id])
+  dateEcheance         DateTime?
+  priorite             String   @default("NORMALE") // BASSE | NORMALE | HAUTE | URGENTE
+  pourcentageAvancement Int     @default(0)
+  tags                 Json?    // string[]
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("taches")
+}
+
+// ─── JALONS ───────────────────────────────────────────────────────────────────
+
+model Jalon {
+  id          String   @id @default(cuid())
+  projetId    String
+  projet      Projet   @relation(fields: [projetId], references: [id])
+  nom         String
+  datePrevis  DateTime
+  dateReelle  DateTime?
+  statut      String   @default("planifie") // planifie | en_cours | termine | retard
+  createdAt   DateTime @default(now())
+
+  @@map("jalons")
+}
+
+// ─── CONTRATS ─────────────────────────────────────────────────────────────────
+
+model Contrat {
+  id                   String        @id @default(cuid())
+  numero               String        @unique // CONT-2026-001
+  clientId             String
+  client               Client        @relation(fields: [clientId], references: [id])
+  projetId             String?
+  projet               Projet?       @relation(fields: [projetId], references: [id])
+  athleteId            String?
+  athlete              Athlete?      @relation(fields: [athleteId], references: [id])
+  typeContrat          String
+  contenu              Json          // {article1: "...", article2: "...", ...}
+  statut               ContratStatut @default(EN_PREPARATION)
+  signeParClient       Boolean       @default(false)
+  signeParPrestataire  Boolean       @default(false)
+  dateSignature        DateTime?
+  pdfUrl               String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  @@map("contrats")
+}
+
+// ─── ACTIVITÉS ────────────────────────────────────────────────────────────────
+
+model Activite {
+  id              String   @id @default(cuid())
+  clientId        String
+  client          Client   @relation(fields: [clientId], references: [id])
+  projetId        String?
+  projet          Projet?  @relation(fields: [projetId], references: [id])
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  type            String   // APPEL | RENCONTRE | EMAIL
+  dateActivite    DateTime
+  statut          String   @default("PLANIFIE") // PLANIFIE | REALISE | ANNULE
+  resultat        String?
+  nextAction      String?
+  dateNextAction  DateTime?
+  createdAt       DateTime @default(now())
+
+  @@map("activites")
+}
+
+// ─── RAPPORTS ─────────────────────────────────────────────────────────────────
+
+model Rapport {
+  id             String   @id @default(cuid())
+  nom            String
+  type           String   // financier | activites | performance
+  periodeDebut   DateTime
+  periodeFin     DateTime
+  donnees        Json
+  createdById    String
+  createdBy      User     @relation(fields: [createdById], references: [id])
+  createdAt      DateTime @default(now())
+
+  @@map("rapports")
+}
+
+// ─── PARAMÈTRES ───────────────────────────────────────────────────────────────
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+
+  @@map("settings")
+}
+
+// ─── SEQUENCES ────────────────────────────────────────────────────────────────
+
+model Sequence {
+  id      String @id @default(cuid())
+  type    String @unique // DEVIS | FACTURE | PROJET | CONTRAT
+  prefixe String
+  annee   Int
+  valeur  Int    @default(0)
+
+  @@map("sequences")
+}
+
+// ─── ENUMS ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  MANAGER
+  COMMERCIAL
+  COACH
+  COMPTABLE
+}
+
+enum Niveau {
+  AMATEUR
+  SEMI_PRO
+  PRO
+}
+
+enum DevisStatut {
+  EN_ATTENTE
+  VALIDE
+  REFUSE
+  CONVERTI
+}
+
+enum FactureStatut {
+  IMPAYEE
+  ACOMPTE_PERCU
+  PARTIELLE
+  PAYEE
+}
+
+enum ProjetStatut {
+  TODO
+  EN_COURS
+  EN_ATTENTE
+  TERMINE
+}
+
+enum ContratStatut {
+  EN_PREPARATION
+  SIGNE
+  EN_COURS
+  EXPIRE
+}
+
+enum MoyenPaiement {
+  BANK
+  CARTE
+  MTN_MONEY
+  AIRTEL_MONEY
+  ORANGE_MONEY
+}

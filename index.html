@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ndembo Kin Connect CRM — Developer Handoff v1.0</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: #F0F2F5; font-family: 'Plus Jakarta Sans', sans-serif; color: #0F172A; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+    a { text-decoration: none; }
+    code { font-family: 'JetBrains Mono', monospace; }
+
+    .page { max-width: 1020px; margin: 0 auto; padding: 48px 32px 100px; }
+
+    /* ── Header ── */
+    .hd { display: flex; align-items: center; gap: 18px; padding-bottom: 28px; border-bottom: 2px solid #E2E8F0; margin-bottom: 40px; }
+    .hd-logo { background: #fff; border-radius: 14px; padding: 8px 10px; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+    .hd-logo img { height: 52px; width: auto; display: block; }
+    .hd-eyebrow { font-size: 11px; font-weight: 700; color: #3A6B84; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+    .hd-title { font-size: 32px; font-weight: 800; letter-spacing: -0.8px; line-height: 1.1; }
+    .hd-sub { font-size: 14px; color: #64748B; margin-top: 5px; }
+
+    /* ── Nav Pills ── */
+    .pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 40px; }
+    .pill { padding: 7px 16px; background: #fff; border: 1.5px solid #E2E8F0; border-radius: 20px; font-size: 12px; font-weight: 600; color: #475569; cursor: pointer; }
+    .pill:hover { border-color: #CBD5E1; color: #334155; }
+
+    /* ── Section wrapper ── */
+    .sec { margin-bottom: 48px; }
+    .sec-num { font-size: 11px; font-weight: 700; color: #94A3B8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+    .sec-title { font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 18px; }
+    .sec-sub { font-size: 14px; color: #64748B; margin-bottom: 18px; }
+
+    /* ── Cards grid ── */
+    .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 13px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+
+    /* ── Stack card ── */
+    .stack-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+    .stack-card.highlight { background: #FEF9EE; border: 1.5px solid #FDE68A; }
+    .badge { font-size: 9px; font-weight: 700; padding: 3px 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: .8px; display: inline-block; }
+    .stack-tech { font-size: 15px; font-weight: 700; margin: 10px 0 5px; }
+    .stack-why { font-size: 12px; color: #64748B; line-height: 1.5; }
+    .stack-alt { font-size: 11px; color: #94A3B8; margin-top: 8px; }
+
+    /* ── RDC warning ── */
+    .rdc-warn { background: #FEF9EE; border: 1px solid #FDE68A; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; display: flex; gap: 10px; align-items: flex-start; }
+    .rdc-warn-icon { font-size: 18px; flex-shrink: 0; }
+    .rdc-warn-text { font-size: 13px; color: #92400E; line-height: 1.6; }
+
+    /* ── Module table ── */
+    .mod-table { background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+    .mod-head { display: grid; grid-template-columns: 0.5fr 2fr 2fr 1.5fr 0.8fr 0.8fr; padding: 10px 18px; border-bottom: 1px solid #E8ECF1; background: #F8FAFC; }
+    .mod-head-cell { font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; }
+    .mod-row { display: grid; grid-template-columns: 0.5fr 2fr 2fr 1.5fr 0.8fr 0.8fr; padding: 12px 18px; border-bottom: 1px solid #F1F5F9; align-items: center; }
+    .mod-row:nth-child(even) { background: #FAFAFA; }
+    .mod-row:nth-child(odd) { background: #fff; }
+    .mod-num { font-size: 12px; color: #94A3B8; font-family: 'JetBrains Mono', monospace; }
+    .mod-name { font-size: 13px; font-weight: 700; color: #0F172A; }
+    .mod-desc { font-size: 11px; color: #94A3B8; margin-top: 1px; }
+    .mod-route { font-size: 12px; color: #3A6B84; font-family: 'JetBrains Mono', monospace; background: #F0F7FF; padding: 3px 8px; border-radius: 5px; display: inline-block; }
+    .mod-table-db { font-size: 12px; color: #475569; font-family: 'JetBrains Mono', monospace; }
+    .phase-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 6px; display: inline-block; }
+    .phase-1 { color: #059669; background: rgba(5,150,105,.08); }
+    .phase-2 { color: #2563EB; background: rgba(37,99,235,.08); }
+    .phase-3 { color: #94A3B8; background: rgba(148,163,184,.08); }
+
+    /* ── Schema block ── */
+    .schema-block { background: #1E293B; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,.1); }
+    .schema-titlebar { padding: 10px 18px; border-bottom: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; gap: 8px; }
+    .schema-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .schema-filename { font-size: 11px; color: rgba(255,255,255,.35); margin-left: 6px; font-family: 'JetBrains Mono', monospace; }
+    .schema-body { padding: 20px 24px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8; overflow-x: auto; }
+    .schema-line { display: block; white-space: pre; }
+
+    /* ── API cards ── */
+    .api-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+    .api-module { font-size: 12px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px; }
+    .api-route-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid #F1F5F9; }
+    .method-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; min-width: 52px; text-align: center; display: inline-block; }
+    .api-path { font-size: 12px; color: #334155; font-family: 'JetBrains Mono', monospace; }
+
+    /* ── RBAC table ── */
+    .rbac-table { background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+    .rbac-head { display: grid; grid-template-columns: 1.5fr repeat(5,1fr); padding: 10px 18px; border-bottom: 1px solid #E8ECF1; background: #F8FAFC; }
+    .rbac-row { display: grid; grid-template-columns: 1.5fr repeat(5,1fr); padding: 10px 18px; border-bottom: 1px solid #F1F5F9; align-items: center; }
+    .rbac-mod { font-size: 13px; font-weight: 600; color: #334155; }
+    .rbac-perm { text-align: center; font-size: 16px; }
+    .rbac-role { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; text-align: center; }
+    .jwt-info { background: #F0F7FF; border: 1px solid #BFDBFE; border-radius: 10px; padding: 14px 18px; margin-top: 14px; font-size: 13px; color: #1E40AF; line-height: 1.6; }
+    .jwt-info code { background: rgba(255,255,255,.7); padding: 1px 5px; border-radius: 3px; }
+
+    /* ── Step cards ── */
+    .step-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 20px 22px; box-shadow: 0 1px 4px rgba(0,0,0,.04); display: flex; align-items: flex-start; gap: 16px; }
+    .step-num { width: 36px; height: 36px; border-radius: 50%; background: #0F172A; color: #FCD116; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; flex-shrink: 0; }
+    .step-body { flex: 1; }
+    .step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .step-title { font-size: 15px; font-weight: 700; color: #0F172A; }
+    .step-tag { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 6px; display: inline-block; }
+    .step-desc { font-size: 13px; color: #475569; line-height: 1.6; margin-bottom: 12px; }
+    .step-prompt { background: #1E293B; border-radius: 9px; padding: 13px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #E2E8F0; line-height: 1.7; white-space: pre-wrap; }
+    .steps-list { display: flex; flex-direction: column; gap: 13px; }
+
+    /* ── Deploy cards ── */
+    .deploy-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 13px; padding: 18px 20px; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+    .deploy-card-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .deploy-icon-box { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .deploy-title { font-size: 14px; font-weight: 700; color: #0F172A; }
+    .deploy-desc { font-size: 13px; color: #64748B; line-height: 1.6; margin-bottom: 10px; }
+    .deploy-cmd { font-size: 12px; font-family: 'JetBrains Mono', monospace; color: #3A6B84; background: #F0F7FF; padding: 4px 10px; border-radius: 6px; display: inline-block; }
+    .mi-icon { font-family: 'Material Icons Outlined'; font-size: 16px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+
+    /* ── Checklist ── */
+    .checklist-box { background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 20px 24px; box-shadow: 0 1px 4px rgba(0,0,0,.04); margin-top: 18px; }
+    .checklist-title { font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 14px; }
+    .checklist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .checklist-item { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-bottom: 1px solid #F8FAFC; }
+    .checklist-box-el { width: 18px; height: 18px; border-radius: 5px; border: 2px solid #E2E8F0; flex-shrink: 0; }
+    .checklist-label { font-size: 13px; color: #334155; }
+
+    /* ── Risk cards ── */
+    .risk-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+    .risk-card.warning { background: #FEF9EE; border: 1.5px solid #FDE68A; }
+    .risk-icon { font-size: 20px; margin-bottom: 8px; }
+    .risk-title { font-size: 13px; font-weight: 700; color: #0F172A; margin-bottom: 5px; }
+    .risk-desc { font-size: 12px; color: #64748B; line-height: 1.5; }
+    .risk-sol { font-size: 11px; font-weight: 600; margin-top: 10px; }
+    .risk-sol.green { color: #059669; }
+    .risk-sol.amber { color: #B45309; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="hd">
+    <div class="hd-logo">
+      <img src="project/assets/logo.png" alt="Ndembo Kin Connect" />
+    </div>
+    <div>
+      <div class="hd-eyebrow">Developer Handoff — v1.0 · Juin 2026</div>
+      <div class="hd-title">Ndembo Kin Connect CRM</div>
+      <div class="hd-sub">Spécifications techniques complètes — 14 modules — Prêt pour Claude Code</div>
+    </div>
+  </div>
+
+  <!-- ═══ NAV PILLS ═══ -->
+  <div class="pills">
+    <a href="#stack" class="pill">01 Stack</a>
+    <a href="#archi" class="pill">02 Architecture</a>
+    <a href="#schema" class="pill">03 Schéma DB</a>
+    <a href="#api" class="pill">04 API</a>
+    <a href="#auth" class="pill">05 Auth RBAC</a>
+    <a href="#claudecode" class="pill">06 Claude Code</a>
+    <a href="#deploy" class="pill">07 Déploiement</a>
+  </div>
+
+  <!-- ═══ 1. STACK ═══ -->
+  <div id="stack" class="sec">
+    <div class="sec-num">01</div>
+    <div class="sec-title">Stack technique recommandé</div>
+    <div class="rdc-warn">
+      <div class="rdc-warn-icon">⚠️</div>
+      <div class="rdc-warn-text"><strong>Contraintes RDC :</strong> internet instable → PWA obligatoire (offline-first). Mobile Money (MTN/Airtel/Orange) au lieu de Stripe. Hébergement africain ou CDN proche pour la latence.</div>
+    </div>
+    <div class="grid-3">
+
+      <div class="stack-card">
+        <span class="badge" style="background:#EFF6FF;color:#1D4ED8;">Frontend</span>
+        <div class="stack-tech">Next.js 14 (App Router)</div>
+        <div class="stack-why">SSR + SSG + PWA. React Server Components. Le prototype DC est le guide UI exact.</div>
+        <div class="stack-alt">Alt: Nuxt.js 3</div>
+      </div>
+
+      <div class="stack-card">
+        <span class="badge" style="background:#F0FDF4;color:#166534;">CSS</span>
+        <div class="stack-tech">TailwindCSS + shadcn/ui</div>
+        <div class="stack-why">Classes utilitaires. shadcn/ui donne les composants (Dialog, Table, Form) prêts à l'emploi, accessibles.</div>
+        <div class="stack-alt">Alt: MUI / Mantine</div>
+      </div>
+
+      <div class="stack-card">
+        <span class="badge" style="background:#FEF9EE;color:#92400E;">Backend</span>
+        <div class="stack-tech">Node.js + Fastify</div>
+        <div class="stack-why">API REST rapide. Léger en mémoire (important sur serveurs bon marché). Plugins natifs pour auth, validation.</div>
+        <div class="stack-alt">Alt: Express.js</div>
+      </div>
+
+      <div class="stack-card">
+        <span class="badge" style="background:#F5F3FF;color:#6D28D9;">Base de données</span>
+        <div class="stack-tech">PostgreSQL + Prisma ORM</div>
+        <div class="stack-why">Relationnelle → parfait pour les 13 modules liés. Prisma génère les types TypeScript auto.</div>
+        <div class="stack-alt">Alt: MySQL / Supabase</div>
+      </div>
+
+      <div class="stack-card">
+        <span class="badge" style="background:#FFF1F2;color:#BE123C;">Auth</span>
+        <div class="stack-tech">JWT + bcrypt</div>
+        <div class="stack-why">Simple, sans dépendance externe. Le RBAC (5 rôles) se gère manuellement dans un middleware léger.</div>
+        <div class="stack-alt">Alt: NextAuth.js</div>
+      </div>
+
+      <div class="stack-card highlight">
+        <span class="badge" style="background:#FFFBEB;color:#B45309;border:1px solid #FDE68A;">Paiements RDC</span>
+        <div class="stack-tech">FlexPay API (Kinshasa)</div>
+        <div class="stack-why">MTN Money, Airtel Money, Orange Money. API locale RDC, documentation en français, sandbox disponible.</div>
+        <div class="stack-alt">Alt: CinetPay</div>
+      </div>
+
+      <div class="stack-card">
+        <span class="badge" style="background:#F0F7FF;color:#1E40AF;">PDF</span>
+        <div class="stack-tech">React-PDF / Puppeteer</div>
+        <div class="stack-why">Génération devis, factures, contrats. React-PDF = côté serveur léger. Puppeteer = rendu fidèle HTML.</div>
+        <div class="stack-alt">Alt: PDFKit</div>
+      </div>
+
+      <div class="stack-card">
+        <span class="badge" style="background:#F0FDF4;color:#166534;">Déploiement</span>
+        <div class="stack-tech">Railway.app ou Render.com</div>
+        <div class="stack-why">Hébergement Node + PostgreSQL tout-en-un. CI/CD depuis GitHub. Gratuit pour commencer, pay-as-you-grow.</div>
+        <div class="stack-alt">Alt: DigitalOcean / VPS</div>
+      </div>
+
+      <div class="stack-card">
+        <span class="badge" style="background:#FFF1F2;color:#BE123C;">PWA / Offline</span>
+        <div class="stack-tech">next-pwa + IndexedDB</div>
+        <div class="stack-why">Cache des listes (athlètes, clients) pour usage sans internet. Sync différée quand connexion rétablie.</div>
+        <div class="stack-alt">Alt: Workbox</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ 2. ARCHITECTURE ═══ -->
+  <div id="archi" class="sec">
+    <div class="sec-num">02</div>
+    <div class="sec-title">Architecture des modules</div>
+    <div class="sec-sub">Flux de conversion : <strong>Devis → Facture → Projet → Contrat</strong></div>
+    <div class="mod-table">
+      <div class="mod-head">
+        <div class="mod-head-cell">#</div>
+        <div class="mod-head-cell">Module</div>
+        <div class="mod-head-cell">Route API (base)</div>
+        <div class="mod-head-cell">Table DB</div>
+        <div class="mod-head-cell">Phase</div>
+        <div class="mod-head-cell">Priorité</div>
+      </div>
+      <div class="mod-row">
+        <div class="mod-num">01</div>
+        <div><div class="mod-name">Utilisateurs</div><div class="mod-desc">Auth + RBAC 5 rôles</div></div>
+        <div><span class="mod-route">/api/users</span></div>
+        <div class="mod-table-db">users</div>
+        <div><span class="phase-badge phase-1">Phase 1</span></div>
+        <div>⭐⭐⭐</div>
+      </div>
+      <div class="mod-row">
+        <div class="mod-num">02</div>
+        <div><div class="mod-name">Athlètes</div><div class="mod-desc">Scouting + fiche carrière</div></div>
+        <div><span class="mod-route">/api/athletes</span></div>
+        <div class="mod-table-db">athletes</div>
+        <div><span class="phase-badge phase-1">Phase 1</span></div>
+        <div>⭐⭐⭐</div>
+      </div>
+      <div class="mod-row">
+        <div class="mod-num">03</div>
+        <div><div class="mod-name">Clients</div><div class="mod-desc">B2B Clubs, Sponsors, Académies</div></div>
+        <div><span class="mod-route">/api/clients</span></div>
+        <div class="mod-table-db">clients</div>
+        <div><span class="phase-badge phase-1">Phase 1</span></div>
+        <div>⭐⭐⭐</div>
+      </div>
+      <div class="mod-row">
+        <div class="mod-num">04</div>
+        <div><div class="mod-name">Prestations</div><div class="mod-desc">Catalogue services</div></div>
+        <div><span class="mod-route">/api/prestations</span></div>
+        <div class="mod-table-db">prestations</div>
+        <div><span class="phase-badge phase-1">Phase 1</span></div>
+        <div>⭐⭐</div>
+      </div>
+      <div class="mod-row">
+        <div class="mod-num">05</div>
+        <div><div class="mod-name">Devis</div><div class="mod-desc">Propositions commerciales + PDF</div></div>
+        <div><span class="mod-route">/api/devis</span></div>
+        <div class="mod-table-db">devis</div>
+        <div><span class="phase-badge phase-1">Phase 1</span></div>
+        <div>⭐⭐⭐</div>
+      </div>
+      <div class="mod-row">
+        <div class="mod-num">06</div>
+        <div><div class="mod-name">Factures</div><div class="mod-desc">Encaissement + suivi paiements</div></div>
+        <div><span class="mod-route">/api/factures</span></div>
+        <div class="mod-table-db">factures</div>
+        <div><span class="phase-badge phase-1">Phase 1</span></div>
+        <div>⭐⭐⭐</div>
+      </div>
+      <div class="mod-row">
+        <div class="mod-num">07</div>
+        <div><div class="mod-name">Règlements</div><div class="mod-desc">Mobile Money + virements</div></div>
+        <div><span class="mod-route">/api/reglements</span></div>
+        <div class="mod-table-db">reglements</div>
+        <div><span class="phase-badge phase-2">Phase 2</span></div>
+        <div>⭐⭐</div>
+      </div>
+      <div class="mod-row">
+        <div class="mod-num">08</div>
+        <div><div class="mod-name">Projets</div><div class="mod-desc">Gestion opérationnelle + Kanban</div></div>
+        <div><span class="mod-route">/api/projets</span></div>
+        <div class="mod-table-db">projets</div>
+        <div><span class="phase-badge phase-2">Phase 2</span></div>
+        <div>⭐⭐⭐</div>
+      </div>
+      <div class="mod-row">
+        <div class="mod-num">09</div>
+        <div><div class="mod-name">Tâches</div><div class="mod-desc">Kanban drag &amp; drop</div></div>
+        <div><span class="mod-route">/api/taches</span></div>
+        <div class="mod-table-db">taches</div>
+        <div><span class="phase-badge phase-2">Phase 2</span></div>
+        <div>⭐⭐⭐</div>
+      </div>
+      <div class="mod-row">
+        <div class="mod-num">10</div>
+        <div><div class="mod-name">Jalons</div><div class="mod-desc">Milestones projets</div></div>
+        <div><span class="mod-route">/api/jalons</span></div>
+        <div class="mod-table-db">jalons</div>
+        <div><span class="phase-badge phase-2">Phase 2</span></div>
+        <div>⭐⭐</div>
+      </div>
+      <div class="mod-row">
+        <div class="mod-num">11</div>
+        <div><div class="mod-name">Contrats</div><div class="mod-desc">Génération + signature électronique</div></div>
+        <div><span class="mod-route">/api/contrats</span></div>
+        <div class="mod-table-db">contrats</div>
+        <div><span class="phase-badge phase-2">Phase 2</span></div>
+        <div>⭐⭐⭐</div>
+      </div>
+      <div class="mod-row">
+        <div class="mod-num">12</div>
+        <div><div class="mod-name">Activités</div><div class="mod-desc">Journal CRM (appels, RDV, emails)</div></div>
+        <div><span class="mod-route">/api/activites</span></div>
+        <div class="mod-table-db">activites</div>
+        <div><span class="phase-badge phase-3">Phase 3</span></div>
+        <div>⭐⭐</div>
+      </div>
+      <div class="mod-row">
+        <div class="mod-num">13</div>
+        <div><div class="mod-name">Rapports</div><div class="mod-desc">KPIs + exports</div></div>
+        <div><span class="mod-route">/api/rapports</span></div>
+        <div class="mod-table-db">rapports</div>
+        <div><span class="phase-badge phase-3">Phase 3</span></div>
+        <div>⭐⭐</div>
+      </div>
+      <div class="mod-row">
+        <div class="mod-num">14</div>
+        <div><div class="mod-name">Paramètres</div><div class="mod-desc">Config + RBAC + Mobile Money</div></div>
+        <div><span class="mod-route">/api/settings</span></div>
+        <div class="mod-table-db">settings</div>
+        <div><span class="phase-badge phase-1">Phase 1</span></div>
+        <div>⭐⭐⭐</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 3. SCHÉMA DB ═══ -->
+  <div id="schema" class="sec">
+    <div class="sec-num">03</div>
+    <div class="sec-title">Schéma Prisma (PostgreSQL)</div>
+    <div class="sec-sub">Tables essentielles Phase 1 — copiez directement dans <code style="background:#F1F5F9;padding:2px 6px;border-radius:4px;font-size:13px;">schema.prisma</code></div>
+    <div class="schema-block">
+      <div class="schema-titlebar">
+        <div class="schema-dot" style="background:#EF4444;"></div>
+        <div class="schema-dot" style="background:#F59E0B;"></div>
+        <div class="schema-dot" style="background:#10B981;"></div>
+        <span class="schema-filename">schema.prisma</span>
+      </div>
+      <div class="schema-body">
+        <span class="schema-line" style="color:#64748B;">// ─── UTILISATEURS ───────────────────────────────────</span>
+        <span class="schema-line" style="color:#FCD116;">model User {</span>
+        <span class="schema-line" style="color:#E2E8F0;">  id         String   @id @default(cuid())</span>
+        <span class="schema-line" style="color:#E2E8F0;">  email      String   @unique</span>
+        <span class="schema-line" style="color:#E2E8F0;">  password   String</span>
+        <span class="schema-line" style="color:#E2E8F0;">  name       String</span>
+        <span class="schema-line" style="color:#7CC8E8;">  role       Role     @default(COMMERCIAL)  // ADMIN | MANAGER | COACH | COMPTABLE | COMMERCIAL</span>
+        <span class="schema-line" style="color:#E2E8F0;">  isActive   Boolean  @default(true)</span>
+        <span class="schema-line" style="color:#E2E8F0;">  createdAt  DateTime @default(now())</span>
+        <span class="schema-line" style="color:#FCD116;">}</span>
+        <span class="schema-line" style="min-height:14px;display:block;"> </span>
+        <span class="schema-line" style="color:#64748B;">// ─── ATHLÈTES ────────────────────────────────────────</span>
+        <span class="schema-line" style="color:#FCD116;">model Athlete {</span>
+        <span class="schema-line" style="color:#E2E8F0;">  id              String  @id @default(cuid())</span>
+        <span class="schema-line" style="color:#E2E8F0;">  nom             String</span>
+        <span class="schema-line" style="color:#7CC8E8;">  sport           String  // football | basketball | athletisme</span>
+        <span class="schema-line" style="color:#E2E8F0;">  poste           String</span>
+        <span class="schema-line" style="color:#7CC8E8;">  niveau          Niveau  // AMATEUR | SEMI_PRO | PRO</span>
+        <span class="schema-line" style="color:#E2E8F0;">  clubActuel      String?</span>
+        <span class="schema-line" style="color:#E2E8F0;">  valeurMarchande Float?</span>
+        <span class="schema-line" style="color:#E2E8F0;">  nationalite     String  @default("RDC")</span>
+        <span class="schema-line" style="color:#E2E8F0;">  statut          String  @default("Actif")</span>
+        <span class="schema-line" style="color:#10B981;">  contrats        Contrat[]</span>
+        <span class="schema-line" style="color:#FCD116;">}</span>
+        <span class="schema-line" style="min-height:14px;display:block;"> </span>
+        <span class="schema-line" style="color:#64748B;">// ─── CLIENTS ─────────────────────────────────────────</span>
+        <span class="schema-line" style="color:#FCD116;">model Client {</span>
+        <span class="schema-line" style="color:#E2E8F0;">  id         String   @id @default(cuid())</span>
+        <span class="schema-line" style="color:#E2E8F0;">  nom        String</span>
+        <span class="schema-line" style="color:#7CC8E8;">  type       String   // Club | Academie | Sponsor | Partenaire</span>
+        <span class="schema-line" style="color:#E2E8F0;">  rccm       String?</span>
+        <span class="schema-line" style="color:#E2E8F0;">  nif        String?</span>
+        <span class="schema-line" style="color:#E2E8F0;">  email      String</span>
+        <span class="schema-line" style="color:#E2E8F0;">  telephone  String</span>
+        <span class="schema-line" style="color:#E2E8F0;">  ville      String</span>
+        <span class="schema-line" style="color:#10B981;">  devis      Devis[]</span>
+        <span class="schema-line" style="color:#10B981;">  factures   Facture[]</span>
+        <span class="schema-line" style="color:#10B981;">  projets    Projet[]</span>
+        <span class="schema-line" style="color:#FCD116;">}</span>
+        <span class="schema-line" style="min-height:14px;display:block;"> </span>
+        <span class="schema-line" style="color:#64748B;">// ─── DEVIS ───────────────────────────────────────────</span>
+        <span class="schema-line" style="color:#FCD116;">model Devis {</span>
+        <span class="schema-line" style="color:#E2E8F0;">  id          String  @id @default(cuid())</span>
+        <span class="schema-line" style="color:#7CC8E8;">  numero      String  @unique  // DEV-2026-001</span>
+        <span class="schema-line" style="color:#E2E8F0;">  clientId    String</span>
+        <span class="schema-line" style="color:#10B981;">  client      Client  @relation(fields:[clientId], references:[id])</span>
+        <span class="schema-line" style="color:#7CC8E8;">  lignes      Json    // [{prestationId, quantite, prixUnit, total}]</span>
+        <span class="schema-line" style="color:#E2E8F0;">  montantHT   Float</span>
+        <span class="schema-line" style="color:#7CC8E8;">  statut      DevisStatut @default(EN_ATTENTE)</span>
+        <span class="schema-line" style="color:#E2E8F0;">  pdfUrl      String?</span>
+        <span class="schema-line" style="color:#10B981;">  facture     Facture?</span>
+        <span class="schema-line" style="color:#FCD116;">}</span>
+        <span class="schema-line" style="min-height:14px;display:block;"> </span>
+        <span class="schema-line" style="color:#64748B;">// ─── ÉNUMÉRATIONS ────────────────────────────────────</span>
+        <span class="schema-line" style="color:#EF4444;">enum Role          { ADMIN MANAGER COMMERCIAL COACH COMPTABLE }</span>
+        <span class="schema-line" style="color:#EF4444;">enum Niveau        { AMATEUR SEMI_PRO PRO }</span>
+        <span class="schema-line" style="color:#EF4444;">enum DevisStatut   { EN_ATTENTE VALIDE REFUSE CONVERTI }</span>
+        <span class="schema-line" style="color:#EF4444;">enum FactureStatut { IMPAYEE ACOMPTE_PERCU PARTIELLE PAYEE }</span>
+        <span class="schema-line" style="color:#EF4444;">enum ProjetStatut  { TODO EN_COURS EN_ATTENTE TERMINE }</span>
+        <span class="schema-line" style="color:#EF4444;">enum ContratStatut { EN_PREPARATION SIGNE EN_COURS EXPIRE }</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 4. API ═══ -->
+  <div id="api" class="sec">
+    <div class="sec-num">04</div>
+    <div class="sec-title">Endpoints API critiques</div>
+    <div class="grid-2">
+
+      <div class="api-card">
+        <div class="api-module">Auth</div>
+        <div class="api-route-row"><span class="method-badge" style="color:#2563EB;background:rgba(37,99,235,.12);">POST</span><span class="api-path">/auth/login</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#2563EB;background:rgba(37,99,235,.12);">POST</span><span class="api-path">/auth/register</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/auth/me</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#2563EB;background:rgba(37,99,235,.12);">POST</span><span class="api-path">/auth/refresh</span></div>
+      </div>
+
+      <div class="api-card">
+        <div class="api-module">Athlètes</div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/athletes</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#2563EB;background:rgba(37,99,235,.12);">POST</span><span class="api-path">/athletes</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/athletes/:id</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#F59E0B;background:rgba(245,158,11,.12);">PUT</span><span class="api-path">/athletes/:id</span></div>
+      </div>
+
+      <div class="api-card">
+        <div class="api-module">Clients</div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/clients</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#2563EB;background:rgba(37,99,235,.12);">POST</span><span class="api-path">/clients</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/clients/:id</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/clients/:id/timeline</span></div>
+      </div>
+
+      <div class="api-card">
+        <div class="api-module">Devis</div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/devis</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#2563EB;background:rgba(37,99,235,.12);">POST</span><span class="api-path">/devis</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/devis/:id/pdf</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#2563EB;background:rgba(37,99,235,.12);">POST</span><span class="api-path">/devis/:id/convert</span></div>
+      </div>
+
+      <div class="api-card">
+        <div class="api-module">Factures</div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/factures</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#2563EB;background:rgba(37,99,235,.12);">POST</span><span class="api-path">/factures</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#8B5CF6;background:rgba(139,92,246,.12);">PATCH</span><span class="api-path">/factures/:id/paiement</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/factures/:id/pdf</span></div>
+      </div>
+
+      <div class="api-card">
+        <div class="api-module">Projets</div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/projets</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#2563EB;background:rgba(37,99,235,.12);">POST</span><span class="api-path">/projets</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/projets/:id/kanban</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#8B5CF6;background:rgba(139,92,246,.12);">PATCH</span><span class="api-path">/taches/:id/move</span></div>
+      </div>
+
+      <div class="api-card">
+        <div class="api-module">Contrats</div>
+        <div class="api-route-row"><span class="method-badge" style="color:#2563EB;background:rgba(37,99,235,.12);">POST</span><span class="api-path">/contrats/generate</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/contrats/:id</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#2563EB;background:rgba(37,99,235,.12);">POST</span><span class="api-path">/contrats/:id/sign</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/contrats/:id/pdf</span></div>
+      </div>
+
+      <div class="api-card">
+        <div class="api-module">Dashboard</div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/dashboard/kpis</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/dashboard/ca</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/dashboard/pipeline</span></div>
+        <div class="api-route-row"><span class="method-badge" style="color:#10B981;background:rgba(16,185,129,.12);">GET</span><span class="api-path">/dashboard/activites</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ 5. AUTH RBAC ═══ -->
+  <div id="auth" class="sec">
+    <div class="sec-num">05</div>
+    <div class="sec-title">Auth + RBAC</div>
+    <div class="rbac-table">
+      <div class="rbac-head">
+        <div class="mod-head-cell">Module</div>
+        <div class="rbac-role" style="color:#B45309;">Admin</div>
+        <div class="rbac-role" style="color:#2563EB;">Manager</div>
+        <div class="rbac-role" style="color:#059669;">Commercial</div>
+        <div class="rbac-role" style="color:#7C3AED;">Coach</div>
+        <div class="rbac-role" style="color:#B91C1C;">Comptable</div>
+      </div>
+      <div class="rbac-row">
+        <div class="rbac-mod">Utilisateurs</div>
+        <div class="rbac-perm">✅</div><div class="rbac-perm">👁</div><div class="rbac-perm">❌</div><div class="rbac-perm">❌</div><div class="rbac-perm">❌</div>
+      </div>
+      <div class="rbac-row">
+        <div class="rbac-mod">Athlètes</div>
+        <div class="rbac-perm">✅</div><div class="rbac-perm">✅</div><div class="rbac-perm">👁</div><div class="rbac-perm">✅</div><div class="rbac-perm">👁</div>
+      </div>
+      <div class="rbac-row">
+        <div class="rbac-mod">Clients</div>
+        <div class="rbac-perm">✅</div><div class="rbac-perm">✅</div><div class="rbac-perm">✅</div><div class="rbac-perm">👁</div><div class="rbac-perm">👁</div>
+      </div>
+      <div class="rbac-row">
+        <div class="rbac-mod">Devis / Factures</div>
+        <div class="rbac-perm">✅</div><div class="rbac-perm">✅</div><div class="rbac-perm">✅</div><div class="rbac-perm">❌</div><div class="rbac-perm">✅</div>
+      </div>
+      <div class="rbac-row">
+        <div class="rbac-mod">Projets / Tâches</div>
+        <div class="rbac-perm">✅</div><div class="rbac-perm">✅</div><div class="rbac-perm">👁</div><div class="rbac-perm">✅</div><div class="rbac-perm">👁</div>
+      </div>
+      <div class="rbac-row">
+        <div class="rbac-mod">Contrats</div>
+        <div class="rbac-perm">✅</div><div class="rbac-perm">✅</div><div class="rbac-perm">❌</div><div class="rbac-perm">❌</div><div class="rbac-perm">👁</div>
+      </div>
+      <div class="rbac-row">
+        <div class="rbac-mod">Règlements</div>
+        <div class="rbac-perm">✅</div><div class="rbac-perm">✅</div><div class="rbac-perm">❌</div><div class="rbac-perm">❌</div><div class="rbac-perm">✅</div>
+      </div>
+      <div class="rbac-row">
+        <div class="rbac-mod">Paramètres</div>
+        <div class="rbac-perm">✅</div><div class="rbac-perm">❌</div><div class="rbac-perm">❌</div><div class="rbac-perm">❌</div><div class="rbac-perm">❌</div>
+      </div>
+    </div>
+    <div class="jwt-info">
+      <strong>JWT + Middleware :</strong> chaque requête API vérifie le token et le rôle. Utilisez <code>@nestjs/jwt</code> ou un middleware Express custom. Le token inclut <code>userId</code>, <code>role</code>, <code>agenceId</code>.
+    </div>
+  </div>
+
+  <!-- ═══ 6. CLAUDE CODE ═══ -->
+  <div id="claudecode" class="sec">
+    <div class="sec-num">06</div>
+    <div class="sec-title">Guide Claude Code — Étape par étape</div>
+    <div class="sec-sub">Comment passer du prototype au code de production avec Claude Code</div>
+    <div class="steps-list">
+
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <div class="step-header">
+            <div class="step-title">Initialisation du projet</div>
+            <span class="step-tag" style="background:rgba(5,150,105,.1);color:#059669;">~30 min</span>
+          </div>
+          <div class="step-desc">Créez la structure Next.js + backend Fastify. Claude Code génère l'arborescence complète en un prompt.</div>
+          <div class="step-prompt">Crée un monorepo avec :
+apps/web   → Next.js 14 App Router + TailwindCSS + shadcn/ui
+apps/api   → Fastify + Prisma + PostgreSQL
+packages/types → types partagés TypeScript
+
+Structure apps/api : src/modules/{auth,athletes,clients,devis,factures,projets,contrats,settings}</div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <div class="step-header">
+            <div class="step-title">Schéma Prisma + seed</div>
+            <span class="step-tag" style="background:rgba(37,99,235,.1);color:#2563EB;">~45 min</span>
+          </div>
+          <div class="step-desc">Collez le schéma Prisma de ce document dans schema.prisma. Claude Code génère les migrations et un seed réaliste.</div>
+          <div class="step-prompt">Voici le schéma Prisma (copie depuis handoff) :
+[coller le schéma complet]
+
+1. npx prisma migrate dev --name init
+2. Génère seed.ts avec 5 athlètes, 5 clients, 4 devis et 1 admin
+   (données réalistes RDC — football, basketball, Kinshasa)</div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <div class="step-header">
+            <div class="step-title">Module Auth + RBAC</div>
+            <span class="step-tag" style="background:rgba(124,58,237,.1);color:#7C3AED;">~1h</span>
+          </div>
+          <div class="step-desc">JWT avec refresh tokens. Middleware de vérification de rôle. 5 rôles : ADMIN, MANAGER, COMMERCIAL, COACH, COMPTABLE.</div>
+          <div class="step-prompt">Crée le module auth Fastify :
+- POST /auth/login → JWT access (15min) + refresh (7j) HttpOnly cookie
+- Middleware checkRole(roles: Role[]) → 403 si non autorisé
+- Guard sur chaque route selon la matrice RBAC du handoff
+- bcrypt pour les mots de passe</div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <div class="step-header">
+            <div class="step-title">CRUD Athlètes + Clients</div>
+            <span class="step-tag" style="background:rgba(5,150,105,.1);color:#059669;">~2h</span>
+          </div>
+          <div class="step-desc">Les deux modules cœur métier. Utilisez le prototype comme référence visuelle exacte pour les champs.</div>
+          <div class="step-prompt">Génère le module Athlètes complet :
+Backend : GET/POST/PUT/DELETE /api/athletes avec pagination, search, filter par sport
+Frontend : page /athletes avec :
+- Table (colonnes : nom, sport, poste, niveau, club, valeur_marchande)
+- Sheet/drawer latéral au clic → détail complet + actions
+- Formulaire création/édition
+
+Utilise le composant Table de shadcn/ui. Respecte la palette du design system.</div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">05</div>
+        <div class="step-body">
+          <div class="step-header">
+            <div class="step-title">Pipeline commercial (Devis → Facture)</div>
+            <span class="step-tag" style="background:rgba(180,83,9,.1);color:#B45309;">~3h</span>
+          </div>
+          <div class="step-desc">Le flux le plus complexe. Devis → conversion en Facture → Règlement. Numérotation auto DEV-YYYY-NNN.</div>
+          <div class="step-prompt">Implémente le flux Devis → Facture :
+1. Création devis avec lignes de prestations (JSON : [{prestationId, quantite, prixUnit}])
+2. Numérotation auto depuis Settings (préfixe + année + séquence)
+3. POST /devis/:id/convert → crée Facture liée, statut Devis = CONVERTI
+4. Génération PDF avec React-PDF (logo, infos légales de Settings, lignes, total)
+5. Page facture avec bouton "Enregistrer paiement" → POST /reglements</div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">06</div>
+        <div class="step-body">
+          <div class="step-header">
+            <div class="step-title">Projets + Kanban drag &amp; drop</div>
+            <span class="step-tag" style="background:rgba(124,58,237,.1);color:#7C3AED;">~2h</span>
+          </div>
+          <div class="step-desc">Kanban 4 colonnes. Utiliser @dnd-kit/core pour le drag &amp; drop. PATCH /taches/:id/move pour persister la position.</div>
+          <div class="step-prompt">Crée le Kanban Projets avec @dnd-kit/core :
+- 4 colonnes : TODO | EN_COURS | EN_ATTENTE | TERMINÉ
+- Drag & drop entre colonnes → PATCH /taches/:id/move {colonne, position}
+- Optimistic updates (UI immédiat, rollback si erreur API)
+- Filtre par projet dans le header</div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">07</div>
+        <div class="step-body">
+          <div class="step-header">
+            <div class="step-title">Mobile Money (FlexPay)</div>
+            <span class="step-tag" style="background:rgba(185,28,28,.1);color:#B91C1C;">~2h</span>
+          </div>
+          <div class="step-desc">Intégration FlexPay pour MTN Money, Airtel Money, Orange Money. Webhook pour confirmation de paiement.</div>
+          <div class="step-prompt">Intègre FlexPay API (flexpay.cd) :
+1. POST /reglements/initiate → appel FlexPay, retourne orderNumber
+2. GET /reglements/status/:orderNumber → vérifie statut
+3. POST /webhooks/flexpay → reçoit confirmation, met à jour Facture.statut
+
+Variables d'env : FLEXPAY_TOKEN, FLEXPAY_MERCHANT_CODE
+Sandbox URL : https://backend.flexpay.cd/api/rest/v1/paymentService</div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">08</div>
+        <div class="step-body">
+          <div class="step-header">
+            <div class="step-title">Déploiement Railway.app</div>
+            <span class="step-tag" style="background:rgba(5,150,105,.1);color:#059669;">~1h</span>
+          </div>
+          <div class="step-desc">CI/CD depuis GitHub. PostgreSQL géré par Railway. Variables d'environnement sécurisées.</div>
+          <div class="step-prompt">Configure le déploiement Railway :
+1. railway.toml pour apps/api (build command + start command)
+2. next.config.js pour le frontend (output: standalone)
+3. Variables d'env nécessaires : DATABASE_URL, JWT_SECRET, FLEXPAY_TOKEN, NEXT_PUBLIC_API_URL
+4. Dockerfile multi-stage pour l'API (node:20-alpine)
+5. Script de migration auto au démarrage (prisma migrate deploy)</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ 7. DÉPLOIEMENT ═══ -->
+  <div id="deploy" class="sec">
+    <div class="sec-num">07</div>
+    <div class="sec-title">Déploiement</div>
+    <div class="grid-2">
+
+      <div class="deploy-card">
+        <div class="deploy-card-hd">
+          <div class="deploy-icon-box" style="background:#F0FDF4;border:1px solid #BBF7D0;">
+            <span class="mi-icon" style="color:#059669;">cloud_upload</span>
+          </div>
+          <div class="deploy-title">Railway.app (recommandé)</div>
+        </div>
+        <div class="deploy-desc">Node.js + PostgreSQL tout-en-un. Déploiement depuis GitHub en un clic. ~12$/mois pour un projet complet.</div>
+        <span class="deploy-cmd">railway up</span>
+      </div>
+
+      <div class="deploy-card">
+        <div class="deploy-card-hd">
+          <div class="deploy-icon-box" style="background:#EFF6FF;border:1px solid #BFDBFE;">
+            <span class="mi-icon" style="color:#2563EB;">language</span>
+          </div>
+          <div class="deploy-title">Domaine personnalisé</div>
+        </div>
+        <div class="deploy-desc">Connectez ndembokin.cd ou crm.ndembokin.cd. SSL automatique via Let's Encrypt. DNS : CNAME vers Railway.</div>
+        <span class="deploy-cmd">railway domain</span>
+      </div>
+
+      <div class="deploy-card">
+        <div class="deploy-card-hd">
+          <div class="deploy-icon-box" style="background:#FEF9EE;border:1px solid #FDE68A;">
+            <span class="mi-icon" style="color:#B45309;">backup</span>
+          </div>
+          <div class="deploy-title">Sauvegardes DB</div>
+        </div>
+        <div class="deploy-desc">pg_dump automatique quotidien. Railway inclut les backups point-in-time. Exportez vers Google Drive (RDC).</div>
+        <span class="deploy-cmd">railway pg dump</span>
+      </div>
+
+      <div class="deploy-card">
+        <div class="deploy-card-hd">
+          <div class="deploy-icon-box" style="background:#FFF1F2;border:1px solid #FECDD3;">
+            <span class="mi-icon" style="color:#BE123C;">speed</span>
+          </div>
+          <div class="deploy-title">CDN Cloudflare</div>
+        </div>
+        <div class="deploy-desc">Mettez Cloudflare devant Railway pour les assets statiques. Réduit la latence depuis Kinshasa de ~40%.</div>
+        <span class="deploy-cmd">cloudflare tunnel</span>
+      </div>
+
+    </div>
+
+    <div class="checklist-box">
+      <div class="checklist-title">Checklist avant mise en production</div>
+      <div class="checklist-grid">
+        <div class="checklist-item"><div class="checklist-box-el"></div><span class="checklist-label">Variables d'env en production (pas de .env)</span></div>
+        <div class="checklist-item"><div class="checklist-box-el"></div><span class="checklist-label">HTTPS forcé + HSTS header</span></div>
+        <div class="checklist-item"><div class="checklist-box-el"></div><span class="checklist-label">Rate limiting sur /auth/login (10 req/min)</span></div>
+        <div class="checklist-item"><div class="checklist-box-el"></div><span class="checklist-label">Validation Zod sur tous les inputs API</span></div>
+        <div class="checklist-item"><div class="checklist-box-el"></div><span class="checklist-label">Sauvegardes DB configurées et testées</span></div>
+        <div class="checklist-item"><div class="checklist-box-el"></div><span class="checklist-label">Logs structurés (pino) sur l'API</span></div>
+        <div class="checklist-item"><div class="checklist-box-el"></div><span class="checklist-label">PWA manifest + service worker actif</span></div>
+        <div class="checklist-item"><div class="checklist-box-el"></div><span class="checklist-label">Test Mobile Money en sandbox</span></div>
+        <div class="checklist-item"><div class="checklist-box-el"></div><span class="checklist-label">CORS restreint au domaine production</span></div>
+        <div class="checklist-item"><div class="checklist-box-el"></div><span class="checklist-label">PDF generation testé (caractères UTF-8 + logo)</span></div>
+        <div class="checklist-item"><div class="checklist-box-el"></div><span class="checklist-label">Import CSV athlètes/clients testé</span></div>
+        <div class="checklist-item"><div class="checklist-box-el"></div><span class="checklist-label">Session review avec équipe Ndembo Kin</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 8. RISQUES ═══ -->
+  <div id="risques" class="sec">
+    <div class="sec-num">08</div>
+    <div class="sec-title">Risques techniques RDC</div>
+    <div class="grid-3">
+
+      <div class="risk-card">
+        <div class="risk-icon">📶</div>
+        <div class="risk-title">Internet instable</div>
+        <div class="risk-desc">Coupures fréquentes à Kinshasa. Les pages doivent rester utilisables offline.</div>
+        <div class="risk-sol green">→ PWA + cache Athlètes/Clients en IndexedDB. Sync au retour réseau.</div>
+      </div>
+
+      <div class="risk-card">
+        <div class="risk-icon">📱</div>
+        <div class="risk-title">Mobile-first</div>
+        <div class="risk-desc">L'équipe utilise principalement des téléphones Android sur le terrain.</div>
+        <div class="risk-sol green">→ Design responsive. Tester sur Chrome Android. Min 44px pour les zones cliquables.</div>
+      </div>
+
+      <div class="risk-card">
+        <div class="risk-icon">⚡</div>
+        <div class="risk-title">Coupures de courant</div>
+        <div class="risk-desc">Pannes d'électricité fréquentes → risque perte de données non sauvegardées.</div>
+        <div class="risk-sol green">→ Auto-save formulaires toutes les 30s dans localStorage. Indicateur de sauvegarde visible.</div>
+      </div>
+
+      <div class="risk-card">
+        <div class="risk-icon">💰</div>
+        <div class="risk-title">Mobile Money instable</div>
+        <div class="risk-desc">Les APIs FlexPay/MTN ont des timeouts. Les paiements peuvent rester en état "pending".</div>
+        <div class="risk-sol green">→ Webhook de confirmation + polling de statut toutes les 2min. UI claire pour le statut en attente.</div>
+      </div>
+
+      <div class="risk-card">
+        <div class="risk-icon">🔐</div>
+        <div class="risk-title">Données sensibles</div>
+        <div class="risk-desc">Valeurs marchandes athlètes, contrats, données financières — données critiques.</div>
+        <div class="risk-sol green">→ Chiffrement DB au repos. Logs d'audit sur actions sensibles. Accès Comptable en lecture seule.</div>
+      </div>
+
+      <div class="risk-card warning">
+        <div class="risk-icon">🌍</div>
+        <div class="risk-title">Latence internationale</div>
+        <div class="risk-desc">Serveurs US/EU → latence 200-400ms depuis Kinshasa sur API calls.</div>
+        <div class="risk-sol amber">→ Railway région EU-West (Paris). Cloudflare CDN. Réduire le nombre de requêtes par page (React Query).</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

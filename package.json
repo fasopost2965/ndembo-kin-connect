@@ -1,0 +1,16 @@
+{
+  "name": "ndembo-kin-connect",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter @nkc/api dev\" \"pnpm --filter @nkc/web dev\"",
+    "build": "pnpm --filter @nkc/types build && pnpm --filter @nkc/api build && pnpm --filter @nkc/web build",
+    "db:migrate": "pnpm --filter @nkc/api db:migrate",
+    "db:seed": "pnpm --filter @nkc/api db:seed",
+    "db:studio": "pnpm --filter @nkc/api db:studio"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.4.5"
+  }
+}
