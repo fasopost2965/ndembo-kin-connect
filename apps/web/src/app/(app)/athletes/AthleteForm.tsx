@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, User, Zap } from 'lucide-react';
 import { athletesApi } from '@/lib/api';
 import { useAutosave, loadDraft, clearDraft } from '@/lib/useAutosave';
 import { Button } from '@/components/ui/button';
@@ -97,80 +97,111 @@ export function AthleteForm({
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-4">
+    <form onSubmit={submit} className="flex flex-col gap-6">
       {error && (
         <div className="rounded-lg bg-[#FEF2F2] px-3 py-2 text-xs font-medium text-[#DC2626]">{error}</div>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Prénom" required>
-          <Input value={form.prenom} onChange={(e) => set('prenom', e.target.value)} required placeholder="Cédric" />
-        </Field>
-        <Field label="Nom" required>
-          <Input value={form.nom} onChange={(e) => set('nom', e.target.value)} required placeholder="Diabase" />
-        </Field>
+      {/* Section Identité */}
+      <div className="rounded-xl border border-slate-200 p-6">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50">
+            <User className="h-5 w-5 text-amber-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-[#07101A]">Identité</h3>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Prénom" required>
+            <Input value={form.prenom} onChange={(e) => set('prenom', e.target.value)} required placeholder="ex: Lukaku" />
+          </Field>
+          <Field label="Nom de famille" required>
+            <Input value={form.nom} onChange={(e) => set('nom', e.target.value)} required placeholder="ex: Mbuyi" />
+          </Field>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Date de naissance">
+            <Input type="date" value={form.nationalite} onChange={(e) => set('nationalite', e.target.value)} />
+          </Field>
+          <Field label="Nationalité">
+            <Select value={form.nationalite} onValueChange={(v) => set('nationalite', v)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="RDC (Congo)">🇨🇩 RDC (Congo)</SelectItem>
+                <SelectItem value="Congo">🇨🇬 Congo</SelectItem>
+                <SelectItem value="Rwanda">🇷🇼 Rwanda</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Téléphone">
+            <Input value={form.telephone} onChange={(e) => set('telephone', e.target.value)} placeholder="+243 8X XXX XXXX" />
+          </Field>
+          <Field label="E-mail">
+            <Input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} placeholder="athlete@email.com" />
+          </Field>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Sport">
-          <Select value={form.sport} onValueChange={(v) => set('sport', v)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {SPORTS.map((s) => (
-                <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="Poste" required>
-          <Input value={form.poste} onChange={(e) => set('poste', e.target.value)} required placeholder="Attaquant" />
+      {/* Section Profil Sportif */}
+      <div className="rounded-xl border border-slate-200 p-6">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+            <Zap className="h-5 w-5 text-blue-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-[#07101A]">Profil sportif</h3>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Sport" required>
+            <Select value={form.sport} onValueChange={(v) => set('sport', v)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {SPORTS.map((s) => (
+                  <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Poste / Spécialité" required>
+            <Input value={form.poste} onChange={(e) => set('poste', e.target.value)} required placeholder="ex: Attaquant, Pivot..." />
+          </Field>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Niveau" required>
+            <Select value={form.niveau} onValueChange={(v) => set('niveau', v as Athlete['niveau'])}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="AMATEUR">-- Niveau --</SelectItem>
+                <SelectItem value="AMATEUR">Amateur</SelectItem>
+                <SelectItem value="SEMI_PRO">Semi-Pro</SelectItem>
+                <SelectItem value="PRO">Pro</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Club actuel">
+            <Input value={form.clubActuel} onChange={(e) => set('clubActuel', e.target.value)} placeholder="ex: TP Mazembe" />
+          </Field>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Valeur marchande (USD)">
+            <Input type="number" value={form.valeurMarchande} onChange={(e) => set('valeurMarchande', e.target.value)} placeholder="0" />
+          </Field>
+          <Field label="Statut">
+            <Select value={form.priorityScouting || 'ACTIF'} onValueChange={(v) => set('priorityScouting', v)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ACTIF">Actif</SelectItem>
+                <SelectItem value="INACTIF">Inactif</SelectItem>
+                <SelectItem value="BLESSE">Blessé</SelectItem>
+                <SelectItem value="TRANSFERT">En transfert</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+        </div>
+        <Field label="Notes / Observations">
+          <textarea value="" onChange={() => {}} placeholder="Talents remarquables, historique, observations du coach..." className="min-h-24 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
         </Field>
       </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Niveau">
-          <Select value={form.niveau} onValueChange={(v) => set('niveau', v as Athlete['niveau'])}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="AMATEUR">Amateur</SelectItem>
-              <SelectItem value="SEMI_PRO">Semi-pro</SelectItem>
-              <SelectItem value="PRO">Pro</SelectItem>
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="Priorité scouting">
-          <Select value={form.priorityScouting} onValueChange={(v) => set('priorityScouting', v)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="HAUTE">Haute</SelectItem>
-              <SelectItem value="NORMALE">Normale</SelectItem>
-              <SelectItem value="BASSE">Basse</SelectItem>
-            </SelectContent>
-          </Select>
-        </Field>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Club actuel">
-          <Input value={form.clubActuel} onChange={(e) => set('clubActuel', e.target.value)} placeholder="AS Vita Club" />
-        </Field>
-        <Field label="Valeur marchande (€)">
-          <Input type="number" value={form.valeurMarchande} onChange={(e) => set('valeurMarchande', e.target.value)} placeholder="850000" />
-        </Field>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Nationalité">
-          <Input value={form.nationalite} onChange={(e) => set('nationalite', e.target.value)} />
-        </Field>
-        <Field label="Téléphone">
-          <Input value={form.telephone} onChange={(e) => set('telephone', e.target.value)} placeholder="+243 …" />
-        </Field>
-      </div>
-
-      <Field label="Email">
-        <Input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} placeholder="c.diabase@gmail.com" />
-      </Field>
 
       {!isEdit && (
         <div className="flex items-center gap-1.5 text-xs text-[#94A3B8]">
