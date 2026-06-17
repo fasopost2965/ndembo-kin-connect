@@ -102,7 +102,7 @@ export default function AthletesPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="mb-5 grid grid-cols-3 gap-3">
+      <div className="mb-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
         <StatCard icon={Users} label="Total athlètes" value={stats.total.toString()} accent="#7CC8E8" />
         <StatCard icon={TrendingUp} label="Valeur du portefeuille" value={formatValeur(stats.valeurTotale)} accent="#FCD116" />
         <StatCard icon={Trophy} label="Athlètes Pro" value={stats.pros.toString()} accent="#10B981" />
@@ -118,7 +118,7 @@ export default function AthletesPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher un athlète…"
-              className="h-9 border-[#E2E8F0] bg-[#F1F5F9] pl-9 text-xs"
+              className="h-9 border-[#E2E8F0] bg-[#F1F5F9] pl-9 text-sm"
             />
           </div>
           <div className="flex gap-1.5">
@@ -190,10 +190,10 @@ export default function AthletesPage() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-xs capitalize text-[#64748B]">{a.sport}</TableCell>
-                    <TableCell className="text-xs text-[#64748B]">{a.poste}</TableCell>
+                    <TableCell className="text-sm capitalize text-[#64748B]">{a.sport}</TableCell>
+                    <TableCell className="text-sm text-[#64748B]">{a.poste}</TableCell>
                     <TableCell><Badge variant={nb.variant}>{nb.label}</Badge></TableCell>
-                    <TableCell className="text-xs text-[#64748B]">{a.clubActuel ?? '—'}</TableCell>
+                    <TableCell className="text-sm text-[#64748B]">{a.clubActuel ?? '—'}</TableCell>
                     <TableCell className="text-right text-[13px] font-bold text-[#C9960C]">
                       {formatValeur(a.valeurMarchande)}
                     </TableCell>

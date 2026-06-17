@@ -24,10 +24,11 @@ const buttonVariants = cva(
         destructive: 'bg-[#FEF2F2] text-[#DC2626] hover:bg-[#FDE4E4]',
       },
       size: {
-        default: 'h-10 px-[22px] py-[11px]',
-        sm: 'h-8 px-3 text-xs',
+        // 44px min touch target on mobile, slightly tighter on ≥sm screens.
+        default: 'h-11 sm:h-10 px-5 py-2.5',
+        sm: 'h-9 sm:h-8 px-3 text-xs',
         lg: 'h-11 px-6',
-        icon: 'h-9 w-9',
+        icon: 'h-11 w-11 sm:h-9 sm:w-9',
       },
     },
     defaultVariants: { variant: 'primary', size: 'default' },

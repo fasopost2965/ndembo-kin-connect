@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Check } from 'lucide-react';
 import { clientsApi, prestationsApi, devisApi } from '@/lib/api';
 import { formatMontant } from '@/lib/utils';
+import { useAutosave, loadDraft, clearDraft } from '@/lib/useAutosave';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,15 +16,22 @@ interface ClientLite { id: string; nom: string }
 interface Prestation { id: string; nom: string; prixBase: number }
 interface LigneRow { prestationId: string; quantite: number; prixUnit: number }
 
+interface DevisDraft { clientId: string; tva: number; notes: string; lignes: LigneRow[] }
+const DRAFT_KEY = 'nkc:draft:devis';
+
 export function DevisForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: () => void }) {
+  const draft = typeof window !== 'undefined' ? loadDraft<DevisDraft>(DRAFT_KEY) : null;
   const [clients, setClients] = useState<ClientLite[]>([]);
   const [prestations, setPrestations] = useState<Prestation[]>([]);
-  const [clientId, setClientId] = useState('');
-  const [tva, setTva] = useState(16);
-  const [notes, setNotes] = useState('');
-  const [lignes, setLignes] = useState<LigneRow[]>([{ prestationId: '', quantite: 1, prixUnit: 0 }]);
+  const [clientId, setClientId] = useState(draft?.clientId ?? '');
+  const [tva, setTva] = useState(draft?.tva ?? 16);
+  const [notes, setNotes] = useState(draft?.notes ?? '');
+  const [lignes, setLignes] = useState<LigneRow[]>(draft?.lignes ?? [{ prestationId: '', quantite: 1, prixUnit: 0 }]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  // Persist the draft (power-cut resilience).
+  useAutosave<DevisDraft>(DRAFT_KEY, { clientId, tva, notes, lignes });
 
   useEffect(() => {
     clientsApi.list({ limit: 100 }).then((r) => setClients(r.data.data)).catch(() => {});
@@ -63,6 +71,7 @@ export function DevisForm({ onSaved, onCancel }: { onSaved: () => void; onCancel
         notes: notes || undefined,
         lignes: lignes.map((l) => ({ prestationId: l.prestationId, quantite: l.quantite, prixUnit: l.prixUnit })),
       });
+      clearDraft(DRAFT_KEY);
       onSaved();
     } catch {
       setError("Échec de la création du devis.");
@@ -146,6 +155,10 @@ export function DevisForm({ onSaved, onCancel }: { onSaved: () => void; onCancel
       <div className="flex flex-col gap-1.5">
         <Label>Notes</Label>
         <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Conditions, mentions…" />
+      </div>
+
+      <div className="flex items-center gap-1.5 text-xs text-[#94A3B8]">
+        <Check size={13} className="text-[#0D9668]" /> Brouillon sauvegardé automatiquement
       </div>
 
       <div className="mt-2 flex gap-2">

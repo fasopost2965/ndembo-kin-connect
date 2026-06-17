@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { Check } from 'lucide-react';
 import { athletesApi } from '@/lib/api';
+import { useAutosave, loadDraft, clearDraft } from '@/lib/useAutosave';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,21 +38,30 @@ export function AthleteForm({
   onCancel: () => void;
 }) {
   const isEdit = !!athlete;
-  const [form, setForm] = useState({
-    nom: athlete?.nom ?? '',
-    prenom: athlete?.prenom ?? '',
-    sport: athlete?.sport ?? 'football',
-    poste: athlete?.poste ?? '',
-    niveau: athlete?.niveau ?? ('AMATEUR' as Athlete['niveau']),
-    clubActuel: athlete?.clubActuel ?? '',
-    valeurMarchande: athlete?.valeurMarchande?.toString() ?? '',
-    nationalite: athlete?.nationalite ?? 'RDC',
-    telephone: athlete?.telephone ?? '',
-    email: athlete?.email ?? '',
-    priorityScouting: athlete?.priorityScouting ?? 'NORMALE',
+  const DRAFT_KEY = 'nkc:draft:athlete';
+  const [form, setForm] = useState(() => {
+    const base = {
+      nom: athlete?.nom ?? '',
+      prenom: athlete?.prenom ?? '',
+      sport: athlete?.sport ?? 'football',
+      poste: athlete?.poste ?? '',
+      niveau: athlete?.niveau ?? ('AMATEUR' as Athlete['niveau']),
+      clubActuel: athlete?.clubActuel ?? '',
+      valeurMarchande: athlete?.valeurMarchande?.toString() ?? '',
+      nationalite: athlete?.nationalite ?? 'RDC',
+      telephone: athlete?.telephone ?? '',
+      email: athlete?.email ?? '',
+      priorityScouting: athlete?.priorityScouting ?? 'NORMALE',
+    };
+    // Restore a draft only in create mode (protects against power cuts).
+    if (!athlete) return loadDraft<typeof base>(DRAFT_KEY) ?? base;
+    return base;
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  // Auto-save the draft every 800ms (create mode only).
+  useAutosave(DRAFT_KEY, form, !isEdit);
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -76,6 +87,7 @@ export function AthleteForm({
     try {
       if (isEdit) await athletesApi.update(athlete!.id, payload);
       else await athletesApi.create(payload);
+      clearDraft(DRAFT_KEY);
       onSaved();
     } catch {
       setError("Échec de l'enregistrement. Vérifiez les champs requis.");
@@ -159,6 +171,12 @@ export function AthleteForm({
       <Field label="Email">
         <Input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} placeholder="c.diabase@gmail.com" />
       </Field>
+
+      {!isEdit && (
+        <div className="flex items-center gap-1.5 text-xs text-[#94A3B8]">
+          <Check size={13} className="text-[#0D9668]" /> Brouillon sauvegardé automatiquement
+        </div>
+      )}
 
       <div className="mt-2 flex gap-2">
         <Button type="submit" variant="gold" disabled={saving} className="flex-1">

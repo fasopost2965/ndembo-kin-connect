@@ -64,7 +64,7 @@ export default function ProjetsPage() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="h-[420px] animate-pulse rounded-2xl border border-[#E2E8F0] bg-white" />
           ))}

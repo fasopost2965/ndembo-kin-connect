@@ -20,6 +20,12 @@ import { contratRoutes } from './modules/contrats/contrats.routes';
 import { settingsRoutes } from './modules/settings/settings.routes';
 import { dashboardRoutes } from './modules/dashboard/dashboard.routes';
 
+// Fail fast on a missing/weak secret in production — never fall back silently.
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-insecure-secret';
+if (process.env.NODE_ENV === 'production' && (!process.env.JWT_SECRET || JWT_SECRET.length < 32)) {
+  throw new Error('JWT_SECRET manquant ou trop court (≥ 32 caractères requis en production)');
+}
+
 const server = Fastify({ logger: true });
 
 async function main() {
@@ -29,7 +35,7 @@ async function main() {
   });
 
   await server.register(jwt, {
-    secret: process.env.JWT_SECRET || 'change-me-in-production',
+    secret: JWT_SECRET,
     cookie: { cookieName: 'refresh_token', signed: false },
   });
 

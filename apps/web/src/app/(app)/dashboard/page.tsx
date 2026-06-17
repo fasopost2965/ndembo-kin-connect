@@ -62,13 +62,13 @@ export default function DashboardPage() {
 
       {/* KPI Cards */}
       {loading ? (
-        <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="bg-white rounded-2xl p-6 border border-slate-200 h-32 animate-pulse" />
           ))}
         </div>
       ) : kpis ? (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <KpiCard label="Chiffre d'affaires" value={kpis.chiffreAffaires} variation={kpis.chiffreAffairesVariation} icon={DollarSign} prefix="$" />
           <KpiCard label="Pipeline commercial" value={kpis.pipeline} variation={kpis.pipelineVariation} icon={Target} prefix="$" />
           <KpiCard label="Athlètes actifs" value={kpis.athletesActifs} variation={kpis.athletesVariation} icon={Users} />
@@ -77,7 +77,7 @@ export default function DashboardPage() {
       ) : null}
 
       {/* Quick links */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: 'Nouvel athlète', href: '/athletes/new', color: 'bg-blue-50 text-blue-700 border-blue-200' },
           { label: 'Nouveau client', href: '/clients/new', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },

@@ -105,7 +105,7 @@ export function KanbanBoard({ projetId, initial }: { projetId: string; initial: 
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={onDragStart} onDragEnd={onDragEnd}>
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {COLONNES.map((col) => (
           <Column key={col.key} meta={col} tasks={columns[col.key]} onAdd={addTask} onRemove={removeTask} />
         ))}
