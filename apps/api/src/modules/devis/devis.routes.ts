@@ -4,21 +4,56 @@ import { can } from '../../lib/rbac';
 import { prisma } from '../../lib/prisma';
 import { nextNumero } from '../../lib/sequences';
 
-const ligneSchema = z.object({
-  prestationId: z.string().optional(),
-  designation: z.string(),
+// Input line: only prestationId + quantite are required; prixUnit is optional
+// and defaults to the prestation's catalogue price (prixBase).
+const ligneInputSchema = z.object({
+  prestationId: z.string(),
   quantite: z.number().min(1),
-  prixUnit: z.number().min(0),
-  total: z.number(),
+  prixUnit: z.number().min(0).optional(),
 });
 
 const devisCreateSchema = z.object({
   clientId: z.string(),
-  lignes: z.array(ligneSchema).min(1),
+  lignes: z.array(ligneInputSchema).min(1),
   tva: z.number().default(16),
   notes: z.string().optional(),
   validiteJours: z.number().default(30),
 });
+
+// Stored line shape: designation + prixUnit + computed total are resolved
+// server-side so the catalogue stays the source of truth.
+interface LigneStored {
+  prestationId: string;
+  designation: string;
+  quantite: number;
+  prixUnit: number;
+  total: number;
+}
+
+/** Resolve input lines against the Prestation catalogue and compute totals. */
+async function resolveLignes(
+  lignes: z.infer<typeof ligneInputSchema>[]
+): Promise<{ lignes: LigneStored[]; montantHT: number }> {
+  const ids = [...new Set(lignes.map((l) => l.prestationId))];
+  const prestations = await prisma.prestation.findMany({ where: { id: { in: ids } } });
+  const byId = new Map(prestations.map((p) => [p.id, p]));
+
+  const resolved = lignes.map((l) => {
+    const prestation = byId.get(l.prestationId);
+    if (!prestation) throw new Error(`Prestation introuvable: ${l.prestationId}`);
+    const prixUnit = l.prixUnit ?? prestation.prixBase;
+    return {
+      prestationId: l.prestationId,
+      designation: prestation.nom,
+      quantite: l.quantite,
+      prixUnit,
+      total: Math.round(prixUnit * l.quantite * 100) / 100,
+    };
+  });
+
+  const montantHT = resolved.reduce((s, l) => s + l.total, 0);
+  return { lignes: resolved, montantHT };
+}
 
 export async function devisRoutes(server: FastifyInstance) {
   // GET /devis
@@ -40,11 +75,25 @@ export async function devisRoutes(server: FastifyInstance) {
   // POST /devis
   server.post('/', { preHandler: [can('devisFactures', 'write')] }, async (req, reply) => {
     const body = devisCreateSchema.parse(req.body);
-    const montantHT = body.lignes.reduce((s, l) => s + l.total, 0);
-    const montantTTC = montantHT * (1 + body.tva / 100);
+    let resolved;
+    try {
+      resolved = await resolveLignes(body.lignes);
+    } catch (e) {
+      return reply.status(400).send({ message: (e as Error).message });
+    }
+    const montantTTC = Math.round(resolved.montantHT * (1 + body.tva / 100) * 100) / 100;
     const numero = await nextNumero('DEVIS');
     const devis = await prisma.devis.create({
-      data: { ...body, lignes: body.lignes as never, montantHT, montantTTC, numero },
+      data: {
+        clientId: body.clientId,
+        tva: body.tva,
+        notes: body.notes,
+        validiteJours: body.validiteJours,
+        lignes: resolved.lignes as never,
+        montantHT: resolved.montantHT,
+        montantTTC,
+        numero,
+      },
     });
     return reply.status(201).send(devis);
   });

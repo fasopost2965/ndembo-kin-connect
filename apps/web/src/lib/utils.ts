@@ -11,6 +11,11 @@ export function formatValeur(value?: number | null): string {
   return value.toLocaleString('fr-FR').replace(/ /g, ' ') + ' €';
 }
 
+/** Format a monetary amount; unlike formatValeur, null/0 renders as "0 €". */
+export function formatMontant(value?: number | null): string {
+  return (value ?? 0).toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' €';
+}
+
 /** Two-letter initials from "Prénom Nom". */
 export function initials(...parts: (string | undefined)[]): string {
   return parts

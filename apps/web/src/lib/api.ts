@@ -70,11 +70,19 @@ export const clientsApi = {
   update: (id: string, data: unknown) => api.put(`/clients/${id}`, data),
 };
 
+// ── Prestations ───────────────────────────────────────────────────────────────
+export const prestationsApi = {
+  list: (activesOnly = true) => api.get('/prestations', { params: activesOnly ? { actives: 'true' } : {} }),
+};
+
 // ── Devis ─────────────────────────────────────────────────────────────────────
+export interface DevisLigneInput { prestationId: string; quantite: number; prixUnit?: number }
+export interface DevisCreateInput { clientId: string; lignes: DevisLigneInput[]; tva?: number; notes?: string }
+
 export const devisApi = {
   list: (params?: Record<string, string | number>) => api.get('/devis', { params }),
   get: (id: string) => api.get(`/devis/${id}`),
-  create: (data: unknown) => api.post('/devis', data),
+  create: (data: DevisCreateInput) => api.post('/devis', data),
   updateStatut: (id: string, statut: string) => api.patch(`/devis/${id}/statut`, { statut }),
   convert: (id: string) => api.post(`/devis/${id}/convert`),
   pdf: (id: string) => api.get(`/devis/${id}/pdf`),
@@ -84,8 +92,19 @@ export const devisApi = {
 export const facturesApi = {
   list: (params?: Record<string, string | number>) => api.get('/factures', { params }),
   get: (id: string) => api.get(`/factures/${id}`),
-  paiement: (id: string, data: unknown) => api.patch(`/factures/${id}/paiement`, data),
   pdf: (id: string) => api.get(`/factures/${id}/pdf`),
+};
+
+// ── Règlements ────────────────────────────────────────────────────────────────
+export interface ReglementInput {
+  factureId: string;
+  montant: number;
+  moyenPaiement: 'BANK' | 'CARTE' | 'MTN_MONEY' | 'AIRTEL_MONEY' | 'ORANGE_MONEY';
+  reference?: string;
+}
+export const reglementsApi = {
+  list: (factureId?: string) => api.get('/reglements', { params: factureId ? { factureId } : {} }),
+  create: (data: ReglementInput) => api.post('/reglements', data),
 };
 
 // ── Projets ───────────────────────────────────────────────────────────────────

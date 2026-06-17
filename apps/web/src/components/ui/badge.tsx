@@ -44,3 +44,33 @@ export function niveauBadge(niveau: string): { variant: BadgeProps['variant']; l
       return { variant: 'amateur', label: 'Amateur' };
   }
 }
+
+/** Map devis statut → badge variant + label. */
+export function devisStatutBadge(statut: string): { variant: BadgeProps['variant']; label: string } {
+  switch (statut) {
+    case 'VALIDE':
+      return { variant: 'progress', label: 'Validé' };
+    case 'CONVERTI':
+      return { variant: 'paid', label: 'Converti' };
+    case 'REFUSE':
+      return { variant: 'unpaid', label: 'Refusé' };
+    case 'EN_ATTENTE':
+    default:
+      return { variant: 'pending', label: 'En attente' };
+  }
+}
+
+/** Map facture statutPaiement → badge variant + label. */
+export function factureStatutBadge(statut: string): { variant: BadgeProps['variant']; label: string } {
+  switch (statut) {
+    case 'PAYEE':
+      return { variant: 'paid', label: 'Payée' };
+    case 'PARTIELLE':
+      return { variant: 'progress', label: 'Partielle' };
+    case 'ACOMPTE_PERCU':
+      return { variant: 'pending', label: 'Acompte perçu' };
+    case 'IMPAYEE':
+    default:
+      return { variant: 'unpaid', label: 'Impayée' };
+  }
+}

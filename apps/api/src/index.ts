@@ -11,6 +11,8 @@ import { athleteRoutes } from './modules/athletes/athletes.routes';
 import { clientRoutes } from './modules/clients/clients.routes';
 import { devisRoutes } from './modules/devis/devis.routes';
 import { factureRoutes } from './modules/factures/factures.routes';
+import { reglementRoutes } from './modules/reglements/reglements.routes';
+import { prestationRoutes } from './modules/prestations/prestations.routes';
 import { projetRoutes } from './modules/projets/projets.routes';
 import { contratRoutes } from './modules/contrats/contrats.routes';
 import { settingsRoutes } from './modules/settings/settings.routes';
@@ -77,6 +79,8 @@ async function main() {
   await server.register(clientRoutes, { prefix: '/clients' });
   await server.register(devisRoutes, { prefix: '/devis' });
   await server.register(factureRoutes, { prefix: '/factures' });
+  await server.register(reglementRoutes, { prefix: '/reglements' });
+  await server.register(prestationRoutes, { prefix: '/prestations' });
   await server.register(projetRoutes, { prefix: '/projets' });
   await server.register(contratRoutes, { prefix: '/contrats' });
   await server.register(settingsRoutes, { prefix: '/settings' });
