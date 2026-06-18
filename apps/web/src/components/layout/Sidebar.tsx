@@ -5,14 +5,21 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 
-// ── Navigation groups (design: Dashboard.dc.html) ──
+// ── Navigation groups (source: ROUTES.md §4 — Sidebar order) ──
 const NAV_GROUPS = [
   {
-    label: 'PRINCIPAL',
+    label: 'PILOTAGE',
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
-      { label: 'Athlètes',  href: '/athletes',  icon: 'directions_run', badge: '45' },
-      { label: 'Clients',   href: '/clients',   icon: 'business',       badge: '28' },
+      { label: 'Rapports',  href: '/rapports',  icon: 'bar_chart' },
+    ],
+  },
+  {
+    label: 'CRM',
+    items: [
+      { label: 'Athlètes', href: '/athletes', icon: 'directions_run', badge: '45' },
+      { label: 'Clients',  href: '/clients',  icon: 'business',       badge: '28' },
+      { label: 'Contrats', href: '/contrats', icon: 'gavel' },
     ],
   },
   {
@@ -25,19 +32,17 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: 'OPÉRATIONS',
+    label: 'PROJETS',
     items: [
-      { label: 'Projets',  href: '/projets',  icon: 'work',     badge: '8' },
-      { label: 'Tâches',   href: '/taches',   icon: 'task_alt' },
-      { label: 'Jalons',   href: '/jalons',   icon: 'flag' },
-      { label: 'Contrats', href: '/contrats', icon: 'gavel' },
+      { label: 'Projets', href: '/projets', icon: 'work',     badge: '8' },
+      { label: 'Tâches',  href: '/taches',  icon: 'task_alt' },
+      { label: 'Jalons',  href: '/jalons',  icon: 'flag' },
     ],
   },
   {
-    label: 'SUIVI',
+    label: 'ACTIVITÉS',
     items: [
       { label: 'Activités', href: '/activites', icon: 'history' },
-      { label: 'Rapports',  href: '/rapports',  icon: 'bar_chart' },
     ],
   },
 ];

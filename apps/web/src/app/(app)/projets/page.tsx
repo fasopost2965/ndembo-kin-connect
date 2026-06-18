@@ -59,7 +59,7 @@ export default function ProjetsPage() {
       >
         <div className="flex items-center gap-2.5">
           <span className="text-[18px] font-extrabold tracking-[-0.3px]" style={{ color: '#0F172A' }}>Projets</span>
-          <span className="text-[12px] font-bold px-2 py-0.5 rounded-lg" style={{ background: '#EBF6FB', color: '#3A6B84' }}>
+          <span className="text-[12px] font-bold px-2.5 py-0.5" style={{ background: '#07101A', color: '#FCD116', borderRadius: 20 }}>
             Kanban
           </span>
         </div>

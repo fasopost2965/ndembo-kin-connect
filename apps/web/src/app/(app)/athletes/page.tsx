@@ -114,8 +114,8 @@ export default function AthletesPage() {
             Athlètes
           </span>
           <span
-            className="px-2 py-0.5 rounded-lg text-[11px] font-bold"
-            style={{ background: '#EBF6FB', color: '#3A6B84' }}
+            className="text-[12px] font-bold px-2.5 py-0.5"
+            style={{ background: '#07101A', color: '#FCD116', borderRadius: 20 }}
           >
             {total}
           </span>

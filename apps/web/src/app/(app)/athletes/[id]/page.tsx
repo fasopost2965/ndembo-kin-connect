@@ -111,99 +111,82 @@ export default function AthleteDetailPage() {
       </div>
 
       {/* ── 2-col grid ── */}
-      <div className="flex gap-5 p-6 flex-1">
+      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 20, padding: '28px 32px', maxWidth: 1200, margin: '0 auto', width: '100%' }}>
 
-        {/* Left card — dark, 300px */}
-        <div
-          className="flex flex-col shrink-0 rounded-2xl overflow-hidden"
-          style={{ width: 300, background: '#07101A' }}
-        >
-          {/* Avatar section */}
+        {/* Left column — 300px, matches design */}
+        <div className="flex flex-col shrink-0 gap-4" style={{ width: 300 }}>
+
+          {/* Dark profile card */}
           <div
-            className="flex flex-col items-center py-8 px-4 text-center"
-            style={{ borderBottom: '1px solid rgba(252,209,22,0.08)' }}
+            className="rounded-[18px] text-center relative overflow-hidden"
+            style={{ background: '#07101A', padding: '28px 22px' }}
           >
+            <div style={{ position: 'absolute', top: -40, right: -40, width: 140, height: 140, borderRadius: '50%', border: '1px solid rgba(252,209,22,0.08)', pointerEvents: 'none' }} />
             <div
-              className="flex items-center justify-center rounded-full text-white font-black mb-3.5"
-              style={{
-                width: 72, height: 72, fontSize: 24,
-                background: gradientFor(athlete.id),
-              }}
+              className="flex items-center justify-center rounded-full font-black mx-auto mb-3.5"
+              style={{ width: 72, height: 72, fontSize: 24, background: gradientFor(athlete.id), color: '#07101A' }}
             >
               {initials(athlete.prenom, athlete.nom)}
             </div>
-            <div className="text-[16px] font-extrabold text-white mb-0.5">
+            <div className="text-[18px] font-extrabold text-white" style={{ letterSpacing: '-0.3px' }}>
               {athlete.prenom} {athlete.nom}
             </div>
-            <div className="text-[12px] capitalize mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            <div className="text-[12px] mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
               {athlete.sport} · {athlete.poste}
             </div>
-            <Badge variant={nb.variant}>{nb.label}</Badge>
+            <div className="mt-3">
+              <Badge variant={nb.variant}>{nb.label}</Badge>
+            </div>
           </div>
 
-          {/* KPI mini-cards */}
-          <div className="grid grid-cols-2 gap-2.5 p-4" style={{ borderBottom: '1px solid rgba(252,209,22,0.06)' }}>
+          {/* White KPI grid */}
+          <div className="grid grid-cols-2 gap-2.5">
             {[
-              { label: 'Valeur', value: formatValeur(athlete.valeurMarchande), color: '#FCD116' },
-              { label: 'Contrats', value: '2', color: '#7CC8E8' },
-              { label: 'Projets', value: '1', color: '#10B981' },
-              { label: 'Activités', value: '14', color: 'rgba(255,255,255,0.6)' },
+              { label: 'Contrats',     value: '2',                              color: '#FCD116', size: 22 },
+              { label: 'Projets',      value: '1',                              color: '#3A6B84', size: 22 },
+              { label: 'Valeur march.',value: formatValeur(athlete.valeurMarchande), color: '#059669', size: 18 },
+              { label: 'Ans',          value: athlete.dateNaissance
+                ? String(new Date().getFullYear() - new Date(athlete.dateNaissance).getFullYear())
+                : '—',                                                            color: '#0F172A', size: 22 },
             ].map(k => (
-              <div
-                key={k.label}
-                className="rounded-xl p-3 text-center"
-                style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(252,209,22,0.07)',
-                }}
-              >
-                <div className="text-[14px] font-extrabold" style={{ color: k.color }}>{k.value}</div>
-                <div className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>{k.label}</div>
+              <div key={k.label} className="rounded-xl text-center"
+                style={{ background: '#fff', border: '1px solid #E2E8F0', padding: 14, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: k.size, fontWeight: 800, color: k.color, letterSpacing: '-0.4px' }}>{k.value}</div>
+                <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 3, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{k.label}</div>
               </div>
             ))}
           </div>
 
-          {/* Contact infos */}
-          <div className="flex-1 px-4 py-4 space-y-3">
+          {/* White contact card */}
+          <div className="rounded-[14px]" style={{ background: '#fff', border: '1px solid #E2E8F0', padding: '18px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 14 }}>Contact</div>
             {[
-              { icon: 'phone', label: 'Téléphone', value: athlete.telephone ?? '—' },
-              { icon: 'mail_outline', label: 'Email', value: athlete.email ?? '—' },
-              { icon: 'flag', label: 'Nationalité', value: athlete.nationalite ?? '—' },
+              { icon: 'phone',         label: 'Téléphone',   value: athlete.telephone ?? '—' },
+              { icon: 'mail_outline',  label: 'Email',       value: athlete.email ?? '—' },
+              { icon: 'flag',          label: 'Nationalité', value: athlete.nationalite ?? '—' },
               { icon: 'sports_soccer', label: 'Club actuel', value: athlete.clubActuel ?? '—' },
-            ].map(row => (
-              <div key={row.label} className="flex gap-2.5">
-                <div
-                  className="flex items-center justify-center rounded-[8px] shrink-0 mt-0.5"
-                  style={{ width: 28, height: 28, background: 'rgba(255,255,255,0.05)' }}
-                >
-                  <MI name={row.icon} size={14} style={{ color: 'rgba(255,255,255,0.3)' }} />
-                </div>
+            ].map((row, i, arr) => (
+              <div key={row.label} className="flex items-center gap-2.5 py-1.5"
+                style={{ borderBottom: i < arr.length - 1 ? '1px solid #F8FAFC' : 'none' }}>
+                <MI name={row.icon} size={16} style={{ color: '#94A3B8', flexShrink: 0 }} />
                 <div>
-                  <div className="text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>{row.label}</div>
-                  <div className="text-[12px] font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                    {row.value}
-                  </div>
+                  <div style={{ fontSize: 10, color: '#94A3B8' }}>{row.label}</div>
+                  <div style={{ fontSize: 13, color: '#334155', fontWeight: 500 }}>{row.value}</div>
                 </div>
               </div>
             ))}
           </div>
 
           {/* CTA */}
-          <div className="px-4 pb-5 pt-2">
-            <button
-              className="w-full flex items-center justify-center gap-1.5 font-bold text-[13px] rounded-[10px]"
-              style={{
-                padding: '11px 0',
-                background: 'linear-gradient(135deg,#DAA520,#F4C430)',
-                color: '#07101A',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              <MI name="description" size={15} style={{ color: '#07101A' }} />
-              Créer un contrat
-            </button>
-          </div>
+          <Link href={`/contrats?athleteId=${id}`}
+            className="w-full flex items-center justify-center gap-2 font-bold text-[13px] rounded-[12px] no-underline"
+            style={{ padding: 12, background: '#07101A', color: '#FCD116', display: 'flex' }}
+            onMouseEnter={e => (e.currentTarget.style.background = '#132730')}
+            onMouseLeave={e => (e.currentTarget.style.background = '#07101A')}
+          >
+            <MI name="description" size={16} style={{ color: '#FCD116' }} />
+            Créer un contrat
+          </Link>
         </div>
 
         {/* Right column */}
@@ -211,17 +194,20 @@ export default function AthleteDetailPage() {
 
           {/* Pill tab bar */}
           <div
-            className="flex gap-1 rounded-xl p-1 mb-5 shrink-0"
-            style={{ background: '#fff', border: '1px solid #E2E8F0', width: 'fit-content' }}
+            className="flex gap-0.5 rounded-xl p-1 mb-5 shrink-0"
+            style={{ background: '#E8ECF1', borderRadius: 12, padding: 4, width: 'fit-content' }}
           >
             {TABS.map(t => (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className="px-4 py-1.5 rounded-[9px] text-[13px] font-semibold transition-all"
+                className="rounded-[9px] text-[13px] transition-all"
                 style={{
-                  background: tab === t.id ? '#07101A' : 'transparent',
-                  color: tab === t.id ? '#FCD116' : '#64748B',
+                  padding: '8px 18px',
+                  background: tab === t.id ? '#fff' : 'transparent',
+                  color: tab === t.id ? '#0F172A' : '#64748B',
+                  fontWeight: tab === t.id ? 700 : 500,
+                  boxShadow: tab === t.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                   border: 'none',
                   cursor: 'pointer',
                 }}

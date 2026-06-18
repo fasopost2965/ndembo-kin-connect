@@ -20,6 +20,9 @@ interface Contrat {
   numero: string;
   typeContrat: string;
   statut: 'EN_PREPARATION' | 'SIGNE' | 'EN_COURS' | 'EXPIRE';
+  montant?: number;
+  dateDebut?: string;
+  dateFin?: string;
   signeParClient: boolean;
   signeParPrestataire: boolean;
   dateSignature?: string;
@@ -27,7 +30,6 @@ interface Contrat {
   updatedAt: string;
   athlete?: Athlete;
   client: Client;
-  montant?: number;
 }
 
 const STATUT_META: Record<string, { label: string; bg: string; color: string }> = {
@@ -45,6 +47,15 @@ function avatarColor(id: string) {
 function initials(name: string) {
   const w = name.split(' ').filter(Boolean);
   return ((w[0] || '')[0] || '') + ((w[1] || '')[0] || '');
+}
+
+function fmtMonth(d: string | undefined): string {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
+}
+function periode(c: Contrat): string {
+  if (c.dateDebut || c.dateFin) return `${fmtMonth(c.dateDebut)} → ${fmtMonth(c.dateFin)}`;
+  return new Date(c.createdAt).getFullYear().toString();
 }
 
 const COL = '1.2fr 2fr 1.4fr 1.4fr 1fr 1.2fr';
@@ -218,7 +229,7 @@ export default function ContratsPage() {
                   </div>
                 </div>
                 <div style={{ fontSize: 13, color: '#334155' }}>{c.typeContrat}</div>
-                <div style={{ fontSize: 12, color: '#64748B' }}>{new Date(c.createdAt).getFullYear()}</div>
+                <div style={{ fontSize: 12, color: '#64748B' }}>{periode(c)}</div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: '#059669', fontFamily: 'monospace' }}>
                   {c.montant ? formatMontant(c.montant) : '—'}
                 </div>
@@ -268,7 +279,7 @@ export default function ContratsPage() {
                 selected.athlete ? { icon: 'sports',     label: 'Athlète', value: `${selected.athlete.prenom} ${selected.athlete.nom}` } : null,
                 { icon: 'apartment', label: 'Client',    value: selected.client.nom },
                 { icon: 'category',  label: 'Type',      value: selected.typeContrat },
-                { icon: 'calendar_today', label: 'Créé le', value: new Date(selected.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) },
+                { icon: 'date_range', label: 'Période', value: periode(selected) },
               ].filter(Boolean).map((info: any) => (
                 <div key={info.label} style={{ display: 'flex', alignItems: 'center', gap: 12, paddingBottom: 12, borderBottom: '1px solid #F1F5F9' }}>
                   <MI name={info.icon} size={18} style={{ color: '#94A3B8', flexShrink: 0 }} />

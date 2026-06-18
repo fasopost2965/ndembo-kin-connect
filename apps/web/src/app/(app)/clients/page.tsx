@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { clientsApi } from '@/lib/api';
 import { formatMontant } from '@/lib/utils';
 
@@ -81,6 +82,7 @@ function StatutBadge({ statut }: { statut: string }) {
 const TYPES = ['Club', 'Académie', 'Sponsor', 'Partenaire'];
 
 export default function ClientsPage() {
+  const router = useRouter();
   const [rows, setRows] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -392,11 +394,13 @@ export default function ClientsPage() {
             {/* Footer actions */}
             <div style={{ padding: '16px 22px', borderTop: '1px solid #E8ECF1', display: 'flex', flexDirection: 'column', gap: 8 }}>
               <button
+                onClick={() => { setDrawerOpen(false); router.push(`/clients/${detail.id}`); }}
                 style={{ width: '100%', padding: 12, background: '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                 <MI name="open_in_new" size={16} style={{ color: '#FCD116' }} />
                 Voir la fiche complète
               </button>
               <button
+                onClick={() => { setDrawerOpen(false); router.push(`/devis/nouveau?clientId=${detail.id}`); }}
                 style={{ width: '100%', padding: 11, background: '#F1F5F9', color: '#475569', fontSize: 13, fontWeight: 600, border: '1px solid #E2E8F0', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit' }}>
                 Créer un devis
               </button>
