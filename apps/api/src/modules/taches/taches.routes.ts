@@ -7,6 +7,19 @@ const COLONNES = ['TODO', 'EN_COURS', 'EN_ATTENTE', 'TERMINE'] as const;
 const PRIORITES = ['BASSE', 'NORMALE', 'HAUTE', 'URGENTE'] as const;
 
 export async function tacheRoutes(server: FastifyInstance) {
+  // GET /taches — list tasks (optionally filtered by project or assignee)
+  server.get('/', { preHandler: [can('projetsTaches', 'read')] }, async (req) => {
+    const { projetId, assigneeId } = req.query as { projetId?: string; assigneeId?: string };
+    return prisma.tache.findMany({
+      where: { ...(projetId && { projetId }), ...(assigneeId && { assigneeId }) },
+      orderBy: [{ colonne: 'asc' }, { position: 'asc' }],
+      include: {
+        assignee: { select: { id: true, name: true } },
+        projet: { select: { id: true, objet: true, numero: true } },
+      },
+    });
+  });
+
   // POST /taches — create a task in a project column
   server.post('/', { preHandler: [can('projetsTaches', 'write')] }, async (req, reply) => {
     const body = z.object({

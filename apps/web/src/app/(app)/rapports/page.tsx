@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { BarChart, Bar, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { rapportsApi } from '@/lib/api';
 
 function MI({ name, size = 16, color }: { name: string; size?: number; color?: string }) {
   return (
@@ -13,54 +15,66 @@ function MI({ name, size = 16, color }: { name: string; size?: number; color?: s
   );
 }
 
-const CA_DATA = [
-  { mois: 'Jan', val: 12 }, { mois: 'Fév', val: 15 }, { mois: 'Mar', val: 19 },
-  { mois: 'Avr', val: 14 }, { mois: 'Mai', val: 22 }, { mois: 'Juin', val: 26 },
-  { mois: 'Juil', val: 18 }, { mois: 'Aoû', val: 16 }, { mois: 'Sep', val: 21 },
-  { mois: 'Oct', val: 24 }, { mois: 'Nov', val: 0 }, { mois: 'Déc', val: 0 },
-];
-
-const FUNNEL = [
-  { label: 'Devis émis',      value: '47', pct: 100, color: '#7CC8E8' },
-  { label: 'Devis validés',   value: '34', pct: 72,  color: '#7CC8E8' },
-  { label: 'Factures payées', value: '30', pct: 64,  color: '#FCD116' },
-];
-
-const TOP_RAW = [
-  { nom: 'Théo Lukaku Mbemba',       val: 130000 },
-  { nom: 'Joël Mbuyi Kabongo',       val: 85000  },
-  { nom: 'Armel Diallo Nzinga',      val: 67000  },
-  { nom: 'Patricia Kabongo Ilunga',  val: 45000  },
-  { nom: 'Christian Pasi Makiadi',   val: 29000  },
-];
-
 const ATH_COLORS = ['#07101A', '#3A6B84', '#1D4ED8', '#059669', '#B45309'];
-
-const REP_RAW = [
-  { label: 'Clubs',       val: 118000, color: '#2563EB' },
-  { label: 'Sponsors',    val: 62000,  color: '#B45309' },
-  { label: 'Académies',   val: 22000,  color: '#6D28D9' },
-  { label: 'Partenaires', val: 12000,  color: '#0E7490' },
-];
+const REP_COLORS: Record<string, string> = {
+  Club: '#2563EB', Sponsor: '#B45309', Academie: '#6D28D9', Partenaire: '#0E7490', Autre: '#64748B',
+};
+const moisCourant = new Date().toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '');
 
 function fmtK(n: number) {
   return '$' + n.toLocaleString('fr-FR');
 }
-
+function fmtCompact(n: number) {
+  return n >= 1000 ? `$${Math.round(n / 1000)}k` : `$${n}`;
+}
 function initials(nom: string) {
   return nom.split(' ').slice(0, 2).map(w => w[0]).join('');
 }
 
-const trendStyle = (up: boolean): React.CSSProperties => ({
-  fontSize: 11, fontWeight: 700,
-  color: up ? '#059669' : '#BE123C',
-  background: up ? '#F0FDF4' : '#FFF1F2',
-  padding: '2px 7px', borderRadius: 6, display: 'inline-block',
-});
+interface Synthese {
+  annee: number;
+  kpis: { caRealise: number; devisEmis: number; athletesActifs: number; athletesTotal: number; delaiPaiementMoyen: number | null };
+  caParMois: { mois: string; val: number }[];
+  funnel: { devisEmis: number; devisValides: number; facturesPayees: number; tauxConversion: number };
+  topAthletes: { nom: string; val: number }[];
+  repartition: { label: string; val: number }[];
+}
 
 export default function RapportsPage() {
-  const topMax = TOP_RAW[0].val;
-  const repTotal = REP_RAW.reduce((a, r) => a + r.val, 0);
+  const [s, setS] = useState<Synthese | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    rapportsApi.synthese()
+      .then(({ data }) => setS(data))
+      .catch(() => setS(null))
+      .finally(() => setLoading(false));
+  }, []);
+
+  // CA mensuel en milliers de USD pour le graphe
+  const caData = (s?.caParMois ?? []).map(m => ({ mois: m.mois, val: Math.round(m.val / 1000) }));
+  const caTotalK = fmtCompact(s?.kpis.caRealise ?? 0);
+
+  const fEmis = s?.funnel.devisEmis ?? 0;
+  const fValides = s?.funnel.devisValides ?? 0;
+  const fPayees = s?.funnel.facturesPayees ?? 0;
+  const funnel = [
+    { label: 'Devis émis',      value: String(fEmis),    pct: 100,                                            color: '#7CC8E8' },
+    { label: 'Devis validés',   value: String(fValides), pct: fEmis ? Math.round((fValides / fEmis) * 100) : 0, color: '#7CC8E8' },
+    { label: 'Factures payées', value: String(fPayees),  pct: fEmis ? Math.round((fPayees / fEmis) * 100) : 0,  color: '#FCD116' },
+  ];
+
+  const topAthletes = s?.topAthletes ?? [];
+  const topMax = topAthletes[0]?.val || 1;
+  const repartition = s?.repartition ?? [];
+  const repTotal = repartition.reduce((a, r) => a + r.val, 0) || 1;
+
+  const kpiCards = [
+    { label: 'CA réalisé',          value: caTotalK,                                              color: '#0F172A', sub: `année ${s?.annee ?? ''}` },
+    { label: 'Devis émis',          value: String(s?.kpis.devisEmis ?? 0),                        color: '#3A6B84', sub: 'toutes périodes' },
+    { label: 'Athlètes actifs',     value: String(s?.kpis.athletesActifs ?? 0),                   color: '#059669', sub: `sur ${s?.kpis.athletesTotal ?? 0} au total` },
+    { label: 'Délai paiement moy.', value: s?.kpis.delaiPaiementMoyen != null ? `${s.kpis.delaiPaiementMoyen}j` : '—', color: '#B45309', sub: 'objectif : 30j' },
+  ];
 
   return (
     <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', minHeight: '100vh', background: '#F0F2F5', display: 'flex', flexDirection: 'column' }}>
@@ -70,8 +84,7 @@ export default function RapportsPage() {
         <span style={{ fontSize: 16, fontWeight: 800, color: '#0F172A', letterSpacing: '-0.3px', flex: 1 }}>Rapports &amp; KPIs</span>
         <div style={{ position: 'relative' }}>
           <select style={{ padding: '9px 32px 9px 12px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 13, fontFamily: 'inherit', color: '#0F172A', outline: 'none', background: '#F8FAFC', appearance: 'none', cursor: 'pointer' }}>
-            <option>Année 2026</option>
-            <option>Année 2025</option>
+            <option>Année {s?.annee ?? new Date().getFullYear()}</option>
           </select>
           <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'inline-flex' }}>
             <MI name="expand_more" size={15} color="#94A3B8" />
@@ -87,19 +100,15 @@ export default function RapportsPage() {
         </button>
       </div>
 
+      {loading ? (
+        <div style={{ padding: '80px 0', textAlign: 'center', color: '#94A3B8', fontSize: 14 }}>Chargement des rapports…</div>
+      ) : (
+      <>
       {/* KPI ROW */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, padding: '20px 28px 0' }}>
-        {[
-          { label: 'CA réalisé',         value: '$214k', color: '#0F172A', sub: 'année 2026',      trend: '+18%', up: true  },
-          { label: 'Devis émis',         value: '47',    color: '#3A6B84', sub: '12 ce mois',      trend: '+6',   up: true  },
-          { label: 'Athlètes actifs',    value: '32',    color: '#059669', sub: 'sur 38 au total', trend: '+3',   up: true  },
-          { label: 'Délai paiement moy.', value: '24j',  color: '#B45309', sub: 'objectif : 30j',  trend: '-4j',  up: true  },
-        ].map(k => (
+        {kpiCards.map(k => (
           <div key={k.label} style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 14, padding: '18px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1 }}>{k.label}</div>
-              <span style={trendStyle(k.up)}>{k.trend}</span>
-            </div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>{k.label}</div>
             <div style={{ fontSize: 26, fontWeight: 800, color: k.color, letterSpacing: '-0.5px' }}>{k.value}</div>
             <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 4 }}>{k.sub}</div>
           </div>
@@ -114,16 +123,16 @@ export default function RapportsPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
             <div>
               <div style={{ fontSize: 15, fontWeight: 800, color: '#0F172A' }}>Chiffre d'affaires mensuel</div>
-              <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 2 }}>En milliers de USD · 2026</div>
+              <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 2 }}>Encaissements en milliers de USD · {s?.annee}</div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 20, fontWeight: 800, color: '#059669', letterSpacing: '-0.4px', fontFamily: 'monospace' }}>$214k</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: '#059669', letterSpacing: '-0.4px', fontFamily: 'monospace' }}>{caTotalK}</div>
               <div style={{ fontSize: 11, color: '#94A3B8' }}>total YTD</div>
             </div>
           </div>
           <div style={{ height: 200 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={CA_DATA} barCategoryGap="20%" margin={{ top: 4, right: 0, left: -28, bottom: 0 }}>
+              <BarChart data={caData} barCategoryGap="20%" margin={{ top: 4, right: 0, left: -28, bottom: 0 }}>
                 <XAxis dataKey="mois" tick={{ fontSize: 10, fill: '#94A3B8', fontWeight: 600, fontFamily: 'Plus Jakarta Sans, sans-serif' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10, fill: '#94A3B8', fontFamily: 'Plus Jakarta Sans, sans-serif' }} axisLine={false} tickLine={false} />
                 <Tooltip
@@ -133,13 +142,13 @@ export default function RapportsPage() {
                   labelStyle={{ fontWeight: 700 }}
                 />
                 <Bar dataKey="val" radius={[5, 5, 2, 2]} maxBarSize={26}>
-                  {CA_DATA.map(entry => (
+                  {caData.map(entry => (
                     <Cell
                       key={entry.mois}
                       fill={
                         entry.val === 0
                           ? '#EEF1F4'
-                          : entry.mois === 'Juin'
+                          : entry.mois.toLowerCase() === moisCourant.toLowerCase()
                           ? 'url(#goldGrad)'
                           : 'url(#slateGrad)'
                       }
@@ -167,12 +176,12 @@ export default function RapportsPage() {
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>Devis → Facture</div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '18px 0' }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 56, fontWeight: 800, color: '#FCD116', letterSpacing: -2, lineHeight: 1 }}>64%</div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 8 }}>30 payées sur 47 devis</div>
+              <div style={{ fontSize: 56, fontWeight: 800, color: '#FCD116', letterSpacing: -2, lineHeight: 1 }}>{s?.funnel.tauxConversion ?? 0}%</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 8 }}>{fPayees} payées sur {fEmis} devis</div>
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {FUNNEL.map(f => (
+            {funnel.map(f => (
               <div key={f.label}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
                   <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>{f.label}</span>
@@ -193,8 +202,11 @@ export default function RapportsPage() {
         {/* TOP ATHLÈTES */}
         <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 16, padding: '22px 24px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div style={{ fontSize: 15, fontWeight: 800, color: '#0F172A', marginBottom: 18 }}>Top athlètes par valeur marchande</div>
+          {topAthletes.length === 0 ? (
+            <div style={{ fontSize: 13, color: '#94A3B8', padding: '20px 0', textAlign: 'center' }}>Aucune valeur marchande renseignée.</div>
+          ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {TOP_RAW.map((a, i) => (
+            {topAthletes.map((a, i) => (
               <div key={a.nom} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{ width: 36, height: 36, borderRadius: '50%', background: ATH_COLORS[i % ATH_COLORS.length], display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#FCD116', flexShrink: 0 }}>
                   {initials(a.nom)}
@@ -211,30 +223,39 @@ export default function RapportsPage() {
               </div>
             ))}
           </div>
+          )}
         </div>
 
         {/* RÉPARTITION CA */}
         <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 16, padding: '22px 24px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div style={{ fontSize: 15, fontWeight: 800, color: '#0F172A', marginBottom: 18 }}>Répartition du CA par type de client</div>
+          {repartition.length === 0 ? (
+            <div style={{ fontSize: 13, color: '#94A3B8', padding: '20px 0', textAlign: 'center' }}>Aucun encaissement enregistré.</div>
+          ) : (
+          <>
           {/* Segmented bar */}
           <div style={{ display: 'flex', height: 18, borderRadius: 6, overflow: 'hidden', marginBottom: 20 }}>
-            {REP_RAW.map(r => (
-              <div key={r.label} style={{ width: `${r.val / repTotal * 100}%`, background: r.color, height: '100%' }} />
+            {repartition.map(r => (
+              <div key={r.label} style={{ width: `${r.val / repTotal * 100}%`, background: REP_COLORS[r.label] ?? '#64748B', height: '100%' }} />
             ))}
           </div>
           {/* Legend */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {REP_RAW.map(r => (
+            {repartition.map(r => (
               <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 12, height: 12, borderRadius: 4, background: r.color, flexShrink: 0 }} />
+                <div style={{ width: 12, height: 12, borderRadius: 4, background: REP_COLORS[r.label] ?? '#64748B', flexShrink: 0 }} />
                 <span style={{ fontSize: 13, color: '#334155', fontWeight: 500, flex: 1 }}>{r.label}</span>
                 <span style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>{Math.round(r.val / repTotal * 100)}%</span>
                 <span style={{ fontSize: 12, color: '#94A3B8', fontFamily: 'monospace', width: 64, textAlign: 'right' }}>{fmtK(r.val)}</span>
               </div>
             ))}
           </div>
+          </>
+          )}
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }

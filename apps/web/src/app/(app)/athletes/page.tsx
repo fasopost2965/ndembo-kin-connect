@@ -46,6 +46,13 @@ const STATUT_META: Record<string, { label: string; bg: string; color: string }> 
   INACTIF:      { label: 'Inactif',      bg: '#F1F5F9', color: '#64748B' },
 };
 
+// Normalise les variantes de statut ('Actif', 'TRANSFERT', 'En transfert'…) vers une clé canonique
+function statutMeta(raw?: string) {
+  const k = (raw ?? '').toUpperCase().replace(/\s+/g, '_').replace(/É/g, 'E');
+  const key = k === 'TRANSFERT' ? 'EN_TRANSFERT' : k;
+  return STATUT_META[key] ?? STATUT_META['ACTIF'];
+}
+
 const AV_GRADIENTS = [
   'linear-gradient(135deg,#3A6B84,#7CC8E8)',
   'linear-gradient(135deg,#C9960C,#FCD116)',
@@ -312,7 +319,7 @@ export default function AthletesPage() {
                       </TableCell>
                       <TableCell>
                         {(() => {
-                          const s = STATUT_META[a.statut] ?? STATUT_META['ACTIF'];
+                          const s = statutMeta(a.statut);
                           return (
                             <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg" style={{ background: s.bg, color: s.color }}>
                               {s.label}

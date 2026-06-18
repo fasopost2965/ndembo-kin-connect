@@ -150,11 +150,33 @@ export const projetsApi = {
 // ── Tâches (Kanban) ─────────────────────────────────────────────────────────────
 export type Colonne = 'TODO' | 'EN_COURS' | 'EN_ATTENTE' | 'TERMINE';
 export const tachesApi = {
+  list: (params?: { projetId?: string; assigneeId?: string }) => api.get('/taches', { params }),
   create: (data: { projetId: string; titre: string; colonne?: Colonne; priorite?: string }) =>
     api.post('/taches', data),
   move: (id: string, data: { colonne: Colonne; position: number }) =>
     api.patch(`/taches/${id}/move`, data),
   remove: (id: string) => api.delete(`/taches/${id}`),
+};
+
+// ── Jalons ──────────────────────────────────────────────────────────────────────
+export const jalonsApi = {
+  list: (projetId?: string) => api.get('/jalons', { params: projetId ? { projetId } : {} }),
+  create: (data: { projetId: string; nom: string; datePrevis: string; statut?: string }) =>
+    api.post('/jalons', data),
+  update: (id: string, data: Record<string, unknown>) => api.patch(`/jalons/${id}`, data),
+  remove: (id: string) => api.delete(`/jalons/${id}`),
+};
+
+// ── Activités (journal CRM) ──────────────────────────────────────────────────────
+export const activitesApi = {
+  list: (params?: { clientId?: string; projetId?: string }) => api.get('/activites', { params }),
+  create: (data: Record<string, unknown>) => api.post('/activites', data),
+  remove: (id: string) => api.delete(`/activites/${id}`),
+};
+
+// ── Rapports & KPIs ──────────────────────────────────────────────────────────────
+export const rapportsApi = {
+  synthese: () => api.get('/rapports/synthese'),
 };
 
 // ── Contrats ──────────────────────────────────────────────────────────────────

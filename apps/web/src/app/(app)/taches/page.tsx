@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { tachesApi } from '@/lib/api';
 
 function MI({ name, size = 16, color }: { name: string; size?: number; color?: string }) {
   return (
@@ -30,34 +31,54 @@ const PRIO_META: Record<string, { bg: string; c: string }> = {
 
 const AVATAR_COLORS = ['#3A6B84', '#1D4ED8', '#059669', '#B45309', '#6D28D9'];
 
-const DATA: { id: number; titre: string; projet: string; assignee: string; priorite: string; echeance: string; statut: Statut }[] = [
-  { id: 1, titre: 'Préparer le dossier de transfert J. Mbala',   projet: 'Transfert TP Mazembe',  assignee: 'Jean-Pierre K.',  priorite: 'Haute',   echeance: 'Demain',      statut: 'EN_COURS'   },
-  { id: 2, titre: 'Signer le contrat de sponsoring MTN',         projet: 'Partenariat MTN RDC',   assignee: 'Amadou S.',       priorite: 'Haute',   echeance: '18 juin',     statut: 'EN_ATTENTE' },
-  { id: 3, titre: 'Organiser la séance photo officielle',        projet: 'Image AS Vita',         assignee: 'Marie-Claire N.', priorite: 'Moyenne', echeance: '22 juin',     statut: 'TODO'       },
-  { id: 4, titre: 'Valider le budget tournoi présaison',         projet: 'Tournoi présaison',     assignee: 'Esther B.',       priorite: 'Moyenne', echeance: '25 juin',     statut: 'EN_COURS'   },
-  { id: 5, titre: "Relancer facture FAC-2026-0038",              projet: 'Recouvrement',          assignee: 'Esther B.',       priorite: 'Haute',   echeance: "Aujourd'hui", statut: 'EN_COURS'   },
-  { id: 6, titre: 'Mettre à jour les fiches de 5 athlètes',     projet: 'Base de données',       assignee: 'Didier M.',       priorite: 'Basse',   echeance: '30 juin',     statut: 'TODO'       },
-  { id: 7, titre: 'Planifier la session de coaching tactique',   projet: 'Coaching AS Vita',      assignee: 'Didier M.',       priorite: 'Moyenne', echeance: '12 juin',     statut: 'TERMINE'    },
-  { id: 8, titre: 'Envoyer le devis DEV-2026-014',              projet: 'Pipeline AS Vita',      assignee: 'Marie-Claire N.', priorite: 'Basse',   echeance: '10 juin',     statut: 'TERMINE'    },
-];
+interface Tache { id: string; titre: string; projet: string; assignee: string; priorite: string; echeance: string; statut: Statut }
+
+// Mapping priorité enum API → libellé d'affichage (et filtre)
+const PRIO_LABEL: Record<string, string> = {
+  URGENTE: 'Haute', HAUTE: 'Haute', NORMALE: 'Moyenne', BASSE: 'Basse',
+};
 
 const HEADERS = ['Tâche', 'Assigné à', 'Priorité', 'Échéance', 'Statut'];
 
 function initials(name: string) {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('');
 }
+function fmtEcheance(d?: string | null) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+}
 
 export default function TachesPage() {
   const [search, setSearch]           = useState('');
   const [filterPrio, setFilterPrio]   = useState('');
+  const [data, setData] = useState<Tache[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = DATA.filter(t => {
+  useEffect(() => {
+    tachesApi.list()
+      .then(({ data }) => {
+        const rows: Tache[] = (data || []).map((t: any) => ({
+          id: t.id,
+          titre: t.titre,
+          projet: t.projet?.objet ?? '—',
+          assignee: t.assignee?.name ?? 'Non assigné',
+          priorite: PRIO_LABEL[t.priorite] ?? 'Moyenne',
+          echeance: fmtEcheance(t.dateEcheance),
+          statut: (t.colonne as Statut) ?? 'TODO',
+        }));
+        setData(rows);
+      })
+      .catch(() => setData([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = data.filter(t => {
     const q = search.toLowerCase();
     return (!q || t.titre.toLowerCase().includes(q) || t.projet.toLowerCase().includes(q))
       && (!filterPrio || t.priorite === filterPrio);
   });
 
-  const cnt = (s: Statut) => DATA.filter(t => t.statut === s).length;
+  const cnt = (s: Statut) => data.filter(t => t.statut === s).length;
   const stats = [
     { label: 'À faire',    value: cnt('TODO'),       dot: '#94A3B8' },
     { label: 'En cours',   value: cnt('EN_COURS'),   dot: '#2563EB' },
@@ -72,7 +93,7 @@ export default function TachesPage() {
       <div style={{ background: '#fff', borderBottom: '1px solid #E8ECF1', padding: '0 28px', display: 'flex', alignItems: 'center', height: 60, gap: 16, flexShrink: 0 }}>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 16, fontWeight: 800, color: '#0F172A', letterSpacing: '-0.3px' }}>Tâches</span>
-          <span style={{ fontSize: 12, fontWeight: 700, background: '#07101A', color: '#FCD116', padding: '2px 9px', borderRadius: 20 }}>{DATA.length}</span>
+          <span style={{ fontSize: 12, fontWeight: 700, background: '#07101A', color: '#FCD116', padding: '2px 9px', borderRadius: 20 }}>{data.length}</span>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <div style={{ position: 'relative' }}>
@@ -138,11 +159,13 @@ export default function TachesPage() {
             ))}
           </div>
           {/* Rows */}
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div style={{ padding: '56px 20px', textAlign: 'center', color: '#94A3B8', fontSize: 13 }}>Chargement…</div>
+          ) : filtered.length === 0 ? (
             <div style={{ padding: '56px 20px', textAlign: 'center' }}>
               <MI name="search_off" size={42} color="#CBD5E1" />
               <div style={{ fontSize: 14, fontWeight: 700, color: '#334155', marginTop: 10 }}>Aucune tâche trouvée</div>
-              <div style={{ fontSize: 13, color: '#94A3B8', marginTop: 4 }}>Essayez d'ajuster la recherche ou le filtre de priorité.</div>
+              <div style={{ fontSize: 13, color: '#94A3B8', marginTop: 4 }}>Les tâches des projets apparaîtront ici.</div>
             </div>
           ) : (
             filtered.map((t, i) => {

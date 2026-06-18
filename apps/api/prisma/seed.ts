@@ -305,6 +305,53 @@ async function main() {
     });
   }
 
+  // ── Jalons du projet ───────────────────────────────────────────────────────
+  const jalons: { id: string; nom: string; datePrevis: string; dateReelle?: string; statut: string }[] = [
+    { id: 'jalon-001', nom: 'Initialisation & cadrage du mandat', datePrevis: '2026-06-02', dateReelle: '2026-06-02', statut: 'termine' },
+    { id: 'jalon-002', nom: 'Dossier médical et administratif complet', datePrevis: '2026-06-12', dateReelle: '2026-06-14', statut: 'termine' },
+    { id: 'jalon-003', nom: 'Négociation des termes avec le club', datePrevis: '2026-06-22', statut: 'en_cours' },
+    { id: 'jalon-004', nom: 'Signature du contrat définitif', datePrevis: '2026-06-30', statut: 'planifie' },
+  ];
+  for (const j of jalons) {
+    await prisma.jalon.upsert({
+      where: { id: j.id },
+      update: {},
+      create: {
+        id: j.id,
+        projetId: projet.id,
+        nom: j.nom,
+        datePrevis: new Date(j.datePrevis),
+        statut: j.statut,
+        ...(j.dateReelle && { dateReelle: new Date(j.dateReelle) }),
+      },
+    });
+  }
+
+  // ── Activités (journal CRM) ────────────────────────────────────────────────
+  const activites: { id: string; clientIdx: number; userId: string; type: string; date: string; statut: string; resultat?: string }[] = [
+    { id: 'acti-001', clientIdx: 0, userId: admin.id,   type: 'RENCONTRE', date: '2026-06-17T10:00:00Z', statut: 'REALISE', resultat: 'Réunion de suivi du mandat de gestion — points contractuels validés.' },
+    { id: 'acti-002', clientIdx: 1, userId: manager.id, type: 'APPEL',     date: '2026-06-16T14:30:00Z', statut: 'REALISE', resultat: 'Appel de relance facture FACT-2026-001 — règlement promis sous 7 jours.' },
+    { id: 'acti-003', clientIdx: 2, userId: manager.id, type: 'EMAIL',     date: '2026-06-15T09:15:00Z', statut: 'REALISE', resultat: 'Envoi de la proposition de partenariat sponsoring saison 2026.' },
+    { id: 'acti-004', clientIdx: 0, userId: admin.id,   type: 'APPEL',     date: '2026-06-14T16:45:00Z', statut: 'REALISE', resultat: 'Confirmation de la date du camp de préparation de juin.' },
+    { id: 'acti-005', clientIdx: 3, userId: manager.id, type: 'RENCONTRE', date: '2026-06-12T11:00:00Z', statut: 'REALISE', resultat: 'Première rencontre — présentation des services de l’agence.' },
+    { id: 'acti-006', clientIdx: 4, userId: admin.id,   type: 'EMAIL',     date: '2026-06-10T08:30:00Z', statut: 'REALISE', resultat: 'Relance commerciale après envoi du devis DEV-2026-003.' },
+  ];
+  for (const a of activites) {
+    await prisma.activite.upsert({
+      where: { id: a.id },
+      update: {},
+      create: {
+        id: a.id,
+        clientId: clients[a.clientIdx].id,
+        userId: a.userId,
+        type: a.type,
+        dateActivite: new Date(a.date),
+        statut: a.statut,
+        ...(a.resultat && { resultat: a.resultat }),
+      },
+    });
+  }
+
   console.log('✅ Seed terminé avec succès');
   console.log('');
   console.log('Comptes créés :');

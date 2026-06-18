@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import './types/augmentations';
 import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import { ZodError } from 'zod';
@@ -15,6 +16,9 @@ import { reglementRoutes } from './modules/reglements/reglements.routes';
 import { prestationRoutes } from './modules/prestations/prestations.routes';
 import { projetRoutes } from './modules/projets/projets.routes';
 import { tacheRoutes } from './modules/taches/taches.routes';
+import { jalonRoutes } from './modules/jalons/jalons.routes';
+import { activiteRoutes } from './modules/activites/activites.routes';
+import { rapportRoutes } from './modules/rapports/rapports.routes';
 import { webhookRoutes } from './modules/webhooks/webhooks.routes';
 import { contratRoutes } from './modules/contrats/contrats.routes';
 import { settingsRoutes } from './modules/settings/settings.routes';
@@ -91,6 +95,9 @@ async function main() {
   await server.register(prestationRoutes, { prefix: '/prestations' });
   await server.register(projetRoutes, { prefix: '/projets' });
   await server.register(tacheRoutes, { prefix: '/taches' });
+  await server.register(jalonRoutes, { prefix: '/jalons' });
+  await server.register(activiteRoutes, { prefix: '/activites' });
+  await server.register(rapportRoutes, { prefix: '/rapports' });
   await server.register(webhookRoutes, { prefix: '/webhooks' });
   await server.register(contratRoutes, { prefix: '/contrats' });
   await server.register(settingsRoutes, { prefix: '/settings' });

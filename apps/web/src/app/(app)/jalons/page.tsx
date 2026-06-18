@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { jalonsApi } from '@/lib/api';
 
 function MI({ name, size = 16, color }: { name: string; size?: number; color?: string }) {
   return (
@@ -27,41 +28,51 @@ const PROJECT_META: Record<string, { icon: string; color: string; bg: string }> 
   'Partenariat MTN RDC':       { icon: 'handshake',     color: '#059669', bg: '#F0FDF4' },
 };
 
-const DATA = [
-  {
-    nom: 'Transfert J. Mbala', client: 'TP Mazembe',
-    jalons: [
-      { titre: 'Accord de principe signé',          date: '2 mai 2026',                   statut: 'ATTEINT'  as JalonStatut },
-      { titre: 'Visite médicale validée',           date: '18 mai 2026',                  statut: 'ATTEINT'  as JalonStatut },
-      { titre: 'Négociation des termes financiers', date: 'En cours · échéance 20 juin',  statut: 'EN_COURS' as JalonStatut },
-      { titre: 'Signature du contrat définitif',   date: 'Prévu 30 juin',                statut: 'A_VENIR'  as JalonStatut },
-    ],
-  },
-  {
-    nom: 'Tournoi présaison AS Vita', client: 'AS Vita Club',
-    jalons: [
-      { titre: 'Budget validé',                       date: '10 mai 2026',                  statut: 'ATTEINT'  as JalonStatut },
-      { titre: 'Réservation du stade',                date: 'En cours · échéance 22 juin',  statut: 'EN_COURS' as JalonStatut },
-      { titre: 'Confirmation des équipes invitées',   date: 'Prévu 28 juin',                statut: 'A_VENIR'  as JalonStatut },
-      { titre: 'Couverture média & sponsors',         date: 'Prévu 5 juil.',                statut: 'A_VENIR'  as JalonStatut },
-    ],
-  },
-  {
-    nom: 'Partenariat MTN RDC', client: 'MTN RDC',
-    jalons: [
-      { titre: 'Proposition commerciale envoyée',   date: '1 juin 2026',   statut: 'ATTEINT' as JalonStatut },
-      { titre: 'Devis validé par le sponsor',       date: '10 juin 2026',  statut: 'ATTEINT' as JalonStatut },
-      { titre: 'Signature du contrat de sponsoring', date: 'Prévu 18 juin', statut: 'A_VENIR' as JalonStatut },
-    ],
-  },
-];
+interface JalonItem { titre: string; date: string; statut: JalonStatut }
+interface ProjetJalons { nom: string; client: string; jalons: JalonItem[] }
 
-const totalCount = DATA.reduce((a, p) => a + p.jalons.length, 0);
+// Mapping statut API (planifie|en_cours|termine|retard) → statut d'affichage
+const STATUT_MAP: Record<string, JalonStatut> = {
+  termine: 'ATTEINT', en_cours: 'EN_COURS', retard: 'EN_COURS', planifie: 'A_VENIR',
+};
+
+function fmtJalonDate(j: any): string {
+  const d = j.statut === 'termine' && j.dateReelle ? j.dateReelle : j.datePrevis;
+  const label = new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+  if (j.statut === 'termine') return label;
+  if (j.statut === 'en_cours') return `En cours · échéance ${new Date(j.datePrevis).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`;
+  return `Prévu ${new Date(j.datePrevis).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`;
+}
 
 export default function JalonsPage() {
   const [filterProjet, setFilterProjet] = useState('');
+  const [data, setData] = useState<ProjetJalons[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = filterProjet ? DATA.filter(p => p.nom === filterProjet) : DATA;
+  useEffect(() => {
+    jalonsApi.list()
+      .then(({ data }) => {
+        // Regroupe les jalons plats par projet
+        const groups = new Map<string, ProjetJalons>();
+        for (const j of (data || []) as any[]) {
+          const nom = j.projet?.objet ?? '—';
+          if (!groups.has(nom)) {
+            groups.set(nom, { nom, client: j.projet?.client?.nom ?? '—', jalons: [] });
+          }
+          groups.get(nom)!.jalons.push({
+            titre: j.nom,
+            date: fmtJalonDate(j),
+            statut: STATUT_MAP[j.statut] ?? 'A_VENIR',
+          });
+        }
+        setData([...groups.values()]);
+      })
+      .catch(() => setData([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const totalCount = data.reduce((a, p) => a + p.jalons.length, 0);
+  const filtered = filterProjet ? data.filter(p => p.nom === filterProjet) : data;
 
   return (
     <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', minHeight: '100vh', background: '#F0F2F5', display: 'flex', flexDirection: 'column' }}>
@@ -80,7 +91,7 @@ export default function JalonsPage() {
               style={{ padding: '9px 32px 9px 12px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 13, fontFamily: 'inherit', color: '#0F172A', outline: 'none', background: '#F8FAFC', appearance: 'none', cursor: 'pointer', minWidth: 200 }}
             >
               <option value="">Tous les projets</option>
-              {DATA.map(p => <option key={p.nom} value={p.nom}>{p.nom}</option>)}
+              {data.map(p => <option key={p.nom} value={p.nom}>{p.nom}</option>)}
             </select>
             <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'inline-flex' }}>
               <MI name="expand_more" size={15} color="#94A3B8" />
@@ -99,7 +110,15 @@ export default function JalonsPage() {
 
       {/* PROJECTS */}
       <div style={{ padding: '22px 28px 32px', display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-        {filtered.map(p => {
+        {loading ? (
+          <div style={{ padding: '56px 20px', textAlign: 'center', color: '#94A3B8', fontSize: 13, background: '#fff', border: '1px solid #E2E8F0', borderRadius: 16 }}>Chargement…</div>
+        ) : filtered.length === 0 ? (
+          <div style={{ padding: '56px 20px', textAlign: 'center', background: '#fff', border: '1px solid #E2E8F0', borderRadius: 16 }}>
+            <MI name="flag" size={42} color="#CBD5E1" />
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#334155', marginTop: 10 }}>Aucun jalon</div>
+            <div style={{ fontSize: 13, color: '#94A3B8', marginTop: 4 }}>Les jalons des projets apparaîtront ici.</div>
+          </div>
+        ) : filtered.map(p => {
           const meta = PROJECT_META[p.nom] ?? { icon: 'flag', color: '#3A6B84', bg: '#EFF6FF' };
           const done = p.jalons.filter(j => j.statut === 'ATTEINT').length;
           const pct = Math.round(done / p.jalons.length * 100);
