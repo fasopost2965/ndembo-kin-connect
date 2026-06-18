@@ -1,11 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
 import { authApi } from '@/lib/api';
 
 export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F0F2F5]" />}>
+      <ResetPasswordView />
+    </Suspense>
+  );
+}
+
+function ResetPasswordView() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');

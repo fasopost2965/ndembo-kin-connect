@@ -3,43 +3,69 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard, Users, UserCheck, FileText,
-  Receipt, FolderKanban, ScrollText, Activity, BarChart3,
-  Settings, LogOut, Menu, X,
-} from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
-const NAV = [
+// ── Navigation groups (design: Dashboard.dc.html) ──
+const NAV_GROUPS = [
   {
-    group: 'Principal',
+    label: 'PRINCIPAL',
     items: [
-      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'Athlètes', href: '/athletes', icon: UserCheck },
-      { label: 'Clients', href: '/clients', icon: Users },
+      { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
+      { label: 'Athlètes',  href: '/athletes',  icon: 'directions_run', badge: '45' },
+      { label: 'Clients',   href: '/clients',   icon: 'business',       badge: '28' },
     ],
   },
   {
-    group: 'Commercial',
+    label: 'COMMERCIAL',
     items: [
-      { label: 'Devis', href: '/devis', icon: FileText },
-      { label: 'Factures', href: '/factures', icon: Receipt },
+      { label: 'Prestations', href: '/prestations', icon: 'category' },
+      { label: 'Devis',       href: '/devis',       icon: 'request_quote', badge: '12' },
+      { label: 'Factures',    href: '/factures',    icon: 'receipt_long' },
+      { label: 'Règlements',  href: '/reglements',  icon: 'payments' },
     ],
   },
   {
-    group: 'Opérations',
+    label: 'OPÉRATIONS',
     items: [
-      { label: 'Projets', href: '/projets', icon: FolderKanban },
-      { label: 'Contrats', href: '/contrats', icon: ScrollText },
+      { label: 'Projets',  href: '/projets',  icon: 'work',     badge: '8' },
+      { label: 'Tâches',   href: '/taches',   icon: 'task_alt' },
+      { label: 'Jalons',   href: '/jalons',   icon: 'flag' },
+      { label: 'Contrats', href: '/contrats', icon: 'gavel' },
     ],
   },
   {
-    group: 'Suivi',
+    label: 'SUIVI',
     items: [
-      { label: 'Activités', href: '/activites', icon: Activity },
-      { label: 'Rapports', href: '/rapports', icon: BarChart3 },
+      { label: 'Activités', href: '/activites', icon: 'history' },
+      { label: 'Rapports',  href: '/rapports',  icon: 'bar_chart' },
     ],
   },
 ];
+
+// Icône Material Icons Outlined inline
+function MI({ name, size = 18, className = '' }: { name: string; size?: number; className?: string }) {
+  return (
+    <span
+      className={`material-icons-outlined select-none leading-none ${className}`}
+      style={{ fontSize: size, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+    >
+      {name}
+    </span>
+  );
+}
+
+function getUserFromStorage(): { name: string; email: string; initials: string } {
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+    if (raw) {
+      const u = JSON.parse(raw);
+      const name = u.name || u.email?.split('@')[0] || 'Administrateur';
+      const initials = name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
+      return { name, email: u.email || 'admin@ndembokin.cd', initials };
+    }
+  } catch {}
+  return { name: 'Administrateur', email: 'admin@ndembokin.cd', initials: 'AD' };
+}
 
 function handleLogout() {
   localStorage.removeItem('access_token');
@@ -47,53 +73,99 @@ function handleLogout() {
   window.location.href = '/login';
 }
 
-/** Shared nav body (links + footer), reused by the desktop sidebar and the
- *  mobile drawer. `onNavigate` lets the drawer close on selection. */
+/** Lien de navigation — actif ou inactif */
+function NavLink({
+  href, icon, label, badge, active, onClick,
+}: {
+  href: string; icon: string; label: string; badge?: string;
+  active: boolean; onClick?: () => void;
+}) {
+  const base = 'flex items-center gap-2.5 px-2.5 py-2 rounded-[9px] mb-0.5 cursor-pointer transition-colors text-[13px] font-medium';
+  const activeStyle = 'bg-[rgba(252,209,22,0.08)] text-[#FCD116] font-semibold border-l-2 border-[#DAA520] pl-[9px]';
+  const inactiveStyle = 'text-[rgba(255,255,255,0.45)] hover:bg-[rgba(255,255,255,0.04)] hover:text-[rgba(255,255,255,0.7)]';
+
+  return (
+    <Link href={href} onClick={onClick} className={`${base} ${active ? activeStyle : inactiveStyle}`}>
+      <MI
+        name={icon}
+        size={18}
+        className={active ? 'text-[#FCD116]' : 'text-[rgba(255,255,255,0.3)]'}
+      />
+      <span className="flex-1">{label}</span>
+      {badge && (
+        <span className="text-[10px] font-bold bg-[rgba(252,209,22,0.12)] text-[rgba(252,209,22,0.7)] px-1.5 py-0.5 rounded-lg">
+          {badge}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+/** Corps de la navigation (partagé sidebar desktop + drawer mobile) */
 function NavBody({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
-  const linkCls = (active: boolean) =>
-    `flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-      active ? 'bg-[#DAA520]/15 text-[#DAA520]' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-    }`;
+  const user = getUserFromStorage();
+
+  const isActive = (href: string) =>
+    pathname === href || (href !== '/dashboard' && pathname.startsWith(href + '/'));
 
   return (
     <>
-      <nav className="flex-1 py-4 px-2 space-y-6 overflow-y-auto">
-        {NAV.map((section) => (
-          <div key={section.group}>
-            <div className="text-slate-600 text-[10px] font-bold uppercase tracking-widest px-2 mb-2">
-              {section.group}
+      {/* Nav groups */}
+      <nav className="flex-1 px-2.5 py-3.5 overflow-y-auto dark-scroll space-y-5">
+        {NAV_GROUPS.map((group) => (
+          <div key={group.label}>
+            <div className="text-[9px] font-bold text-[rgba(255,255,255,0.2)] tracking-[2px] uppercase px-2.5 mb-1">
+              {group.label}
             </div>
-            <div className="space-y-0.5">
-              {section.items.map((item) => {
-                const active = pathname === item.href || pathname.startsWith(item.href + '/');
-                const Icon = item.icon;
-                return (
-                  <Link key={item.href} href={item.href} onClick={onNavigate} className={linkCls(active)}>
-                    <Icon size={16} strokeWidth={active ? 2.5 : 2} />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
+            {group.items.map((item) => (
+              <NavLink
+                key={item.href}
+                href={item.href}
+                icon={item.icon}
+                label={item.label}
+                badge={item.badge}
+                active={isActive(item.href)}
+                onClick={onNavigate}
+              />
+            ))}
           </div>
         ))}
       </nav>
 
-      <div className="p-2 border-t border-white/5 space-y-0.5">
-        <Link
+      {/* Paramètres */}
+      <div className="px-2.5 pb-1.5">
+        <div className="h-px bg-[rgba(252,209,22,0.07)] mx-2 mb-2" />
+        <NavLink
           href="/parametres"
+          icon="settings"
+          label="Paramètres"
+          active={pathname.startsWith('/parametres')}
           onClick={onNavigate}
-          className={linkCls(pathname.startsWith('/parametres'))}
-        >
-          <Settings size={16} /> Paramètres
-        </Link>
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:text-red-400 hover:bg-red-500/5 transition-colors"
-        >
-          <LogOut size={16} /> Déconnexion
-        </button>
+        />
+      </div>
+
+      {/* Profil utilisateur */}
+      <div className="px-4 py-3 border-t border-[rgba(252,209,22,0.07)]">
+        <div className="flex items-center gap-2.5">
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black text-[#07101A] shrink-0"
+            style={{ background: 'linear-gradient(135deg,#DAA520,#FCD116)' }}
+          >
+            {user.initials}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[12px] font-semibold text-[rgba(255,255,255,0.7)] truncate">{user.name}</div>
+            <div className="text-[10px] text-[rgba(255,255,255,0.25)] truncate">{user.email}</div>
+          </div>
+          <button
+            onClick={handleLogout}
+            title="Déconnexion"
+            className="flex items-center justify-center w-6 h-6 rounded-md hover:bg-[rgba(255,255,255,0.08)] transition-colors"
+          >
+            <MI name="logout" size={14} className="text-[rgba(255,255,255,0.2)] hover:text-[rgba(255,255,255,0.5)]" />
+          </button>
+        </div>
       </div>
     </>
   );
@@ -102,37 +174,55 @@ function NavBody({ onNavigate }: { onNavigate?: () => void }) {
 function Brand() {
   return (
     <div className="flex items-center gap-3">
-      <div className="bg-white rounded-xl p-1.5">
-        <img src="/logo.png" alt="NKC" className="h-8 w-auto" />
+      <div className="bg-white rounded-[10px] px-1.5 py-1 flex items-center justify-center shrink-0">
+        <img src="/logo.png" alt="NKC" className="h-7 w-auto" />
       </div>
       <div>
-        <div className="text-white font-bold text-xs leading-tight">Ndembo Kin</div>
-        <div className="text-[#DAA520] text-[10px] font-semibold">Connect CRM</div>
+        <div className="text-white font-extrabold text-[14px] leading-tight tracking-[-0.2px]">Ndembo Kin</div>
+        <div
+          className="text-[9px] font-bold tracking-[1.5px] uppercase mt-0.5"
+          style={{ color: 'rgba(252,209,22,0.5)' }}
+        >
+          CONNECT SARL
+        </div>
       </div>
     </div>
   );
 }
 
-/** Desktop sidebar — hidden below md. */
+/** Sidebar desktop — masquée en dessous de md */
 export function Sidebar() {
   return (
-    <aside className="hidden md:flex w-[195px] min-h-screen bg-[#0F172A] flex-col border-r border-white/5 shrink-0">
-      <div className="p-4 border-b border-white/5"><Brand /></div>
+    <aside
+      className="hidden md:flex flex-col shrink-0"
+      style={{
+        width: 252,
+        minHeight: '100vh',
+        background: '#07101A',
+        borderRight: '1px solid rgba(252,209,22,0.08)',
+      }}
+    >
+      <div className="px-4 py-5" style={{ borderBottom: '1px solid rgba(252,209,22,0.07)' }}>
+        <Brand />
+      </div>
       <NavBody />
     </aside>
   );
 }
 
-/** Mobile top bar with a burger that opens a left slide-over drawer. */
+/** Mobile — barre du haut + drawer slide-over */
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <header className="md:hidden sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-white/5 bg-[#0F172A] px-3">
+      <header
+        className="md:hidden sticky top-0 z-30 flex h-14 items-center gap-3 px-3"
+        style={{ background: '#07101A', borderBottom: '1px solid rgba(252,209,22,0.08)' }}
+      >
         <button
           onClick={() => setOpen(true)}
           aria-label="Ouvrir le menu"
-          className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-300 hover:bg-white/10"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-300 hover:bg-white/10"
         >
           <Menu size={22} />
         </button>
@@ -142,15 +232,20 @@ export function MobileNav() {
       {open && (
         <div className="md:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0 flex w-64 flex-col bg-[#0F172A] shadow-xl">
-            <div className="flex items-center justify-between border-b border-white/5 p-4">
+          <div
+            className="absolute inset-y-0 left-0 flex flex-col shadow-xl"
+            style={{ width: 252, background: '#07101A' }}
+          >
+            <div
+              className="flex items-center justify-between px-4 py-5"
+              style={{ borderBottom: '1px solid rgba(252,209,22,0.07)' }}
+            >
               <Brand />
               <button
                 onClick={() => setOpen(false)}
-                aria-label="Fermer le menu"
-                className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
             <NavBody onNavigate={() => setOpen(false)} />

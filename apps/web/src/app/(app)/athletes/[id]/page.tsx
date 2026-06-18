@@ -2,39 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Phone, Mail, MapPin, FileSignature, Trash2, Pencil } from 'lucide-react';
+import Link from 'next/link';
 import { athletesApi } from '@/lib/api';
-import { initials, cn } from '@/lib/utils';
+import { initials, formatValeur } from '@/lib/utils';
+import { Badge, niveauBadge } from '@/components/ui/badge';
 
-interface Athlete {
-  id: string;
-  nom: string;
-  prenom: string;
-  sport: string;
-  poste: string;
-  niveau: string;
-  status: string;
-  valeurMarchande: number;
-  email: string;
-  telephone: string;
-  ville: string;
-  age?: number;
-  contrats?: number;
-  projets?: number;
+function MI({ name, size = 16, style }: { name: string; size?: number; style?: React.CSSProperties }) {
+  return (
+    <span
+      className="material-icons-outlined select-none leading-none"
+      style={{ fontSize: size, display: 'inline-flex', alignItems: 'center', ...style }}
+    >
+      {name}
+    </span>
+  );
 }
-
-const NIVEAU_COLORS: Record<string, string> = {
-  PRO: 'bg-emerald-100 text-emerald-700',
-  SEMI_PRO: 'bg-blue-100 text-blue-700',
-  AMATEUR: 'bg-amber-100 text-amber-700',
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  ACTIF: 'bg-[#FCD116] text-[#07101A]',
-  INACTIF: 'bg-slate-200 text-slate-600',
-  TRANSFERT: 'bg-orange-100 text-orange-700',
-  BLESSE: 'bg-red-100 text-red-700',
-};
 
 const AV_GRADIENTS = [
   'linear-gradient(135deg,#3A6B84,#7CC8E8)',
@@ -43,10 +25,23 @@ const AV_GRADIENTS = [
   'linear-gradient(135deg,#0D9668,#10B981)',
   'linear-gradient(135deg,#6D28D9,#A78BFA)',
 ];
-
 function gradientFor(id: string) {
   const n = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
   return AV_GRADIENTS[n % AV_GRADIENTS.length];
+}
+
+const TABS = [
+  { id: 'carriere', label: 'Carrière' },
+  { id: 'contrats', label: 'Contrats' },
+  { id: 'activites', label: 'Activités' },
+  { id: 'notes', label: 'Notes' },
+];
+
+interface Athlete {
+  id: string; nom: string; prenom: string; sport: string; poste: string;
+  niveau: string; valeurMarchande: number; email?: string; telephone?: string;
+  nationalite?: string; clubActuel?: string; priorityScouting?: string;
+  dateNaissance?: string;
 }
 
 export default function AthleteDetailPage() {
@@ -56,7 +51,7 @@ export default function AthleteDetailPage() {
 
   const [athlete, setAthlete] = useState<Athlete | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('carriere');
+  const [tab, setTab] = useState('carriere');
 
   useEffect(() => {
     if (!id) return;
@@ -68,186 +63,252 @@ export default function AthleteDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin">⏳</div>
+      <div className="flex items-center justify-center min-h-screen" style={{ background: '#F0F2F5' }}>
+        <div className="w-8 h-8 rounded-full border-2 border-[#07101A] border-t-[#FCD116]"
+          style={{ animation: 'spin 0.7s linear infinite' }} />
       </div>
     );
   }
 
-  if (!athlete) {
-    return (
-      <div className="p-6 text-center">
-        <p className="text-slate-600">Athlète non trouvé</p>
-      </div>
-    );
-  }
+  if (!athlete) return null;
+
+  const nb = niveauBadge(athlete.niveau);
 
   return (
-    <div className="p-6 lg:p-8">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <button
-          onClick={() => router.back()}
-          className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-slate-600" />
-        </button>
-        <div className="flex-1">
-          <div className="text-sm text-slate-600 mb-1">Athlètes</div>
-          <h1 className="text-2xl font-bold text-[#07101A]">
+    <div className="flex flex-col min-h-screen" style={{ background: '#F0F2F5' }}>
+
+      {/* ── Breadcrumb topbar ── */}
+      <div
+        className="flex items-center justify-between px-6 shrink-0"
+        style={{ background: '#fff', borderBottom: '1px solid #E8ECF1', height: 60 }}
+      >
+        <div className="flex items-center gap-2 text-[13px]">
+          <Link href="/athletes" className="hover:underline" style={{ color: '#64748B' }}>
+            Athlètes
+          </Link>
+          <MI name="chevron_right" size={14} style={{ color: '#CBD5E1' }} />
+          <span className="font-semibold" style={{ color: '#0F172A' }}>
             {athlete.prenom} {athlete.nom}
-          </h1>
+          </span>
         </div>
-        <div className="flex gap-2">
-          <button className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium flex items-center gap-2 transition-colors">
-            <Pencil className="w-4 h-4" />
+        <div className="flex items-center gap-2">
+          <Link
+            href="/athletes"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-[9px] text-[13px] font-semibold transition-colors"
+            style={{ background: '#F1F5F9', border: '1px solid #E2E8F0', color: '#334155' }}
+          >
+            <MI name="arrow_back" size={14} style={{ color: '#64748B' }} />
+            Retour
+          </Link>
+          <button
+            className="flex items-center gap-1.5 px-4 py-2 rounded-[9px] text-[13px] font-bold"
+            style={{ background: '#07101A', color: '#FCD116', border: 'none', cursor: 'pointer' }}
+          >
+            <MI name="edit" size={14} style={{ color: '#FCD116' }} />
             Modifier
-          </button>
-          <button className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg font-medium flex items-center gap-2 transition-colors">
-            <Trash2 className="w-4 h-4" />
-            Supprimer
           </button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column - Profile Card */}
-        <div className="lg:col-span-1">
-          {/* Avatar Card */}
+      {/* ── 2-col grid ── */}
+      <div className="flex gap-5 p-6 flex-1">
+
+        {/* Left card — dark, 300px */}
+        <div
+          className="flex flex-col shrink-0 rounded-2xl overflow-hidden"
+          style={{ width: 300, background: '#07101A' }}
+        >
+          {/* Avatar section */}
           <div
-            className="rounded-3xl p-12 text-white text-center mb-6"
-            style={{ background: gradientFor(athlete.id) }}
+            className="flex flex-col items-center py-8 px-4 text-center"
+            style={{ borderBottom: '1px solid rgba(252,209,22,0.08)' }}
           >
-            <div className="w-32 h-32 rounded-full bg-[#FCD116] text-[#07101A] font-bold text-4xl flex items-center justify-center mx-auto mb-6">
-              {initials(`${athlete.prenom} ${athlete.nom}`)}
+            <div
+              className="flex items-center justify-center rounded-full text-white font-black mb-3.5"
+              style={{
+                width: 72, height: 72, fontSize: 24,
+                background: gradientFor(athlete.id),
+              }}
+            >
+              {initials(athlete.prenom, athlete.nom)}
             </div>
-            <h2 className="text-2xl font-bold mb-1">
+            <div className="text-[16px] font-extrabold text-white mb-0.5">
               {athlete.prenom} {athlete.nom}
-            </h2>
-            <p className="text-white/80 text-sm mb-4">
-              {athlete.sport} • {athlete.poste}
-            </p>
-            <div className="flex gap-2 justify-center mb-4">
-              <span className={cn('px-3 py-1 rounded-full text-xs font-semibold', NIVEAU_COLORS[athlete.niveau] || 'bg-slate-200')}>
-                {athlete.niveau}
-              </span>
-              <span className={cn('px-3 py-1 rounded-full text-xs font-semibold', STATUS_COLORS[athlete.status] || 'bg-slate-200')}>
-                {athlete.status}
-              </span>
             </div>
+            <div className="text-[12px] capitalize mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              {athlete.sport} · {athlete.poste}
+            </div>
+            <Badge variant={nb.variant}>{nb.label}</Badge>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            <div className="bg-white rounded-lg p-4 border border-slate-200">
-              <div className="text-[#FCD116] text-2xl font-bold">
-                {athlete.contrats || 0}
+          {/* KPI mini-cards */}
+          <div className="grid grid-cols-2 gap-2.5 p-4" style={{ borderBottom: '1px solid rgba(252,209,22,0.06)' }}>
+            {[
+              { label: 'Valeur', value: formatValeur(athlete.valeurMarchande), color: '#FCD116' },
+              { label: 'Contrats', value: '2', color: '#7CC8E8' },
+              { label: 'Projets', value: '1', color: '#10B981' },
+              { label: 'Activités', value: '14', color: 'rgba(255,255,255,0.6)' },
+            ].map(k => (
+              <div
+                key={k.label}
+                className="rounded-xl p-3 text-center"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(252,209,22,0.07)',
+                }}
+              >
+                <div className="text-[14px] font-extrabold" style={{ color: k.color }}>{k.value}</div>
+                <div className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>{k.label}</div>
               </div>
-              <div className="text-xs text-slate-500 uppercase tracking-wide mt-1">
-                Contrats
-              </div>
-            </div>
-            <div className="bg-white rounded-lg p-4 border border-slate-200">
-              <div className="text-[#FCD116] text-2xl font-bold">
-                {athlete.projets || 0}
-              </div>
-              <div className="text-xs text-slate-500 uppercase tracking-wide mt-1">
-                Projets
-              </div>
-            </div>
-            <div className="bg-white rounded-lg p-4 border border-slate-200">
-              <div className="text-[#3A6B84] text-2xl font-bold">
-                ${(athlete.valeurMarchande / 1000).toFixed(0)}K
-              </div>
-              <div className="text-xs text-slate-500 uppercase tracking-wide mt-1">
-                Valeur march.
-              </div>
-            </div>
-            <div className="bg-white rounded-lg p-4 border border-slate-200">
-              <div className="text-[#07101A] text-2xl font-bold">
-                {athlete.age || 24}
-              </div>
-              <div className="text-xs text-slate-500 uppercase tracking-wide mt-1">
-                Ans
-              </div>
-            </div>
+            ))}
           </div>
 
-          {/* Contact Card */}
-          <div className="bg-white rounded-lg p-6 border border-slate-200 mb-6">
-            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-4">
-              Contact
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <Phone className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" />
+          {/* Contact infos */}
+          <div className="flex-1 px-4 py-4 space-y-3">
+            {[
+              { icon: 'phone', label: 'Téléphone', value: athlete.telephone ?? '—' },
+              { icon: 'mail_outline', label: 'Email', value: athlete.email ?? '—' },
+              { icon: 'flag', label: 'Nationalité', value: athlete.nationalite ?? '—' },
+              { icon: 'sports_soccer', label: 'Club actuel', value: athlete.clubActuel ?? '—' },
+            ].map(row => (
+              <div key={row.label} className="flex gap-2.5">
+                <div
+                  className="flex items-center justify-center rounded-[8px] shrink-0 mt-0.5"
+                  style={{ width: 28, height: 28, background: 'rgba(255,255,255,0.05)' }}
+                >
+                  <MI name={row.icon} size={14} style={{ color: 'rgba(255,255,255,0.3)' }} />
+                </div>
                 <div>
-                  <div className="text-xs text-slate-500">Téléphone</div>
-                  <div className="text-sm font-medium text-[#07101A]">
-                    {athlete.telephone}
+                  <div className="text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>{row.label}</div>
+                  <div className="text-[12px] font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                    {row.value}
                   </div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <Mail className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <div className="text-xs text-slate-500">E-mail</div>
-                  <div className="text-sm font-medium text-[#07101A]">
-                    {athlete.email}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <div className="text-xs text-slate-500">Ville</div>
-                  <div className="text-sm font-medium text-[#07101A]">
-                    {athlete.ville}
-                  </div>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
 
-          {/* CTA Button */}
-          <button className="w-full bg-[#07101A] hover:bg-[#0F172A] text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 group">
-            <FileSignature className="w-4 h-4" />
-            Créer un contrat
-          </button>
+          {/* CTA */}
+          <div className="px-4 pb-5 pt-2">
+            <button
+              className="w-full flex items-center justify-center gap-1.5 font-bold text-[13px] rounded-[10px]"
+              style={{
+                padding: '11px 0',
+                background: 'linear-gradient(135deg,#DAA520,#F4C430)',
+                color: '#07101A',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <MI name="description" size={15} style={{ color: '#07101A' }} />
+              Créer un contrat
+            </button>
+          </div>
         </div>
 
-        {/* Right Column - Tabs */}
-        <div className="lg:col-span-2">
-          {/* Tab Navigation */}
-          <div className="flex gap-4 border-b border-slate-200 mb-6">
-            {[
-              { id: 'carriere', label: 'Carrière' },
-              { id: 'contrats', label: 'Contrats' },
-              { id: 'activites', label: 'Activités' },
-              { id: 'notes', label: 'Notes' },
-            ].map(tab => (
+        {/* Right column */}
+        <div className="flex-1 flex flex-col min-w-0">
+
+          {/* Pill tab bar */}
+          <div
+            className="flex gap-1 rounded-xl p-1 mb-5 shrink-0"
+            style={{ background: '#fff', border: '1px solid #E2E8F0', width: 'fit-content' }}
+          >
+            {TABS.map(t => (
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  'pb-3 px-1 text-sm font-medium border-b-2 transition-colors',
-                  activeTab === tab.id
-                    ? 'border-[#FCD116] text-[#07101A]'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
-                )}
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className="px-4 py-1.5 rounded-[9px] text-[13px] font-semibold transition-all"
+                style={{
+                  background: tab === t.id ? '#07101A' : 'transparent',
+                  color: tab === t.id ? '#FCD116' : '#64748B',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
               >
-                {tab.label}
+                {t.label}
               </button>
             ))}
           </div>
 
-          {/* Tab Content */}
-          <div className="bg-white rounded-lg border border-slate-200 p-8 text-center text-slate-500">
-            <p>Contenu de l'onglet "{activeTab}" - À implémenter</p>
+          {/* Tab content */}
+          <div
+            className="flex-1 rounded-2xl p-6"
+            style={{ background: '#fff', border: '1px solid #E2E8F0' }}
+          >
+            {tab === 'carriere' && <CarriereTab athlete={athlete} />}
+            {tab === 'contrats' && <EmptyTab label="Contrats" icon="gavel" />}
+            {tab === 'activites' && <EmptyTab label="Activités" icon="history" />}
+            {tab === 'notes' && <EmptyTab label="Notes" icon="sticky_note_2" />}
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function CarriereTab({ athlete }: { athlete: Athlete }) {
+  const sections = [
+    {
+      title: 'Informations sportives',
+      rows: [
+        { label: 'Sport', value: athlete.sport, capitalize: true },
+        { label: 'Poste', value: athlete.poste },
+        { label: 'Niveau', value: athlete.niveau },
+        { label: 'Club actuel', value: athlete.clubActuel ?? '—' },
+        { label: 'Priorité scouting', value: athlete.priorityScouting ?? '—' },
+      ],
+    },
+    {
+      title: 'Informations personnelles',
+      rows: [
+        { label: 'Nationalité', value: athlete.nationalite ?? '—' },
+        { label: 'Date de naissance', value: athlete.dateNaissance ?? '—' },
+        { label: 'Téléphone', value: athlete.telephone ?? '—' },
+        { label: 'Email', value: athlete.email ?? '—' },
+      ],
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 gap-6">
+      {sections.map(section => (
+        <div key={section.title}>
+          <div className="text-[11px] font-bold uppercase tracking-[1.5px] mb-3.5" style={{ color: '#94A3B8' }}>
+            {section.title}
+          </div>
+          <div className="space-y-3">
+            {section.rows.map(row => (
+              <div
+                key={row.label}
+                className="flex justify-between items-center py-2.5"
+                style={{ borderBottom: '1px solid #F1F5F9' }}
+              >
+                <span className="text-[12px]" style={{ color: '#94A3B8' }}>{row.label}</span>
+                <span
+                  className="text-[13px] font-semibold"
+                  style={{
+                    color: '#0F172A',
+                    textTransform: row.capitalize ? 'capitalize' : undefined,
+                  }}
+                >
+                  {row.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EmptyTab({ label, icon }: { label: string; icon: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16" style={{ color: '#94A3B8' }}>
+      <MI name={icon} size={40} style={{ color: '#E2E8F0', marginBottom: 12 }} />
+      <div className="text-[14px] font-semibold" style={{ color: '#CBD5E1' }}>Aucun(e) {label.toLowerCase()}</div>
+      <div className="text-[12px] mt-1">Les données apparaîtront ici</div>
     </div>
   );
 }

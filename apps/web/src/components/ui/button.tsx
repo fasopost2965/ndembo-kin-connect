@@ -15,13 +15,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-[#132730] text-white hover:bg-[#0B1A20]',
+        // CTA principal : fond #07101A, texte or — utilisé sur tous les écrans
+        primary: 'bg-[#07101A] text-[#FCD116] font-bold hover:bg-[#132730]',
+        // Variante texte blanc (Design System "Primaire")
+        dark: 'bg-[#132730] text-white hover:bg-[#07101A]',
         accent: 'bg-[#7CC8E8] text-[#0B2530] font-bold hover:bg-[#63b9dd]',
         gold: 'bg-gradient-to-br from-[#DAA520] to-[#F4C430] text-[#07101A] font-bold hover:opacity-90',
-        secondary: 'bg-[#F1F5F9] text-[#334155] hover:bg-[#E8EDF3]',
+        secondary: 'bg-[#F1F5F9] text-[#475569] border border-[#E2E8F0] hover:bg-[#E2E8F0]',
         outline: 'border-[1.5px] border-[#E2E8F0] text-[#334155] hover:bg-[#F8FAFC]',
         ghost: 'text-[#334155] hover:bg-[#F1F5F9]',
-        destructive: 'bg-[#FEF2F2] text-[#DC2626] hover:bg-[#FDE4E4]',
+        destructive: 'bg-[#FFF1F2] text-[#BE123C] border border-[#FECDD3] hover:bg-[#FDE4E4]',
       },
       size: {
         // 44px min touch target on mobile, slightly tighter on ≥sm screens.

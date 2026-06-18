@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F0F2F5; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; min-height: 100vh; background: #F0F2F5;">
+
+  <!-- TOPBAR -->
+  <div style="background: #fff; border-bottom: 1px solid #E8ECF1; padding: 0 32px; display: flex; align-items: center; height: 60px; gap: 8px;">
+    <div style="background: #07101A; border-radius: 8px; padding: 4px 5px;">
+      <img src="assets/logo.png" style="height: 22px; width: auto; display: block;" />
+    </div>
+    <span style="font-size: 13px; color: #94A3B8;">/</span>
+    <span style="font-size: 13px; color: #94A3B8; cursor: pointer;" style-hover="color: #3A6B84;">Athlètes</span>
+    <span style="font-size: 13px; color: #94A3B8;">/</span>
+    <span style="font-size: 13px; font-weight: 600; color: #0F172A;">{{ athlete.prenom }} {{ athlete.nom }}</span>
+    <div style="flex: 1;"></div>
+    <div style="display: flex; gap: 8px;">
+      <button style="padding: 7px 14px; background: #F1F5F9; color: #475569; font-size: 12px; font-weight: 600; border: 1px solid #E2E8F0; border-radius: 8px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 6px;" style-hover="background: #E2E8F0;">
+        <span style="font-family: Material Icons Outlined; font-size: 15px; display: inline-flex; line-height: 1;">edit</span>Modifier
+      </button>
+      <button style="padding: 7px 14px; background: #FFF1F2; color: #BE123C; font-size: 12px; font-weight: 600; border: 1px solid #FECDD3; border-radius: 8px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 6px;">
+        <span style="font-family: Material Icons Outlined; font-size: 15px; display: inline-flex; line-height: 1;">delete_outline</span>Supprimer
+      </button>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 300px 1fr; gap: 20px; padding: 28px 32px; max-width: 1200px; margin: 0 auto;">
+
+    <!-- COLONNE GAUCHE — Profil -->
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+
+      <!-- Card profil principal -->
+      <div style="background: #07101A; border-radius: 18px; padding: 28px 22px; text-align: center; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -40px; right: -40px; width: 140px; height: 140px; border-radius: 50%; border: 1px solid rgba(252,209,22,0.08); pointer-events: none;"></div>
+        <div style="width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg,#DAA520,#FCD116); display: flex; align-items: center; justify-content: center; color: #07101A; font-size: 24px; font-weight: 800; margin: 0 auto 14px;">{{ athlete.initials }}</div>
+        <div style="font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -0.3px;">{{ athlete.prenom }} {{ athlete.nom }}</div>
+        <div style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px;">{{ athlete.sport }} · {{ athlete.poste }}</div>
+        <div style="margin: 12px 0;">
+          <span style="{{ athlete.niveauStyle }}">{{ athlete.niveau }}</span>
+        </div>
+        <div style="display: flex; justify-content: center; gap: 6px; margin-top: 14px;">
+          <span style="{{ athlete.statutStyle }}">{{ athlete.statut }}</span>
+        </div>
+      </div>
+
+      <!-- Stats rapides -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+          <div style="font-size: 22px; font-weight: 800; color: #FCD116; letter-spacing: -0.4px;">{{ athlete.contrats }}</div>
+          <div style="font-size: 10px; color: #94A3B8; margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Contrats</div>
+        </div>
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+          <div style="font-size: 22px; font-weight: 800; color: #3A6B84; letter-spacing: -0.4px;">{{ athlete.projets }}</div>
+          <div style="font-size: 10px; color: #94A3B8; margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Projets</div>
+        </div>
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+          <div style="font-size: 18px; font-weight: 800; color: #059669; letter-spacing: -0.3px;">{{ athlete.valeurFmt }}</div>
+          <div style="font-size: 10px; color: #94A3B8; margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Valeur march.</div>
+        </div>
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+          <div style="font-size: 22px; font-weight: 800; color: #0F172A; letter-spacing: -0.4px;">{{ athlete.age }}</div>
+          <div style="font-size: 10px; color: #94A3B8; margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Ans</div>
+        </div>
+      </div>
+
+      <!-- Infos contact -->
+      <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+        <div style="font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px;">Contact</div>
+        <sc-for list="{{ contactItems }}" as="c" hint-placeholder-count="3">
+          <div style="display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #F8FAFC;">
+            <span style="font-family: Material Icons Outlined; font-size: 16px; color: #94A3B8; display: inline-flex; line-height: 1; flex-shrink: 0;">{{ c.icon }}</span>
+            <div>
+              <div style="font-size: 10px; color: #94A3B8;">{{ c.label }}</div>
+              <div style="font-size: 13px; color: #334155; font-weight: 500;">{{ c.value }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- Action rapide -->
+      <button style="width: 100%; padding: 12px; background: #07101A; color: #FCD116; font-size: 13px; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px;" style-hover="background: #132730;">
+        <span style="font-family: Material Icons Outlined; font-size: 16px; display: inline-flex; line-height: 1;">description</span>
+        Créer un contrat
+      </button>
+    </div>
+
+    <!-- COLONNE DROITE — Onglets -->
+    <div>
+      <!-- Onglets -->
+      <div style="display: flex; gap: 2px; background: #E8ECF1; border-radius: 12px; padding: 4px; margin-bottom: 20px; width: fit-content;">
+        <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="4">
+          <div onClick="{{ tab.onClick }}" style="{{ tab.style }}">{{ tab.label }}</div>
+        </sc-for>
+      </div>
+
+      <!-- Tab: Carrière -->
+      <sc-if value="{{ activeTab === 'carriere' }}" hint-placeholder-val="{{ true }}">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 22px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+          <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 18px;">Historique de carrière</div>
+          <div style="position: relative; padding-left: 24px;">
+            <div style="position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: #E8ECF1;"></div>
+            <sc-for list="{{ carriere }}" as="c" hint-placeholder-count="4">
+              <div style="position: relative; margin-bottom: 24px;">
+                <div style="position: absolute; left: -21px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #FCD116; border: 2px solid #fff; box-shadow: 0 0 0 2px #FCD116;"></div>
+                <div style="font-size: 10px; color: #94A3B8; font-weight: 600; margin-bottom: 3px;">{{ c.periode }}</div>
+                <div style="font-size: 14px; font-weight: 700; color: #0F172A;">{{ c.club }}</div>
+                <div style="font-size: 12px; color: #64748B; margin-top: 2px;">{{ c.role }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Tab: Contrats -->
+      <sc-if value="{{ activeTab === 'contrats' }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+          <div style="padding: 16px 22px; border-bottom: 1px solid #E8ECF1; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A;">Contrats</div>
+            <button style="padding: 6px 14px; background: #07101A; color: #FCD116; font-size: 12px; font-weight: 600; border: none; border-radius: 7px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif;">+ Nouveau contrat</button>
+          </div>
+          <sc-for list="{{ contrats }}" as="c" hint-placeholder-count="3">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; border-bottom: 1px solid #F8FAFC;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 36px; height: 36px; border-radius: 9px; background: #F0F7FF; display: flex; align-items: center; justify-content: center;">
+                  <span style="font-family: Material Icons Outlined; font-size: 18px; color: #3A6B84; display: inline-flex; line-height: 1;">description</span>
+                </div>
+                <div>
+                  <div style="font-size: 13px; font-weight: 600; color: #0F172A;">{{ c.ref }}</div>
+                  <div style="font-size: 11px; color: #94A3B8;">{{ c.periode }}</div>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 14px; font-weight: 700; color: #059669;">{{ c.montant }}</div>
+                <span style="{{ c.statutStyle }}">{{ c.statut }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- Tab: Activités -->
+      <sc-if value="{{ activeTab === 'activites' }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 22px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+          <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 18px;">Journal d'activités</div>
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <sc-for list="{{ activites }}" as="a" hint-placeholder-count="5">
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="{{ a.iBox }}">
+                  <span style="font-family: Material Icons Outlined; font-size: 15px; display: inline-flex; line-height: 1; color: {{ a.iColor }};">{{ a.icon }}</span>
+                </div>
+                <div style="flex: 1;">
+                  <div style="font-size: 13px; color: #334155; font-weight: 500;">{{ a.desc }}</div>
+                  <div style="font-size: 11px; color: #94A3B8; margin-top: 2px;">{{ a.time }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Tab: Notes -->
+      <sc-if value="{{ activeTab === 'notes' }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 22px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A;">Notes du coach</div>
+            <button style="padding: 6px 14px; background: #F1F5F9; color: #475569; font-size: 12px; font-weight: 600; border: 1px solid #E2E8F0; border-radius: 7px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif;">+ Ajouter</button>
+          </div>
+          <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 14px 16px; font-size: 13px; color: #78350F; line-height: 1.6;">{{ athlete.notes }}</div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1280, &quot;height&quot;: 900}}">
+
+class Component extends DCLogic {
+  state = { activeTab: 'carriere' };
+
+  renderVals() {
+    const s = this.state;
+    const tabStyle = (id) => s.activeTab === id
+      ? { padding:'8px 18px', borderRadius:9, background:'#fff', fontSize:13, fontWeight:700, color:'#0F172A', cursor:'pointer', boxShadow:'0 1px 3px rgba(0,0,0,0.08)' }
+      : { padding:'8px 18px', borderRadius:9, fontSize:13, fontWeight:500, color:'#64748B', cursor:'pointer' };
+
+    const athlete = {
+      prenom: 'Joël', nom: 'Mbuyi Kabongo', initials: 'JM',
+      sport: 'Football', poste: 'Attaquant', niveau: 'PRO', statut: 'Actif',
+      age: 24, nationalite: 'RDC', club: 'AS Vita Club',
+      contrats: 3, projets: 2, valeurFmt: '$85K',
+      telephone: '+243 81 234 5678', email: 'joel.mbuyi@gmail.com',
+      notes: 'Joueur très prometteur. Excellente vitesse, bon jeu de tête. À surveiller pour transfert vers Ligue 1 en 2027. Parle français + lingala.',
+      niveauStyle: { fontSize:11, fontWeight:700, background:'rgba(5,150,105,0.12)', color:'#059669', padding:'3px 10px', borderRadius:20, display:'inline-block' },
+      statutStyle: { fontSize:11, fontWeight:700, background:'rgba(252,209,22,0.15)', color:'#FCD116', padding:'3px 10px', borderRadius:20, display:'inline-block' },
+    };
+
+    const contactItems = [
+      { icon:'phone', label:'Téléphone', value:'+243 81 234 5678' },
+      { icon:'email', label:'E-mail', value:'joel.mbuyi@gmail.com' },
+      { icon:'location_on', label:'Ville', value:'Kinshasa, RDC' },
+    ];
+
+    const tabs = ['carriere','contrats','activites','notes'].map(id => ({
+      id, label: id.charAt(0).toUpperCase()+id.slice(1),
+      style: tabStyle(id),
+      onClick: () => this.setState({ activeTab: id }),
+    }));
+
+    const carriere = [
+      { periode:'2024 — Présent', club:'AS Vita Club', role:'Attaquant titulaire · 18 buts / saison' },
+      { periode:'2022 — 2024', club:'TP Mazembe', role:'Ailier droit · 11 buts · 7 passes' },
+      { periode:'2020 — 2022', club:'Académie Ndembo Kin', role:'Formation · MVP promotion 2022' },
+      { periode:'2018 — 2020', club:'CS Don Bosco', role:'Équipe U18' },
+    ];
+
+    const contrats = [
+      { ref:'CTR-2024-007', periode:'Jan 2024 — Déc 2025', montant:'$24 000', statut:'EN_COURS', statutStyle:{fontSize:10, fontWeight:700, background:'#EFF6FF', color:'#2563EB', padding:'2px 8px', borderRadius:5, display:'inline-block'} },
+      { ref:'CTR-2023-003', periode:'Juil 2023 — Jan 2024', montant:'$8 500', statut:'EXPIRÉ', statutStyle:{fontSize:10, fontWeight:700, background:'#F1F5F9', color:'#94A3B8', padding:'2px 8px', borderRadius:5, display:'inline-block'} },
+      { ref:'CTR-2022-011', periode:'Fév 2022 — Juil 2023', montant:'$6 000', statut:'EXPIRÉ', statutStyle:{fontSize:10, fontWeight:700, background:'#F1F5F9', color:'#94A3B8', padding:'2px 8px', borderRadius:5, display:'inline-block'} },
+    ];
+
+    const activites = [
+      { icon:'event', iColor:'#3A6B84', iBox:{width:32, height:32, borderRadius:8, background:'#EFF6FF', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0}, desc:'Réunion de suivi avec le coach — évaluation tactique', time:'Aujourd\'hui, 10h30' },
+      { icon:'description', iColor:'#059669', iBox:{width:32, height:32, borderRadius:8, background:'#F0FDF4', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0}, desc:'Contrat CTR-2024-007 signé électroniquement', time:'15 juin 2026, 14h12' },
+      { icon:'phone', iColor:'#B45309', iBox:{width:32, height:32, borderRadius:8, background:'#FEF9EE', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0}, desc:'Appel avec l\'agent du joueur — négociation prime', time:'12 juin 2026, 09h45' },
+      { icon:'star', iColor:'#DAA520', iBox:{width:32, height:32, borderRadius:8, background:'#FFFBEB', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0}, desc:'MVP du match AS Vita vs TP Mazembe (3-1)', time:'8 juin 2026' },
+      { icon:'add_circle', iColor:'#64748B', iBox:{width:32, height:32, borderRadius:8, background:'#F1F5F9', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0}, desc:'Fiche créée dans le CRM Ndembo Kin Connect', time:'1 jan. 2024' },
+    ];
+
+    return { athlete, activeTab: s.activeTab, tabs, contactItems, carriere, contrats, activites };
+  }
+}
+
+</script>
+</body>
+</html>

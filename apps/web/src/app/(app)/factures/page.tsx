@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { FileText, Wallet, Smartphone } from 'lucide-react';
 import { facturesApi } from '@/lib/api';
@@ -13,6 +14,15 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { PaiementForm } from './PaiementForm';
 import { MobileMoneyForm } from './MobileMoneyForm';
+
+function MI({ name, size = 16, style }: { name: string; size?: number; style?: React.CSSProperties }) {
+  return (
+    <span className="material-icons-outlined select-none leading-none"
+      style={{ fontSize: size, display: 'inline-flex', alignItems: 'center', ...style }}>
+      {name}
+    </span>
+  );
+}
 
 type PayMode = 'none' | 'manual' | 'momo';
 
@@ -72,22 +82,78 @@ function FacturesView() {
 
   const restant = detail ? Math.max(0, detail.montantTTC - detail.acomptePercu) : 0;
 
+  const totalTTC = rows.reduce((s, f) => s + f.montantTTC, 0);
+  const totalEncaisse = rows.reduce((s, f) => s + f.acomptePercu, 0);
+  const impayees = rows.filter(f => f.statutPaiement === 'IMPAYEE').length;
+  const payees = rows.filter(f => f.statutPaiement === 'PAYEE').length;
+
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-extrabold tracking-tight text-[#0F172A]">Factures</h1>
-        <p className="mt-1 text-sm text-[#64748B]">Encaissement &amp; suivi des paiements</p>
+    <div className="flex flex-col min-h-screen" style={{ background: '#F0F2F5' }}>
+
+      {/* ── Topbar with tab toggle ── */}
+      <div
+        className="flex items-center gap-4 px-6 shrink-0"
+        style={{ background: '#fff', borderBottom: '1px solid #E8ECF1', height: 60 }}
+      >
+        <div className="text-[18px] font-extrabold tracking-[-0.3px]" style={{ color: '#0F172A' }}>
+          Pipeline Commercial
+        </div>
+        <div
+          className="flex gap-0.5 rounded-lg p-0.5 ml-2"
+          style={{ background: '#F1F5F9', border: '1px solid #E2E8F0' }}
+        >
+          <Link
+            href="/devis"
+            className="px-4 py-1.5 rounded-md text-[13px] font-medium"
+            style={{ color: '#64748B' }}
+          >
+            Devis
+          </Link>
+          <div
+            className="px-4 py-1.5 rounded-md text-[13px] font-bold"
+            style={{ background: '#07101A', color: '#FCD116' }}
+          >
+            Factures
+          </div>
+        </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.05)]">
+      <div className="flex-1 p-6">
+
+        {/* ── KPI cards ── */}
+        <div className="grid grid-cols-4 gap-4 mb-5">
+          {[
+            { icon: 'receipt_long', label: 'Factures total', value: rows.length.toString(), iconColor: '#3A6B84', iconBg: '#EBF6FB' },
+            { icon: 'warning_amber', label: 'Impayées', value: impayees.toString(), iconColor: '#EF4444', iconBg: '#FEF2F2' },
+            { icon: 'check_circle', label: 'Payées', value: payees.toString(), iconColor: '#10B981', iconBg: '#ECFDF5' },
+            { icon: 'account_balance_wallet', label: 'Encaissé TTC', value: formatMontant(totalEncaisse), iconColor: '#FCD116', iconBg: '#FEF9EE' },
+          ].map(k => (
+            <div
+              key={k.label}
+              className="flex items-center gap-3 rounded-2xl p-4"
+              style={{ background: '#fff', border: '1px solid #E2E8F0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+            >
+              <div className="flex items-center justify-center shrink-0 rounded-xl" style={{ width: 40, height: 40, background: k.iconBg }}>
+                <MI name={k.icon} size={18} style={{ color: k.iconColor }} />
+              </div>
+              <div>
+                <div className="text-[20px] font-extrabold leading-none tracking-[-0.3px]" style={{ color: '#0F172A' }}>{k.value}</div>
+                <div className="text-[11px] mt-0.5" style={{ color: '#94A3B8' }}>{k.label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+      <div className="overflow-hidden rounded-2xl" style={{ background: '#fff', border: '1px solid #E2E8F0', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
         <Table>
           <TableHeader>
-            <TableRow className="hover:bg-transparent">
+            <TableRow className="hover:bg-transparent" style={{ borderBottom: '1px solid #E8ECF1' }}>
               <TableHead>Numéro</TableHead>
               <TableHead>Client</TableHead>
               <TableHead className="text-right">Montant TTC</TableHead>
               <TableHead className="text-right">Encaissé</TableHead>
               <TableHead>Statut</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -102,11 +168,32 @@ function FacturesView() {
                 const sb = factureStatutBadge(f.statutPaiement);
                 return (
                   <TableRow key={f.id} className="cursor-pointer" data-state={selectedId === f.id ? 'selected' : undefined} onClick={() => setSelectedId(f.id)}>
-                    <TableCell className="font-mono text-xs font-semibold text-[#3A6B84]">{f.numero}</TableCell>
-                    <TableCell className="text-sm text-[#334155]">{f.client?.nom ?? '—'}</TableCell>
-                    <TableCell className="text-right text-[13px] font-bold text-[#0F172A]">{formatMontant(f.montantTTC)}</TableCell>
-                    <TableCell className="text-right text-xs text-[#0D9668]">{formatMontant(f.acomptePercu)}</TableCell>
+                    <TableCell className="font-mono text-xs font-semibold" style={{ color: '#3A6B84' }}>{f.numero}</TableCell>
+                    <TableCell className="text-sm" style={{ color: '#334155' }}>{f.client?.nom ?? '—'}</TableCell>
+                    <TableCell className="text-right text-[13px] font-bold" style={{ color: '#0F172A' }}>{formatMontant(f.montantTTC)}</TableCell>
+                    <TableCell className="text-right text-xs" style={{ color: '#0D9668' }}>{formatMontant(f.acomptePercu)}</TableCell>
                     <TableCell><Badge variant={sb.variant}>{sb.label}</Badge></TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-1">
+                        {f.statutPaiement !== 'PAYEE' && (
+                          <button
+                            onClick={e => { e.stopPropagation(); setSelectedId(f.id); }}
+                            className="flex items-center gap-1 px-2.5 py-1 rounded-[7px] text-[11px] font-semibold"
+                            style={{ background: '#FEF9EE', color: '#B45309', border: '1px solid #FDE68A', cursor: 'pointer' }}
+                          >
+                            <MI name="smartphone" size={12} style={{ color: '#B45309' }} />
+                            Payer
+                          </button>
+                        )}
+                        <button
+                          onClick={e => { e.stopPropagation(); facturesApi.pdf(f.id); }}
+                          className="flex items-center justify-center w-7 h-7 rounded-[7px]"
+                          style={{ background: '#F1F5F9', border: '1px solid #E2E8F0', cursor: 'pointer' }}
+                        >
+                          <MI name="picture_as_pdf" size={13} style={{ color: '#94A3B8' }} />
+                        </button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 );
               })
@@ -205,6 +292,7 @@ function FacturesView() {
           )}
         </SheetContent>
       </Sheet>
+      </div>
     </div>
   );
 }

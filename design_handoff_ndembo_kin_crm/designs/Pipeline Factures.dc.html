@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F0F2F5; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; min-height: 100vh; background: #F0F2F5; display: flex; flex-direction: column;">
+
+  <!-- TOPBAR -->
+  <div style="background: #fff; border-bottom: 1px solid #E8ECF1; padding: 0 28px; display: flex; align-items: center; height: 60px; gap: 14px; flex-shrink: 0;">
+    <div style="background: #07101A; border-radius: 8px; padding: 4px 5px;">
+      <img src="assets/logo.png" style="height: 22px; width: auto; display: block;" />
+    </div>
+    <!-- Onglets Devis / Factures -->
+    <div style="display: flex; gap: 2px; background: #F1F5F9; border-radius: 10px; padding: 3px;">
+      <div onClick="{{ showDevis }}" style="{{ tabDevisStyle }}">Devis</div>
+      <div onClick="{{ showFactures }}" style="{{ tabFacturesStyle }}">Factures</div>
+    </div>
+    <div style="flex: 1;"></div>
+    <div style="position: relative;">
+      <span style="position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 16px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">search</span>
+      <input type="text" placeholder="Rechercher…" value="{{ search }}" onInput="{{ onSearch }}"
+        style="padding: 8px 14px 8px 36px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #F8FAFC; width: 200px;"
+        style-focus="border-color: #3A6B84; background: #fff;" />
+    </div>
+    <div style="position: relative;">
+      <select value="{{ filterStatut }}" onChange="{{ onFilterStatut }}"
+        style="padding: 8px 30px 8px 12px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #F8FAFC; appearance: none; cursor: pointer;">
+        <option value="">Tous statuts</option>
+        <sc-for list="{{ statutOptions }}" as="opt" hint-placeholder-count="4">
+          <option value="{{ opt.value }}">{{ opt.label }}</option>
+        </sc-for>
+      </select>
+      <span style="position: absolute; right: 9px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 15px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+    </div>
+    <button style="padding: 8px 18px; background: #07101A; color: #FCD116; font-size: 13px; font-weight: 700; border: none; border-radius: 9px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 7px; white-space: nowrap;" style-hover="background: #132730;">
+      <span style="font-family: Material Icons Outlined; font-size: 15px; display: inline-flex; line-height: 1;">add</span>
+      {{ addLabel }}
+    </button>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px 28px 0;">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+      <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+        <div style="font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">{{ k.label }}</div>
+        <div style="font-size: 26px; font-weight: 800; color: {{ k.color }}; letter-spacing: -0.5px;">{{ k.value }}</div>
+        <div style="font-size: 11px; color: #94A3B8; margin-top: 4px;">{{ k.sub }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- TABLE -->
+  <div style="padding: 16px 28px 32px; flex: 1;">
+    <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+      <!-- En-tête -->
+      <div style="display: grid; grid-template-columns: 1.2fr 2fr 1.2fr 1.2fr 1.2fr 1fr 120px; gap: 8px; padding: 11px 20px; background: #F8FAFC; border-bottom: 1px solid #E8ECF1;">
+        <sc-for list="{{ tableHeaders }}" as="h" hint-placeholder-count="7">
+          <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">{{ h }}</div>
+        </sc-for>
+      </div>
+      <!-- Lignes -->
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+        <div style="display: grid; grid-template-columns: 1.2fr 2fr 1.2fr 1.2fr 1.2fr 1fr 120px; gap: 8px; padding: 14px 20px; border-bottom: 1px solid #F8FAFC; align-items: center;" style-hover="background: #F8FAFC;">
+          <!-- Ref + type -->
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: #0F172A;">{{ r.ref }}</div>
+            <div style="font-size: 10px; color: #94A3B8; margin-top: 2px;">{{ r.type }}</div>
+          </div>
+          <!-- Client -->
+          <div style="display: flex; align-items: center; gap: 9px;">
+            <div style="{{ r.avatarStyle }}">{{ r.clientInitials }}</div>
+            <div>
+              <div style="font-size: 13px; font-weight: 600; color: #0F172A;">{{ r.client }}</div>
+              <div style="font-size: 11px; color: #94A3B8;">{{ r.clientType }}</div>
+            </div>
+          </div>
+          <!-- Dates -->
+          <div style="font-size: 12px; color: #64748B;">{{ r.date }}</div>
+          <div style="font-size: 12px; color: {{ r.echeanceColor }}; font-weight: 600;">{{ r.echeance }}</div>
+          <!-- Montant -->
+          <div style="font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.2px;">{{ r.montant }}</div>
+          <!-- Statut -->
+          <div><span style="{{ r.statutStyle }}">{{ r.statut }}</span></div>
+          <!-- Actions -->
+          <div style="display: flex; gap: 6px; justify-content: flex-end;">
+            <div style="width: 30px; height: 30px; border-radius: 8px; background: #F1F5F9; border: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background: #EFF6FF;">
+              <span style="font-family: Material Icons Outlined; font-size: 15px; color: #64748B; display: inline-flex; line-height: 1;">picture_as_pdf</span>
+            </div>
+            <sc-if value="{{ r.canConvert }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ r.onConvert }}" style="width: 30px; height: 30px; border-radius: 8px; background: #F0FDF4; border: 1px solid #BBF7D0; display: flex; align-items: center; justify-content: center; cursor: pointer;" title="Convertir en facture" style-hover="background: #DCFCE7;">
+                <span style="font-family: Material Icons Outlined; font-size: 15px; color: #059669; display: inline-flex; line-height: 1;">swap_horiz</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ r.canPay }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ r.onPay }}" style="width: 30px; height: 30px; border-radius: 8px; background: #FEF9EE; border: 1px solid #FDE68A; display: flex; align-items: center; justify-content: center; cursor: pointer;" title="Enregistrer paiement" style-hover="background: #FEF3C7;">
+                <span style="font-family: Material Icons Outlined; font-size: 15px; color: #B45309; display: inline-flex; line-height: 1;">smartphone</span>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+
+class Component extends DCLogic {
+  state = { view:'factures', search:'', filterStatut:'' };
+
+  _devisData = [
+    { id:1, ref:'DEV-2026-014', client:'AS Vita Club', clientType:'Club', montant:8500, date:'17 juin', echeance:'17 juil', statut:'EN_ATTENTE' },
+    { id:2, ref:'DEV-2026-013', client:'MTN RDC', clientType:'Sponsor', montant:24000, date:'10 juin', echeance:'10 juil', statut:'VALIDE' },
+    { id:3, ref:'DEV-2026-012', client:'TP Mazembe', clientType:'Club', montant:6200, date:'5 juin', echeance:'5 juil', statut:'CONVERTI' },
+    { id:4, ref:'DEV-2026-011', client:'Académie Elan', clientType:'Académie', montant:3800, date:'28 mai', echeance:'28 juin', statut:'REFUSE' },
+    { id:5, ref:'DEV-2026-010', client:'AS Vita Club', clientType:'Club', montant:12500, date:'20 mai', echeance:'20 juin', statut:'VALIDE' },
+  ];
+  _facturesData = [
+    { id:1, ref:'FAC-2026-009', client:'AS Vita Club', clientType:'Club', montant:8500, date:'17 juin', echeance:'17 juil', statut:'EN_ATTENTE', solde:3200 },
+    { id:2, ref:'FAC-2026-008', client:'MTN RDC', clientType:'Sponsor', montant:24000, date:'10 juin', echeance:'10 juil', statut:'PARTIELLEMENT_PAYÉE', solde:14000 },
+    { id:3, ref:'FAC-2026-007', client:'TP Mazembe', clientType:'Club', montant:6200, date:'5 juin', echeance:'5 juil', statut:'PAYÉE', solde:0 },
+    { id:4, ref:'FAC-2026-006', client:'BC Kinshasa', clientType:'Club', montant:4500, date:'28 mai', echeance:'28 juin', statut:'EN_RETARD', solde:4500 },
+    { id:5, ref:'FAC-2026-005', client:'Académie Elan', clientType:'Académie', montant:3800, date:'15 mai', echeance:'15 juin', statut:'PAYÉE', solde:0 },
+    { id:6, ref:'FAC-2026-004', client:'AS Vita Club', clientType:'Club', montant:12500, date:'1 mai', echeance:'1 juin', statut:'PAYÉE', solde:0 },
+  ];
+
+  _statutStyleDevis(s) {
+    const m = { EN_ATTENTE:{bg:'#F1F5F9',c:'#64748B'}, VALIDE:{bg:'#F0FDF4',c:'#059669'}, REFUSE:{bg:'#FFF1F2',c:'#BE123C'}, CONVERTI:{bg:'#EFF6FF',c:'#2563EB'} };
+    const x = m[s]||m.EN_ATTENTE;
+    return { fontSize:10, fontWeight:700, background:x.bg, color:x.c, padding:'3px 9px', borderRadius:20, display:'inline-block', whiteSpace:'nowrap' };
+  }
+  _statutStyleFacture(s) {
+    const m = { EN_ATTENTE:{bg:'#F1F5F9',c:'#64748B'}, PARTIELLEMENT_PAYÉE:{bg:'#FEF9EE',c:'#B45309'}, PAYÉE:{bg:'#F0FDF4',c:'#059669'}, EN_RETARD:{bg:'#FFF1F2',c:'#BE123C'} };
+    const x = m[s]||m.EN_ATTENTE;
+    return { fontSize:10, fontWeight:700, background:x.bg, color:x.c, padding:'3px 9px', borderRadius:20, display:'inline-block', whiteSpace:'nowrap' };
+  }
+  _avatarStyle(id) {
+    const cs = ['#07101A','#3A6B84','#1D4ED8','#059669','#B45309'];
+    return { width:34, height:34, borderRadius:10, background:cs[id%5], display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:800, color:'#FCD116', flexShrink:0 };
+  }
+  _fmt(n) { return '$'+n.toLocaleString('fr-FR'); }
+
+  renderVals() {
+    const s = this.state;
+    const isDevis = s.view === 'devis';
+    const tabBase = { padding:'7px 18px', borderRadius:8, fontSize:13, fontWeight:600, cursor:'pointer' };
+    const tabAct = { ...tabBase, background:'#fff', color:'#0F172A', boxShadow:'0 1px 3px rgba(0,0,0,0.08)' };
+    const tabInact = { ...tabBase, background:'transparent', color:'#64748B' };
+
+    const devisStatuts = ['EN_ATTENTE','VALIDE','REFUSE','CONVERTI'];
+    const factureStatuts = ['EN_ATTENTE','PARTIELLEMENT_PAYÉE','PAYÉE','EN_RETARD'];
+    const statutOptions = (isDevis ? devisStatuts : factureStatuts).map(v => ({
+      value:v, label:v.replace(/_/g,' '),
+    }));
+
+    const rawData = isDevis ? this._devisData : this._facturesData;
+    const filtered = rawData.filter(r => {
+      const q = s.search.toLowerCase();
+      return (!q || r.ref.toLowerCase().includes(q) || r.client.toLowerCase().includes(q))
+        && (!s.filterStatut || r.statut === s.filterStatut);
+    });
+
+    const rows = filtered.map((r,i) => {
+      const isRetard = r.echeance && r.statut === 'EN_RETARD';
+      return {
+        ...r,
+        type: isDevis ? 'Devis' : 'Facture',
+        clientInitials: r.client.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(),
+        avatarStyle: this._avatarStyle(r.id),
+        montant: this._fmt(r.montant),
+        echeanceColor: isRetard ? '#BE123C' : '#64748B',
+        statutStyle: isDevis ? this._statutStyleDevis(r.statut) : this._statutStyleFacture(r.statut),
+        canConvert: isDevis && r.statut === 'VALIDE',
+        canPay: !isDevis && ['EN_ATTENTE','PARTIELLEMENT_PAYÉE','EN_RETARD'].includes(r.statut),
+        onConvert: () => alert('→ Convertir '+r.ref+' en facture'),
+        onPay: () => alert('→ Paiement Mobile Money pour '+r.ref+' · solde : '+this._fmt(r.solde||0)),
+      };
+    });
+
+    const totalCA = this._facturesData.reduce((s,r)=>s+r.montant,0);
+    const totalPayee = this._facturesData.filter(r=>r.statut==='PAYÉE').reduce((s,r)=>s+r.montant,0);
+    const totalEnAttente = this._facturesData.filter(r=>['EN_ATTENTE','PARTIELLEMENT_PAYÉE'].includes(r.statut)).reduce((s,r)=>s+(r.solde||0),0);
+    const totalRetard = this._facturesData.filter(r=>r.statut==='EN_RETARD').reduce((s,r)=>s+r.montant,0);
+
+    const kpis = isDevis ? [
+      { label:'Total devis', value:this._devisData.length, color:'#0F172A', sub:'ce mois' },
+      { label:'Montant total', value:this._fmt(this._devisData.reduce((s,r)=>s+r.montant,0)), color:'#3A6B84', sub:'en cours' },
+      { label:'Validés', value:this._devisData.filter(r=>r.statut==='VALIDE').length, color:'#059669', sub:'à convertir' },
+      { label:'Convertis', value:this._devisData.filter(r=>r.statut==='CONVERTI').length, color:'#2563EB', sub:'en facture' },
+    ] : [
+      { label:'CA total', value:this._fmt(totalCA), color:'#0F172A', sub:'toutes factures' },
+      { label:'Encaissé', value:this._fmt(totalPayee), color:'#059669', sub:'confirmé' },
+      { label:'En attente', value:this._fmt(totalEnAttente), color:'#B45309', sub:'à percevoir' },
+      { label:'En retard', value:this._fmt(totalRetard), color:'#BE123C', sub:'action requise' },
+    ];
+
+    return {
+      view: s.view, search: s.search, filterStatut: s.filterStatut,
+      tabDevisStyle: isDevis ? tabAct : tabInact,
+      tabFacturesStyle: !isDevis ? tabAct : tabInact,
+      addLabel: isDevis ? 'Nouveau devis' : 'Nouvelle facture',
+      statutOptions, rows, kpis,
+      tableHeaders: ['Référence','Client','Émission','Échéance','Montant','Statut',''],
+      showDevis: () => this.setState({ view:'devis', filterStatut:'' }),
+      showFactures: () => this.setState({ view:'factures', filterStatut:'' }),
+      onSearch: (e) => this.setState({ search:e.target.value }),
+      onFilterStatut: (e) => this.setState({ filterStatut:e.target.value }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

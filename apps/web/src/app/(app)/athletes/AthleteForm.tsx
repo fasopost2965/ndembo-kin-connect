@@ -49,6 +49,7 @@ export function AthleteForm({
       clubActuel: athlete?.clubActuel ?? '',
       valeurMarchande: athlete?.valeurMarchande?.toString() ?? '',
       nationalite: athlete?.nationalite ?? 'RDC',
+      dateNaissance: '',
       telephone: athlete?.telephone ?? '',
       email: athlete?.email ?? '',
       priorityScouting: athlete?.priorityScouting ?? 'NORMALE',
@@ -120,7 +121,7 @@ export function AthleteForm({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Date de naissance">
-            <Input type="date" value={form.nationalite} onChange={(e) => set('nationalite', e.target.value)} />
+            <Input type="date" value={form.dateNaissance} onChange={(e) => set('dateNaissance', e.target.value)} />
           </Field>
           <Field label="Nationalité">
             <Select value={form.nationalite} onValueChange={(v) => set('nationalite', v)}>
@@ -171,7 +172,6 @@ export function AthleteForm({
             <Select value={form.niveau} onValueChange={(v) => set('niveau', v as Athlete['niveau'])}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="AMATEUR">-- Niveau --</SelectItem>
                 <SelectItem value="AMATEUR">Amateur</SelectItem>
                 <SelectItem value="SEMI_PRO">Semi-Pro</SelectItem>
                 <SelectItem value="PRO">Pro</SelectItem>

@@ -2,39 +2,42 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import { authApi } from '@/lib/api';
 
-interface DemoAccount {
-  role: string;
-  email: string;
-  initials: string;
-  bgColor: string;
-  password?: string;
+function MI({ name, size = 16, style }: { name: string; size?: number; style?: React.CSSProperties }) {
+  return (
+    <span
+      className="material-icons-outlined select-none leading-none"
+      style={{ fontSize: size, display: 'inline-flex', alignItems: 'center', ...style }}
+    >
+      {name}
+    </span>
+  );
 }
 
-const DEMO_ACCOUNTS: DemoAccount[] = [
+const DEMO_ACCOUNTS = [
   {
     role: 'Administrateur',
     email: 'admin@ndembokin.cd',
+    password: 'demo123',
     initials: 'AD',
-    bgColor: 'bg-amber-100',
-    password: 'demo123'
+    avatarStyle: { background: 'linear-gradient(135deg,#DAA520,#FCD116)', color: '#07101A' },
   },
   {
     role: 'Commercial',
     email: 'commercial@ndembokin.cd',
+    password: 'demo123',
     initials: 'CC',
-    bgColor: 'bg-blue-100',
-    password: 'demo123'
+    avatarStyle: { background: 'linear-gradient(135deg,#3A6B84,#2563EB)', color: '#fff' },
   },
   {
     role: 'Coach',
     email: 'coach@ndembokin.cd',
+    password: 'demo123',
     initials: 'CH',
-    bgColor: 'bg-green-100',
-    password: 'demo123'
-  }
+    avatarStyle: { background: 'linear-gradient(135deg,#059669,#10B981)', color: '#fff' },
+  },
 ];
 
 export default function LoginPage() {
@@ -43,7 +46,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPwd, setShowPwd] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,188 +64,304 @@ export default function LoginPage() {
     }
   }
 
-  function handleDemoAccount(account: DemoAccount) {
-    setEmail(account.email);
-    setPassword(account.password || '');
-  }
-
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Navy Background */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#07101A] flex-col justify-between p-12 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#3A6B84]/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#FCD116]/5 rounded-full blur-3xl" />
+    <div className="min-h-screen flex" style={{ background: '#F0F2F5', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
 
+      {/* ── Left panel (42%) ── */}
+      <div
+        className="hidden lg:flex flex-col justify-between relative overflow-hidden shrink-0"
+        style={{ width: '42%', background: '#07101A', padding: '48px 40px' }}
+      >
+        {/* Halos décoratifs */}
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full pointer-events-none"
+          style={{ background: 'rgba(58,107,132,0.08)', filter: 'blur(60px)' }} />
+        <div className="absolute bottom-0 left-0 w-56 h-56 rounded-full pointer-events-none"
+          style={{ background: 'rgba(252,209,22,0.05)', filter: 'blur(50px)' }} />
+
+        {/* Brand */}
         <div className="relative z-10">
-          {/* Logo & Header */}
-          <div className="mb-16">
-            <div className="inline-flex items-center gap-3 mb-8">
-              <div className="bg-white rounded-full p-2.5 w-12 h-12 flex items-center justify-center">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#07101A] to-[#3A6B84] rounded-full" />
-              </div>
-              <div>
-                <h1 className="text-white font-bold text-lg">Ndembo Kin</h1>
-                <p className="text-[#FCD116] text-xs font-semibold tracking-wider">CONNECT SARL</p>
+          <div className="flex items-center gap-3 mb-12">
+            <div className="bg-white rounded-[10px] px-1.5 py-1 flex items-center justify-center"
+              style={{ height: 40 }}>
+              <img src="/logo.png" alt="NKC" className="h-7 w-auto" />
+            </div>
+            <div>
+              <div className="font-extrabold text-white text-[15px] leading-tight">Ndembo Kin</div>
+              <div className="font-bold text-[9px] tracking-[1.5px] uppercase" style={{ color: 'rgba(252,209,22,0.55)' }}>
+                CONNECT SARL
               </div>
             </div>
-
-            <h2 className="text-white text-4xl font-bold leading-tight mb-4">
-              Gérez vos athlètes, clients et contrats depuis Kinshasa.
-            </h2>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              Plateforme CRM conçue pour l'agence sportive Ndembo Kin Connect — sport, business, excellence.
-            </p>
           </div>
+
+          <h2 className="text-white font-extrabold text-[32px] leading-[1.15] tracking-[-0.6px] mb-4">
+            Gérez vos athlètes,<br />clients et contrats<br />depuis Kinshasa.
+          </h2>
+          <p className="text-[14px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            Plateforme CRM conçue pour l'agence sportive<br />Ndembo Kin Connect — sport, business, excellence.
+          </p>
         </div>
 
         {/* Stats */}
-        <div className="relative z-10 grid grid-cols-3 gap-8">
-          <div>
-            <div className="text-[#FCD116] text-3xl font-bold mb-1">14</div>
-            <p className="text-slate-400 text-xs uppercase tracking-wide">modules actifs</p>
-          </div>
-          <div>
-            <div className="text-[#FCD116] text-3xl font-bold mb-1">5</div>
-            <p className="text-slate-400 text-xs uppercase tracking-wide">rôles d'accès</p>
-          </div>
-          <div>
-            <div className="text-[#FCD116] text-3xl font-bold mb-1">PWA</div>
-            <p className="text-slate-400 text-xs uppercase tracking-wide">offline-first</p>
-          </div>
+        <div className="relative z-10 grid grid-cols-3 gap-5">
+          {[
+            { value: '14', label: 'Modules actifs' },
+            { value: '5', label: "Rôles d'accès" },
+            { value: 'PWA', label: 'Offline-first' },
+          ].map(s => (
+            <div
+              key={s.label}
+              className="rounded-xl p-4"
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(252,209,22,0.08)',
+              }}
+            >
+              <div className="text-[28px] font-black leading-none mb-1" style={{ color: '#FCD116' }}>{s.value}</div>
+              <div className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>{s.label}</div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Right Side - White Background */}
-      <div className="w-full lg:w-1/2 bg-white flex flex-col justify-center p-6 lg:p-12">
-        <div className="w-full max-w-md mx-auto">
-          {/* Mobile Logo (visible on mobile) */}
-          <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="bg-[#07101A] rounded-full p-2 w-10 h-10 flex items-center justify-center">
-              <div className="w-6 h-6 bg-gradient-to-br from-[#FCD116] to-[#3A6B84] rounded-full" />
+      {/* ── Right panel (58%) ── */}
+      <div
+        className="flex-1 flex flex-col items-center justify-center"
+        style={{ background: '#F0F2F5', padding: '32px 24px' }}
+      >
+        {/* Logo mobile */}
+        <div className="lg:hidden flex items-center gap-3 mb-8">
+          <div className="bg-[#07101A] rounded-[10px] px-1.5 py-1 flex items-center justify-center">
+            <img src="/logo.png" alt="NKC" className="h-7 w-auto" />
+          </div>
+          <div>
+            <div className="font-extrabold text-[#07101A] text-[15px]">Ndembo Kin</div>
+            <div className="font-bold text-[9px] tracking-[1.5px] uppercase" style={{ color: '#FCD116' }}>
+              CONNECT SARL
             </div>
-            <div>
-              <h1 className="text-[#07101A] font-bold">Ndembo Kin</h1>
-              <p className="text-[#FCD116] text-xs font-semibold">CONNECT</p>
+          </div>
+        </div>
+
+        {/* Form card */}
+        <div
+          className="w-full"
+          style={{
+            maxWidth: 430,
+            background: '#fff',
+            borderRadius: 20,
+            boxShadow: '0 4px 24px rgba(15,23,42,0.06)',
+            padding: 40,
+          }}
+        >
+          <div className="mb-7">
+            <div className="text-[24px] font-extrabold mb-1" style={{ color: '#0F172A' }}>
+              Connexion
+            </div>
+            <div className="text-[14px]" style={{ color: '#64748B' }}>
+              Accédez à votre espace de gestion
             </div>
           </div>
 
-          {/* Welcome */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-[#07101A] mb-2">
-              Bienvenue 👋
-            </h1>
-            <p className="text-slate-600 text-sm">
-              Connectez-vous à votre espace de travail
-            </p>
-          </div>
+          {error && (
+            <div
+              className="flex items-center gap-2 px-4 py-3 rounded-xl text-[13px] font-medium mb-5"
+              style={{ background: '#FFF1F2', border: '1px solid #FECDD3', color: '#BE123C' }}
+            >
+              <MI name="error_outline" size={16} style={{ color: '#BE123C' }} />
+              {error}
+            </div>
+          )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6 mb-8">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
-                {error}
-              </div>
-            )}
-
-            {/* Email Field */}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {/* Email */}
             <div>
-              <label className="block text-sm font-semibold text-[#07101A] mb-2">
+              <label className="block text-[13px] font-semibold mb-1.5" style={{ color: '#334155' }}>
                 Adresse e-mail
               </label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                placeholder="email@ndembokin.cd"
-                className="w-full px-4 py-3 border border-slate-200 rounded-lg text-[#07101A] placeholder-slate-400 focus:outline-none focus:border-[#FCD116] focus:ring-2 focus:ring-[#FCD116]/20 transition-all"
-              />
+              <div className="relative">
+                <div className="absolute left-3.5 top-0 bottom-0 flex items-center pointer-events-none">
+                  <MI name="mail_outline" size={16} style={{ color: '#94A3B8' }} />
+                </div>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  placeholder="email@ndembokin.cd"
+                  style={{
+                    width: '100%',
+                    paddingLeft: 40,
+                    paddingRight: 14,
+                    paddingTop: 11,
+                    paddingBottom: 11,
+                    borderRadius: 10,
+                    border: '1.5px solid #E2E8F0',
+                    background: '#FAFBFC',
+                    color: '#0F172A',
+                    fontSize: 14,
+                    outline: 'none',
+                    transition: 'border-color .15s, box-shadow .15s',
+                  }}
+                  onFocus={e => {
+                    e.target.style.borderColor = '#3A6B84';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(58,107,132,0.12)';
+                  }}
+                  onBlur={e => {
+                    e.target.style.borderColor = '#E2E8F0';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+              </div>
             </div>
 
-            {/* Password Field */}
+            {/* Password */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-semibold text-[#07101A]">
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="text-[13px] font-semibold" style={{ color: '#334155' }}>
                   Mot de passe
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-[#3A6B84] hover:text-[#FCD116] text-xs transition-colors"
+                <Link
+                  href="/forgot-password"
+                  className="text-[12px] font-semibold hover:underline"
+                  style={{ color: '#3A6B84' }}
                 >
-                  {showPassword ? 'Masquer' : 'Afficher'}
-                </button>
+                  Mot de passe oublié ?
+                </Link>
               </div>
               <div className="relative">
+                <div className="absolute left-3.5 top-0 bottom-0 flex items-center pointer-events-none">
+                  <MI name="lock_outline" size={16} style={{ color: '#94A3B8' }} />
+                </div>
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPwd ? 'text' : 'password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 border border-slate-200 rounded-lg text-[#07101A] placeholder-slate-400 focus:outline-none focus:border-[#FCD116] focus:ring-2 focus:ring-[#FCD116]/20 transition-all"
+                  style={{
+                    width: '100%',
+                    paddingLeft: 40,
+                    paddingRight: 44,
+                    paddingTop: 11,
+                    paddingBottom: 11,
+                    borderRadius: 10,
+                    border: '1.5px solid #E2E8F0',
+                    background: '#FAFBFC',
+                    color: '#0F172A',
+                    fontSize: 14,
+                    outline: 'none',
+                    transition: 'border-color .15s, box-shadow .15s',
+                  }}
+                  onFocus={e => {
+                    e.target.style.borderColor = '#3A6B84';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(58,107,132,0.12)';
+                  }}
+                  onBlur={e => {
+                    e.target.style.borderColor = '#E2E8F0';
+                    e.target.style.boxShadow = 'none';
+                  }}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-slate-400 hover:text-[#07101A] transition-colors"
+                  onClick={() => setShowPwd(!showPwd)}
                   tabIndex={-1}
+                  className="absolute right-3.5 top-0 bottom-0 flex items-center"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  <MI
+                    name={showPwd ? 'visibility_off' : 'visibility'}
+                    size={17}
+                    style={{ color: '#94A3B8' }}
+                  />
                 </button>
               </div>
-              <button
-                type="button"
-                className="text-[#3A6B84] hover:text-[#FCD116] text-xs mt-2 font-medium transition-colors"
-              >
-                Mot de passe oublié ?
-              </button>
             </div>
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#07101A] hover:bg-[#0F172A] text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+              className="w-full flex items-center justify-center gap-2 font-bold text-[14px] rounded-[10px] transition-all"
+              style={{
+                marginTop: 4,
+                padding: '13px 24px',
+                background: loading ? '#132730' : '#07101A',
+                color: '#FCD116',
+                opacity: loading ? 0.7 : 1,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                border: 'none',
+              }}
             >
-              Se connecter
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              {loading ? (
+                <>
+                  <span
+                    className="w-4 h-4 rounded-full border-2 border-[#FCD116] border-t-transparent"
+                    style={{ animation: 'spin 0.7s linear infinite' }}
+                  />
+                  Connexion…
+                </>
+              ) : (
+                <>
+                  Se connecter
+                  <MI name="arrow_forward" size={16} style={{ color: '#FCD116' }} />
+                </>
+              )}
             </button>
           </form>
+        </div>
 
-          {/* Demo Accounts */}
-          <div className="border-t border-slate-200 pt-8">
-            <p className="text-slate-700 text-xs font-semibold uppercase tracking-wider mb-4 text-center">
-              Comptes de démonstration
-            </p>
-            <div className="space-y-3">
-              {DEMO_ACCOUNTS.map((account) => (
-                <button
-                  key={account.email}
-                  type="button"
-                  onClick={() => handleDemoAccount(account)}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-[#FCD116] hover:bg-yellow-50/30 transition-all text-left group"
+        {/* Demo accounts */}
+        <div className="w-full mt-5" style={{ maxWidth: 430 }}>
+          <div
+            className="text-center text-[11px] font-bold uppercase tracking-[1.5px] mb-3"
+            style={{ color: '#94A3B8' }}
+          >
+            Comptes de démonstration
+          </div>
+          <div className="flex flex-col gap-2">
+            {DEMO_ACCOUNTS.map(acc => (
+              <button
+                key={acc.email}
+                type="button"
+                onClick={() => {
+                  setEmail(acc.email);
+                  setPassword(acc.password);
+                }}
+                className="flex items-center gap-3 w-full text-left transition-all"
+                style={{
+                  background: '#fff',
+                  border: '1px solid #E8ECF1',
+                  borderRadius: 12,
+                  padding: '11px 14px',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#3A6B84';
+                  (e.currentTarget as HTMLButtonElement).style.background = '#F8FBFC';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#E8ECF1';
+                  (e.currentTarget as HTMLButtonElement).style.background = '#fff';
+                }}
+              >
+                <div
+                  className="flex items-center justify-center text-[9px] font-black shrink-0"
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    fontSize: 9,
+                    fontWeight: 800,
+                    ...acc.avatarStyle,
+                  }}
                 >
-                  <div className={`w-10 h-10 ${account.bgColor} rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm text-slate-700`}>
-                    {account.initials}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#07101A]">
-                      {account.role}
-                    </p>
-                    <p className="text-xs text-slate-600 truncate">
-                      {account.email}
-                    </p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#FCD116] transition-colors flex-shrink-0" />
-                </button>
-              ))}
-            </div>
+                  {acc.initials}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-bold" style={{ color: '#0F172A' }}>{acc.role}</div>
+                  <div className="text-[11px] truncate" style={{ color: '#94A3B8' }}>{acc.email}</div>
+                </div>
+                <MI name="chevron_right" size={16} style={{ color: '#CBD5E1' }} />
+              </button>
+            ))}
           </div>
         </div>
       </div>

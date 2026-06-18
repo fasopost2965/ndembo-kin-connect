@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F0F2F5; }
+    * { box-sizing: border-box; }
+    select { appearance: none; -webkit-appearance: none; }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; min-height: 100vh; background: #F0F2F5; display: flex; flex-direction: column;">
+
+  <!-- TOPBAR -->
+  <div style="background: #fff; border-bottom: 1px solid #E8ECF1; padding: 0 32px; display: flex; align-items: center; height: 60px; flex-shrink: 0;">
+    <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+      <div style="background: #07101A; border-radius: 8px; padding: 4px 5px;">
+        <img src="assets/logo.png" style="height: 22px; width: auto; display: block;" />
+      </div>
+      <span style="font-size: 13px; color: #94A3B8;">/</span>
+      <span style="font-size: 13px; color: #94A3B8;" onClick="{{ goBack }}" style-hover="color: #3A6B84; cursor: pointer;">Athlètes</span>
+      <span style="font-size: 13px; color: #94A3B8;">/</span>
+      <span style="font-size: 13px; font-weight: 600; color: #0F172A;">Nouvel athlète</span>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button onClick="{{ goBack }}" style="padding: 8px 18px; background: #F1F5F9; color: #475569; font-size: 13px; font-weight: 600; border: 1px solid #E2E8F0; border-radius: 9px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif;" style-hover="background: #E2E8F0;">Annuler</button>
+      <button onClick="{{ onSave }}" style="padding: 8px 20px; background: #07101A; color: #FCD116; font-size: 13px; font-weight: 700; border: none; border-radius: 9px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 7px;" style-hover="background: #132730;">
+        <span style="font-family: Material Icons Outlined; font-size: 16px; display: inline-flex; line-height: 1;">save</span>
+        Enregistrer
+      </button>
+    </div>
+  </div>
+
+  <!-- CONTENU -->
+  <div style="flex: 1; padding: 32px; max-width: 860px; margin: 0 auto; width: 100%;">
+
+    <!-- Brouillon -->
+    <sc-if value="{{ hasDraft }}" hint-placeholder-val="{{ false }}">
+      <div style="background: #FEF9EE; border: 1px solid #FDE68A; border-radius: 10px; padding: 10px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+        <span style="font-family: Material Icons Outlined; font-size: 16px; color: #B45309; display: inline-flex; line-height: 1;">restore</span>
+        <div style="font-size: 13px; color: #92400E; flex: 1;">Brouillon sauvegardé automatiquement — <strong>reprendre ?</strong></div>
+        <button onClick="{{ restoreDraft }}" style="padding: 4px 12px; background: #B45309; color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif;">Reprendre</button>
+        <button onClick="{{ clearDraft }}" style="padding: 4px 12px; background: transparent; color: #94A3B8; border: 1px solid #E2E8F0; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif;">Ignorer</button>
+      </div>
+    </sc-if>
+
+    <!-- Succès -->
+    <sc-if value="{{ saved }}" hint-placeholder-val="{{ false }}">
+      <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+        <span style="font-family: Material Icons Outlined; font-size: 18px; color: #059669; display: inline-flex; line-height: 1;">check_circle</span>
+        <div style="font-size: 13px; color: #166534; font-weight: 600;">Athlète enregistré avec succès !</div>
+      </div>
+    </sc-if>
+
+    <!-- Section 1 : Identité -->
+    <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px 28px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid #F1F5F9;">
+        <div style="width: 32px; height: 32px; border-radius: 9px; background: #FEF9EE; border: 1px solid #FDE68A; display: flex; align-items: center; justify-content: center;">
+          <span style="font-family: Material Icons Outlined; font-size: 16px; color: #B45309; display: inline-flex; line-height: 1;">person</span>
+        </div>
+        <div style="font-size: 15px; font-weight: 700; color: #0F172A;">Identité</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Prénom <span style="color: #EF4444;">*</span></label>
+          <input type="text" placeholder="ex: Lukaku" value="{{ form.prenom }}" onInput="{{ onPrenom }}"
+            style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;"
+            style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Nom de famille <span style="color: #EF4444;">*</span></label>
+          <input type="text" placeholder="ex: Mbuyi" value="{{ form.nom }}" onInput="{{ onNom }}"
+            style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;"
+            style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Date de naissance</label>
+          <input type="date" value="{{ form.ddn }}" onInput="{{ onDdn }}"
+            style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;"
+            style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Nationalité</label>
+          <div style="position: relative;">
+            <select value="{{ form.nationalite }}" onChange="{{ onNationalite }}"
+              style="width: 100%; padding: 11px 36px 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC; cursor: pointer;"
+              style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);">
+              <option value="RDC">🇨🇩 RDC (Congo)</option>
+              <option value="Congo-B">🇨🇬 Congo-Brazzaville</option>
+              <option value="Angola">🇦🇴 Angola</option>
+              <option value="Cameroun">🇨🇲 Cameroun</option>
+              <option value="Autre">Autre</option>
+            </select>
+            <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 16px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+          </div>
+        </div>
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Téléphone</label>
+          <input type="tel" placeholder="+243 8X XXX XXXX" value="{{ form.telephone }}" onInput="{{ onTelephone }}"
+            style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;"
+            style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">E-mail</label>
+          <input type="email" placeholder="athlete@email.com" value="{{ form.email }}" onInput="{{ onEmail }}"
+            style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;"
+            style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2 : Sport -->
+    <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px 28px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid #F1F5F9;">
+        <div style="width: 32px; height: 32px; border-radius: 9px; background: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center;">
+          <span style="font-family: Material Icons Outlined; font-size: 16px; color: #2563EB; display: inline-flex; line-height: 1;">sports_soccer</span>
+        </div>
+        <div style="font-size: 15px; font-weight: 700; color: #0F172A;">Profil sportif</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Sport <span style="color: #EF4444;">*</span></label>
+          <div style="position: relative;">
+            <select value="{{ form.sport }}" onChange="{{ onSport }}"
+              style="width: 100%; padding: 11px 36px 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC; cursor: pointer;"
+              style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);">
+              <option value="">-- Choisir --</option>
+              <option value="Football">⚽ Football</option>
+              <option value="Basketball">🏀 Basketball</option>
+              <option value="Athlétisme">🏃 Athlétisme</option>
+              <option value="Boxe">🥊 Boxe</option>
+              <option value="Natation">🏊 Natation</option>
+            </select>
+            <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 16px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+          </div>
+        </div>
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Poste / Spécialité</label>
+          <input type="text" placeholder="ex: Attaquant, Pivot…" value="{{ form.poste }}" onInput="{{ onPoste }}"
+            style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;"
+            style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Niveau <span style="color: #EF4444;">*</span></label>
+          <div style="position: relative;">
+            <select value="{{ form.niveau }}" onChange="{{ onNiveau }}"
+              style="width: 100%; padding: 11px 36px 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC; cursor: pointer;"
+              style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);">
+              <option value="">-- Niveau --</option>
+              <option value="AMATEUR">Amateur</option>
+              <option value="SEMI_PRO">Semi-professionnel</option>
+              <option value="PRO">Professionnel</option>
+            </select>
+            <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 16px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+          </div>
+        </div>
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Club actuel</label>
+          <input type="text" placeholder="ex: TP Mazembe" value="{{ form.club }}" onInput="{{ onClub }}"
+            style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;"
+            style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Valeur marchande (USD)</label>
+          <div style="position: relative;">
+            <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #94A3B8; font-weight: 600;">$</span>
+            <input type="number" placeholder="0" value="{{ form.valeur }}" onInput="{{ onValeur }}"
+              style="width: 100%; padding: 11px 14px 11px 28px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;"
+              style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+          </div>
+        </div>
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Statut</label>
+          <div style="position: relative;">
+            <select value="{{ form.statut }}" onChange="{{ onStatut }}"
+              style="width: 100%; padding: 11px 36px 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC; cursor: pointer;"
+              style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);">
+              <option value="Actif">Actif</option>
+              <option value="En transfert">En transfert</option>
+              <option value="Blessé">Blessé</option>
+              <option value="Inactif">Inactif</option>
+            </select>
+            <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 16px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Notes / Observations</label>
+        <textarea placeholder="Talents remarquables, historique, observations du coach…" value="{{ form.notes }}" onInput="{{ onNotes }}"
+          style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC; height: 88px; resize: vertical; line-height: 1.5;"
+          style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);"></textarea>
+      </div>
+    </div>
+
+    <!-- Actions bas -->
+    <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 4px 0 32px;">
+      <button onClick="{{ goBack }}" style="padding: 11px 22px; background: #F1F5F9; color: #475569; font-size: 14px; font-weight: 600; border: 1px solid #E2E8F0; border-radius: 10px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif;" style-hover="background: #E2E8F0;">Annuler</button>
+      <button onClick="{{ onSave }}" style="padding: 11px 28px; background: #07101A; color: #FCD116; font-size: 14px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 8px;" style-hover="background: #132730;">
+        <span style="font-family: Material Icons Outlined; font-size: 16px; display: inline-flex; line-height: 1;">check</span>
+        Enregistrer l'athlète
+      </button>
+    </div>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1280, &quot;height&quot;: 900}}">
+
+class Component extends DCLogic {
+  DRAFT_KEY = 'draft:athlete';
+  state = {
+    saved: false,
+    hasDraft: false,
+    form: { prenom:'', nom:'', ddn:'', nationalite:'RDC', telephone:'', email:'', sport:'', poste:'', niveau:'', club:'', valeur:'', statut:'Actif', notes:'' },
+  };
+
+  componentDidMount() {
+    try {
+      const raw = localStorage.getItem(this.DRAFT_KEY);
+      if (raw) this.setState({ hasDraft: true });
+    } catch(e) {}
+    this._draftTimer = null;
+  }
+
+  _scheduleDraft(form) {
+    clearTimeout(this._draftTimer);
+    this._draftTimer = setTimeout(() => {
+      try { localStorage.setItem(this.DRAFT_KEY, JSON.stringify(form)); } catch(e) {}
+    }, 800);
+  }
+
+  _field(key) {
+    return (e) => {
+      const form = { ...this.state.form, [key]: e.target.value };
+      this.setState({ form });
+      this._scheduleDraft(form);
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    return {
+      form: s.form,
+      saved: s.saved,
+      hasDraft: s.hasDraft,
+      onPrenom: this._field('prenom'),
+      onNom: this._field('nom'),
+      onDdn: this._field('ddn'),
+      onNationalite: this._field('nationalite'),
+      onTelephone: this._field('telephone'),
+      onEmail: this._field('email'),
+      onSport: this._field('sport'),
+      onPoste: this._field('poste'),
+      onNiveau: this._field('niveau'),
+      onClub: this._field('club'),
+      onValeur: this._field('valeur'),
+      onStatut: this._field('statut'),
+      onNotes: this._field('notes'),
+      restoreDraft: () => {
+        try {
+          const raw = localStorage.getItem(this.DRAFT_KEY);
+          if (raw) this.setState({ form: JSON.parse(raw), hasDraft: false });
+        } catch(e) {}
+      },
+      clearDraft: () => {
+        try { localStorage.removeItem(this.DRAFT_KEY); } catch(e) {}
+        this.setState({ hasDraft: false });
+      },
+      goBack: () => alert('← Retour à la liste des athlètes'),
+      onSave: () => {
+        const f = s.form;
+        if (!f.prenom || !f.nom || !f.sport || !f.niveau) {
+          alert('Veuillez remplir les champs obligatoires (*)');
+          return;
+        }
+        try { localStorage.removeItem(this.DRAFT_KEY); } catch(e) {}
+        this.setState({ saved: true });
+        setTimeout(() => this.setState({ saved: false }), 3000);
+      },
+    };
+  }
+}
+
+</script>
+</body>
+</html>

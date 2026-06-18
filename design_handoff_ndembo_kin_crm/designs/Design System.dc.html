@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F4F6F9; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; max-width: 1080px; margin: 0 auto; padding: 48px 40px 80px;">
+
+  <!-- Header -->
+  <div style="display: flex; align-items: center; gap: 20px; padding-bottom: 32px; border-bottom: 1px solid #E8ECF1; margin-bottom: 44px;">
+    <div style="background: #fff; border-radius: 16px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+      <img src="assets/logo.png" style="height: 64px; width: auto; display: block;" />
+    </div>
+    <div>
+      <div style="font-size: 13px; font-weight: 700; color: #3A6B84; letter-spacing: 2px; text-transform: uppercase;">Design System</div>
+      <div style="font-size: 34px; font-weight: 800; letter-spacing: -0.8px; line-height: 1.1; margin-top: 4px;">Ndembo Kin Connect</div>
+      <div style="font-size: 15px; color: #94A3B8; margin-top: 4px;">Identité visuelle du CRM — inspirée des couleurs de la RDC</div>
+    </div>
+  </div>
+
+  <!-- ═══ BRAND COLORS ═══ -->
+  <div style="margin-bottom: 52px;">
+    <div style="font-size: 12px; font-weight: 700; color: #94A3B8; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px;">01 — Palette</div>
+    <div style="font-size: 22px; font-weight: 700; margin-bottom: 4px;">Couleurs de marque</div>
+    <div style="font-size: 14px; color: #64748B; margin-bottom: 24px;">Dérivées du logo : le bleu drapeau et le cyan dominent, le rouge et l'or en accents (RDC).</div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px;">
+      <sc-for list="{{ brandColors }}" as="c" hint-placeholder-count="4">
+        <div style="background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+          <div style="{{ c.swatch }}"></div>
+          <div style="padding: 16px;">
+            <div style="font-size: 14px; font-weight: 700;">{{ c.name }}</div>
+            <div style="font-size: 12px; color: #94A3B8; margin-top: 3px; font-family: monospace;">{{ c.hex }}</div>
+            <div style="font-size: 12px; color: #64748B; margin-top: 8px; line-height: 1.4;">{{ c.use }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- Neutrals -->
+    <div style="font-size: 13px; font-weight: 600; color: #64748B; margin: 24px 0 12px;">Neutres (interface)</div>
+    <div style="display: flex; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <sc-for list="{{ neutrals }}" as="n" hint-placeholder-count="6">
+        <div style="{{ n.cell }}">
+          <div style="{{ n.label }}">{{ n.hex }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- Semantic -->
+    <div style="font-size: 13px; font-weight: 600; color: #64748B; margin: 24px 0 12px;">Sémantique (statuts)</div>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+      <sc-for list="{{ semantic }}" as="s" hint-placeholder-count="4">
+        <div style="display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+          <div style="{{ s.dot }}"></div>
+          <div>
+            <div style="font-size: 13px; font-weight: 700;">{{ s.name }}</div>
+            <div style="font-size: 11px; color: #94A3B8; font-family: monospace;">{{ s.hex }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- ═══ TYPOGRAPHY ═══ -->
+  <div style="margin-bottom: 52px;">
+    <div style="font-size: 12px; font-weight: 700; color: #94A3B8; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px;">02 — Typographie</div>
+    <div style="font-size: 22px; font-weight: 700; margin-bottom: 4px;">Plus Jakarta Sans</div>
+    <div style="font-size: 14px; color: #64748B; margin-bottom: 24px;">Une seule famille, géométrique et moderne. Graisses 400 à 800.</div>
+
+    <div style="background: #fff; border-radius: 16px; padding: 8px 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <div style="display: flex; align-items: baseline; gap: 24px; padding: 20px 0; border-bottom: 1px solid #F1F5F9;">
+        <div style="width: 130px; font-size: 12px; color: #94A3B8; font-weight: 600;">Display / 800</div>
+        <div style="font-size: 40px; font-weight: 800; letter-spacing: -1px;">Tableau de bord</div>
+      </div>
+      <div style="display: flex; align-items: baseline; gap: 24px; padding: 20px 0; border-bottom: 1px solid #F1F5F9;">
+        <div style="width: 130px; font-size: 12px; color: #94A3B8; font-weight: 600;">Titre / 700</div>
+        <div style="font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">Gestion des athlètes</div>
+      </div>
+      <div style="display: flex; align-items: baseline; gap: 24px; padding: 20px 0; border-bottom: 1px solid #F1F5F9;">
+        <div style="width: 130px; font-size: 12px; color: #94A3B8; font-weight: 600;">Section / 600</div>
+        <div style="font-size: 18px; font-weight: 600;">Chiffre d'affaires mensuel</div>
+      </div>
+      <div style="display: flex; align-items: baseline; gap: 24px; padding: 20px 0; border-bottom: 1px solid #F1F5F9;">
+        <div style="width: 130px; font-size: 12px; color: #94A3B8; font-weight: 600;">Corps / 400</div>
+        <div style="font-size: 15px; font-weight: 400; color: #334155;">Suivi des prestations, devis et factures en temps réel.</div>
+      </div>
+      <div style="display: flex; align-items: baseline; gap: 24px; padding: 20px 0;">
+        <div style="width: 130px; font-size: 12px; color: #94A3B8; font-weight: 600;">Label / 600</div>
+        <div style="font-size: 11px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Valeur marchande</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ COMPONENTS ═══ -->
+  <div style="margin-bottom: 52px;">
+    <div style="font-size: 12px; font-weight: 700; color: #94A3B8; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px;">03 — Composants</div>
+    <div style="font-size: 22px; font-weight: 700; margin-bottom: 24px;">Éléments d'interface</div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+      <!-- Buttons -->
+      <div style="background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="font-size: 13px; font-weight: 700; color: #64748B; margin-bottom: 18px;">Boutons</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+          <div style="background: #132730; color: #fff; padding: 11px 22px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer;">Primaire</div>
+          <div style="background: #7CC8E8; color: #0B2530; padding: 11px 22px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer;">Accent</div>
+          <div style="background: #F1F5F9; color: #334155; padding: 11px 22px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer;">Secondaire</div>
+          <div style="border: 1.5px solid #E2E8F0; color: #334155; padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer;">Contour</div>
+        </div>
+      </div>
+
+      <!-- Badges -->
+      <div style="background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="font-size: 13px; font-weight: 700; color: #64748B; margin-bottom: 18px;">Badges de statut</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <span style="font-size: 12px; font-weight: 700; color: #0D9668; background: #ECFDF5; padding: 5px 12px; border-radius: 8px;">Payée</span>
+          <span style="font-size: 12px; font-weight: 700; color: #C9960C; background: #FEF9EE; padding: 5px 12px; border-radius: 8px;">En attente</span>
+          <span style="font-size: 12px; font-weight: 700; color: #DC2626; background: #FEF2F2; padding: 5px 12px; border-radius: 8px;">Impayée</span>
+          <span style="font-size: 12px; font-weight: 700; color: #3A6B84; background: #EBF6FB; padding: 5px 12px; border-radius: 8px;">En cours</span>
+          <span style="font-size: 12px; font-weight: 700; color: #64748B; background: #F1F5F9; padding: 5px 12px; border-radius: 8px;">Brouillon</span>
+        </div>
+        <div style="font-size: 13px; font-weight: 700; color: #64748B; margin: 22px 0 12px;">Niveau athlète</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <span style="font-size: 12px; font-weight: 700; color: #6D28D9; background: #F5F3FF; padding: 5px 12px; border-radius: 8px;">Pro</span>
+          <span style="font-size: 12px; font-weight: 700; color: #2563EB; background: #EFF6FF; padding: 5px 12px; border-radius: 8px;">Semi-pro</span>
+          <span style="font-size: 12px; font-weight: 700; color: #64748B; background: #F1F5F9; padding: 5px 12px; border-radius: 8px;">Amateur</span>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <div style="background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="font-size: 13px; font-weight: 700; color: #64748B; margin-bottom: 18px;">Champs de saisie</div>
+        <div style="font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Nom de l'athlète</div>
+        <div style="display: flex; align-items: center; gap: 10px; border: 1.5px solid #E2E8F0; border-radius: 10px; padding: 11px 14px; margin-bottom: 14px;">
+          <span style="font-family: Material Icons Outlined; font-size: 18px; color: #94A3B8;">person</span>
+          <span style="font-size: 14px; color: #334155;">Cédric Bakambu</span>
+        </div>
+        <div style="font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Champ actif</div>
+        <div style="display: flex; align-items: center; gap: 10px; border: 1.5px solid #7CC8E8; border-radius: 10px; padding: 11px 14px; box-shadow: 0 0 0 3px rgba(124,200,232,0.15);">
+          <span style="font-family: Material Icons Outlined; font-size: 18px; color: #3A6B84;">search</span>
+          <span style="font-size: 14px; color: #0F172A;">Recherche...</span>
+        </div>
+      </div>
+
+      <!-- Avatar + tags -->
+      <div style="background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="font-size: 13px; font-weight: 700; color: #64748B; margin-bottom: 18px;">Avatars & puces</div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px;">
+          <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #3A6B84, #7CC8E8); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 700;">CB</div>
+          <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #C9960C, #FCD116); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 700;">MK</div>
+          <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #B91C1C, #EF4444); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 700;">JL</div>
+          <div style="width: 40px; height: 40px; border-radius: 50%; background: #F1F5F9; display: flex; align-items: center; justify-content: center; color: #94A3B8; font-size: 16px; font-weight: 700;">+5</div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <span style="font-size: 12px; color: #334155; background: #F1F5F9; padding: 5px 12px; border-radius: 20px; font-weight: 500;">⚽ Football</span>
+          <span style="font-size: 12px; color: #334155; background: #F1F5F9; padding: 5px 12px; border-radius: 20px; font-weight: 500;">🏀 Basket</span>
+          <span style="font-size: 12px; color: #334155; background: #F1F5F9; padding: 5px 12px; border-radius: 20px; font-weight: 500;">Attaquant</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ RADII & SHADOWS ═══ -->
+  <div>
+    <div style="font-size: 12px; font-weight: 700; color: #94A3B8; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px;">04 — Forme & élévation</div>
+    <div style="font-size: 22px; font-weight: 700; margin-bottom: 24px;">Rayons & ombres</div>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+      <div style="background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
+        <div style="font-size: 13px; font-weight: 700;">8px</div>
+        <div style="font-size: 11px; color: #94A3B8; margin-top: 4px;">Boutons, badges</div>
+      </div>
+      <div style="background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
+        <div style="font-size: 13px; font-weight: 700;">12px</div>
+        <div style="font-size: 11px; color: #94A3B8; margin-top: 4px;">Champs, puces</div>
+      </div>
+      <div style="background: #fff; padding: 24px; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
+        <div style="font-size: 13px; font-weight: 700;">16px</div>
+        <div style="font-size: 11px; color: #94A3B8; margin-top: 4px;">Cartes</div>
+      </div>
+      <div style="background: #fff; padding: 24px; border-radius: 16px; box-shadow: 0 8px 24px rgba(15,23,42,0.12); text-align: center;">
+        <div style="font-size: 13px; font-weight: 700;">Élevée</div>
+        <div style="font-size: 11px; color: #94A3B8; margin-top: 4px;">Modales, menus</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+class Component extends DCLogic {
+  renderVals() {
+    const swatchBase = { height: '88px' };
+    const brandColors = [
+      { name: 'Bleu Drapeau', hex: '#132730', use: 'Sidebar, boutons primaires, texte fort', swatch: { ...swatchBase, background: '#132730' } },
+      { name: 'Ardoise', hex: '#3A6B84', use: 'Liens, icônes, éléments de marque', swatch: { ...swatchBase, background: '#3A6B84' } },
+      { name: 'Cyan Connect', hex: '#7CC8E8', use: 'Accent principal, surbrillance, KPIs', swatch: { ...swatchBase, background: '#7CC8E8' } },
+      { name: 'Or RDC', hex: '#FCD116', use: 'Accent secondaire, mises en avant', swatch: { ...swatchBase, background: '#FCD116' } },
+    ];
+
+    const neutrals = [
+      { hex: '#0F172A', dark: true }, { hex: '#334155', dark: true },
+      { hex: '#64748B', dark: true }, { hex: '#94A3B8', dark: false },
+      { hex: '#E2E8F0', dark: false }, { hex: '#F4F6F9', dark: false },
+    ].map(n => ({
+      cell: { flex: 1, background: n.hex, height: '70px', display: 'flex', alignItems: 'flex-end', padding: '8px' },
+      label: { fontSize: '10px', fontFamily: 'monospace', fontWeight: 600, color: n.dark ? 'rgba(255,255,255,0.8)' : '#64748B' },
+      hex: n.hex,
+    }));
+
+    const semantic = [
+      { name: 'Succès', hex: '#10B981' },
+      { name: 'Attention', hex: '#F59E0B' },
+      { name: 'Erreur', hex: '#EF4444' },
+      { name: 'Info', hex: '#3A6B84' },
+    ].map(s => ({ ...s, dot: { width: '20px', height: '20px', borderRadius: '6px', background: s.hex, flexShrink: 0 } }));
+
+    return { brandColors, neutrals, semantic };
+  }
+}
+
+</script>
+</body>
+</html>

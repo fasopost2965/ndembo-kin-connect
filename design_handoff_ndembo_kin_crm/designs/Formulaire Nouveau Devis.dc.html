@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F0F2F5; }
+    * { box-sizing: border-box; }
+    select { appearance: none; -webkit-appearance: none; }
+    input[type=number]::-webkit-inner-spin-button { opacity: 1; }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; min-height: 100vh; background: #F0F2F5; display: flex; flex-direction: column;">
+
+  <!-- TOPBAR -->
+  <div style="background: #fff; border-bottom: 1px solid #E8ECF1; padding: 0 32px; display: flex; align-items: center; height: 60px; flex-shrink: 0;">
+    <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+      <div style="background: #07101A; border-radius: 8px; padding: 4px 5px;">
+        <img src="assets/logo.png" style="height: 22px; width: auto; display: block;" />
+      </div>
+      <span style="font-size: 13px; color: #94A3B8;">/</span>
+      <span style="font-size: 13px; color: #94A3B8; cursor: pointer;" style-hover="color: #3A6B84;">Devis</span>
+      <span style="font-size: 13px; color: #94A3B8;">/</span>
+      <span style="font-size: 13px; font-weight: 600; color: #0F172A;">{{ devisRef }}</span>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button style="padding: 8px 16px; background: #F1F5F9; color: #475569; font-size: 13px; font-weight: 600; border: 1px solid #E2E8F0; border-radius: 9px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 6px;" style-hover="background: #E2E8F0;">
+        <span style="font-family: Material Icons Outlined; font-size: 15px; display: inline-flex; line-height: 1;">picture_as_pdf</span>Aperçu PDF
+      </button>
+      <button onClick="{{ onSave }}" style="padding: 8px 20px; background: #07101A; color: #FCD116; font-size: 13px; font-weight: 700; border: none; border-radius: 9px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 7px;" style-hover="background: #132730;">
+        <span style="font-family: Material Icons Outlined; font-size: 15px; display: inline-flex; line-height: 1;">send</span>
+        Enregistrer le devis
+      </button>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 320px; gap: 20px; padding: 28px 32px; max-width: 1200px; margin: 0 auto; width: 100%;">
+
+    <!-- COLONNE GAUCHE -->
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+
+      <!-- Infos générales -->
+      <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px 26px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid #F1F5F9;">
+          <div style="width: 32px; height: 32px; border-radius: 9px; background: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center;">
+            <span style="font-family: Material Icons Outlined; font-size: 16px; color: #2563EB; display: inline-flex; line-height: 1;">info</span>
+          </div>
+          <div style="font-size: 15px; font-weight: 700; color: #0F172A;">Informations générales</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Référence devis</label>
+            <input type="text" value="{{ devisRef }}" readOnly
+              style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #94A3B8; background: #F8FAFC; cursor: not-allowed;" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Date d'émission</label>
+            <input type="date" value="{{ dateEmission }}" onInput="{{ onDateEmission }}"
+              style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;"
+              style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Date de validité</label>
+            <input type="date" value="{{ dateValidite }}" onInput="{{ onDateValidite }}"
+              style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;"
+              style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+          </div>
+          <div style="grid-column: span 2;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Client <span style="color: #EF4444;">*</span></label>
+            <div style="position: relative;">
+              <select value="{{ clientId }}" onChange="{{ onClient }}"
+                style="width: 100%; padding: 11px 36px 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC; cursor: pointer;"
+                style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);">
+                <option value="">-- Sélectionner un client --</option>
+                <option value="1">AS Vita Club — Club · Kinshasa</option>
+                <option value="2">TP Mazembe — Club · Lubumbashi</option>
+                <option value="3">MTN RDC — Sponsor</option>
+                <option value="4">Académie Elan — Académie · Kinshasa</option>
+              </select>
+              <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 16px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+            </div>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Commercial assigné</label>
+            <div style="position: relative;">
+              <select style="width: 100%; padding: 11px 36px 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC; cursor: pointer;" style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);">
+                <option>Amadou S. (Admin)</option>
+                <option>Jean-Pierre K.</option>
+                <option>Marie-Claire N.</option>
+              </select>
+              <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 16px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lignes de prestations -->
+      <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+        <div style="padding: 18px 24px; border-bottom: 1px solid #E8ECF1; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 32px; height: 32px; border-radius: 9px; background: #FEF9EE; border: 1px solid #FDE68A; display: flex; align-items: center; justify-content: center;">
+              <span style="font-family: Material Icons Outlined; font-size: 16px; color: #B45309; display: inline-flex; line-height: 1;">list_alt</span>
+            </div>
+            <div style="font-size: 15px; font-weight: 700; color: #0F172A;">Lignes de prestations</div>
+          </div>
+          <button onClick="{{ addLigne }}" style="padding: 7px 14px; background: #07101A; color: #FCD116; font-size: 12px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 6px;" style-hover="background: #132730;">
+            <span style="font-family: Material Icons Outlined; font-size: 15px; display: inline-flex; line-height: 1;">add</span>Ajouter une ligne
+          </button>
+        </div>
+        <!-- En-tête colonnes -->
+        <div style="display: grid; grid-template-columns: 3fr 1fr 1.2fr 1.2fr 40px; gap: 8px; padding: 10px 20px; background: #F8FAFC; border-bottom: 1px solid #E8ECF1;">
+          <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Prestation</div>
+          <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Qté</div>
+          <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Prix unitaire</div>
+          <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Total HT</div>
+          <div></div>
+        </div>
+        <sc-for list="{{ lignes }}" as="ligne" hint-placeholder-count="3">
+          <div style="display: grid; grid-template-columns: 3fr 1fr 1.2fr 1.2fr 40px; gap: 8px; padding: 10px 20px; border-bottom: 1px solid #F8FAFC; align-items: center;">
+            <div style="position: relative;">
+              <select value="{{ ligne.prestationId }}" onChange="{{ ligne.onPrestation }}"
+                style="width: 100%; padding: 9px 30px 9px 10px; border: 1.5px solid #E2E8F0; border-radius: 8px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC; cursor: pointer;"
+                style-focus="border-color: #3A6B84; background: #fff;">
+                <option value="">-- Choisir --</option>
+                <option value="1">Représentation sportive internationale</option>
+                <option value="2">Négociation de transfert</option>
+                <option value="3">Coaching tactique (session)</option>
+                <option value="4">Organisation d'événement sportif</option>
+                <option value="5">Scouting & recrutement</option>
+              </select>
+              <span style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 14px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+            </div>
+            <input type="number" value="{{ ligne.quantite }}" onInput="{{ ligne.onQte }}" min="1"
+              style="width: 100%; padding: 9px 10px; border: 1.5px solid #E2E8F0; border-radius: 8px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC; text-align: center;"
+              style-focus="border-color: #3A6B84; background: #fff;" />
+            <div style="position: relative;">
+              <span style="position: absolute; left: 9px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #94A3B8; font-weight: 600;">$</span>
+              <input type="number" value="{{ ligne.prixUnit }}" onInput="{{ ligne.onPrix }}" min="0"
+                style="width: 100%; padding: 9px 10px 9px 22px; border: 1.5px solid #E2E8F0; border-radius: 8px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;"
+                style-focus="border-color: #3A6B84; background: #fff;" />
+            </div>
+            <div style="font-size: 14px; font-weight: 700; color: #059669; padding: 0 4px;">{{ ligne.totalFmt }}</div>
+            <button onClick="{{ ligne.onDelete }}" style="width: 28px; height: 28px; border-radius: 7px; background: #FFF1F2; border: 1px solid #FECDD3; cursor: pointer; display: flex; align-items: center; justify-content: center;" style-hover="background: #FFE4E6;">
+              <span style="font-family: Material Icons Outlined; font-size: 14px; color: #BE123C; display: inline-flex; line-height: 1;">delete_outline</span>
+            </button>
+          </div>
+        </sc-for>
+        <!-- Ligne vide si aucune prestation -->
+        <sc-if value="{{ noLignes }}" hint-placeholder-val="{{ false }}">
+          <div style="padding: 32px; text-align: center; color: #94A3B8; font-size: 13px;">
+            <span style="font-family: Material Icons Outlined; font-size: 32px; display: block; margin-bottom: 8px; color: #CBD5E1;">receipt_long</span>
+            Aucune prestation ajoutée — cliquez sur « Ajouter une ligne »
+          </div>
+        </sc-if>
+      </div>
+
+      <!-- Notes -->
+      <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px;">Notes et conditions</label>
+        <textarea placeholder="Conditions de paiement, délais, mentions légales particulières…"
+          style="width: 100%; padding: 12px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC; height: 80px; resize: vertical; line-height: 1.5;"
+          style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);"></textarea>
+      </div>
+    </div>
+
+    <!-- COLONNE DROITE — Récap -->
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+
+      <!-- Récapitulatif financier -->
+      <div style="background: #07101A; border-radius: 16px; padding: 22px 20px; position: sticky; top: 20px;">
+        <div style="font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 18px;">Récapitulatif</div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 13px; color: rgba(255,255,255,0.5);">Sous-total HT</span>
+            <span style="font-size: 14px; font-weight: 600; color: #fff;">{{ totalHT }}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 13px; color: rgba(255,255,255,0.5);">TVA (16%)</span>
+            <span style="font-size: 14px; font-weight: 600; color: #fff;">{{ tva }}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 13px; color: rgba(255,255,255,0.5);">Remise</span>
+            <div style="position: relative; width: 90px;">
+              <input type="number" value="{{ remise }}" onInput="{{ onRemise }}" min="0" max="100" placeholder="0"
+                style="width: 100%; padding: 5px 24px 5px 8px; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #fff; background: rgba(255,255,255,0.07); outline: none; text-align: right;"
+                style-focus="border-color: rgba(252,209,22,0.4);" />
+              <span style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 12px; color: rgba(255,255,255,0.4);">%</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <span style="font-size: 15px; font-weight: 700; color: #fff;">Total TTC</span>
+          <span style="font-size: 24px; font-weight: 800; color: #FCD116; letter-spacing: -0.5px;">{{ totalTTC }}</span>
+        </div>
+
+        <button onClick="{{ onSave }}" style="width: 100%; padding: 13px; background: #FCD116; color: #07101A; font-size: 14px; font-weight: 800; border: none; border-radius: 11px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px;" style-hover="background: #DAA520;">
+          <span style="font-family: Material Icons Outlined; font-size: 18px; display: inline-flex; line-height: 1;">send</span>
+          Enregistrer le devis
+        </button>
+        <button style="width: 100%; padding: 11px; background: transparent; color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.1); border-radius: 11px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;" style-hover="border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.7);">
+          <span style="font-family: Material Icons Outlined; font-size: 16px; display: inline-flex; line-height: 1;">picture_as_pdf</span>
+          Aperçu PDF
+        </button>
+      </div>
+
+      <!-- Statut -->
+      <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+        <div style="font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">Statut du devis</div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <sc-for list="{{ statutOptions }}" as="opt" hint-placeholder-count="4">
+            <div onClick="{{ opt.onClick }}" style="{{ opt.style }}">
+              <div style="{{ opt.dot }}"></div>
+              <div>
+                <div style="font-size: 13px; font-weight: 600; color: #334155;">{{ opt.label }}</div>
+                <div style="font-size: 11px; color: #94A3B8;">{{ opt.desc }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1280, &quot;height&quot;: 900}}">
+
+class Component extends DCLogic {
+  state = {
+    devisRef: 'DEV-2026-014',
+    dateEmission: new Date().toISOString().split('T')[0],
+    dateValidite: new Date(Date.now()+30*86400000).toISOString().split('T')[0],
+    clientId: '',
+    remise: 0,
+    statut: 'EN_ATTENTE',
+    lignes: [
+      { id:1, prestationId:'1', quantite:1, prixUnit:5000 },
+      { id:2, prestationId:'3', quantite:4, prixUnit:800 },
+    ],
+    saved: false,
+  };
+
+  _fmt(n) { return '$' + (n||0).toLocaleString('fr-FR'); }
+
+  _totals() {
+    const ht = this.state.lignes.reduce((s,l) => s + (l.quantite||0)*(l.prixUnit||0), 0);
+    const tva = ht * 0.16;
+    const remise = ht * (this.state.remise||0) / 100;
+    const ttc = ht + tva - remise;
+    return { ht, tva, ttc };
+  }
+
+  _updateLigne(id, key, value) {
+    this.setState({ lignes: this.state.lignes.map(l => l.id===id ? {...l, [key]:parseFloat(value)||0} : l) });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const { ht, tva, ttc } = this._totals();
+
+    const statutDefs = [
+      { id:'EN_ATTENTE', label:'En attente', desc:'Brouillon, non envoyé', color:'#94A3B8' },
+      { id:'VALIDE', label:'Validé', desc:'Accepté par le client', color:'#059669' },
+      { id:'REFUSE', label:'Refusé', desc:'Client a décliné', color:'#BE123C' },
+      { id:'CONVERTI', label:'Converti', desc:'Facture générée', color:'#2563EB' },
+    ];
+
+    const lignes = s.lignes.map(l => ({
+      ...l,
+      totalFmt: this._fmt((l.quantite||0)*(l.prixUnit||0)),
+      onPrestation: (e) => this._updateLigne(l.id,'prestationId',e.target.value),
+      onQte: (e) => this._updateLigne(l.id,'quantite',e.target.value),
+      onPrix: (e) => this._updateLigne(l.id,'prixUnit',e.target.value),
+      onDelete: () => this.setState({ lignes: s.lignes.filter(x => x.id!==l.id) }),
+    }));
+
+    return {
+      devisRef: s.devisRef,
+      dateEmission: s.dateEmission,
+      dateValidite: s.dateValidite,
+      clientId: s.clientId,
+      remise: s.remise,
+      lignes,
+      noLignes: lignes.length === 0,
+      totalHT: this._fmt(ht),
+      tva: this._fmt(tva),
+      totalTTC: this._fmt(ttc),
+      onDateEmission: (e) => this.setState({ dateEmission: e.target.value }),
+      onDateValidite: (e) => this.setState({ dateValidite: e.target.value }),
+      onClient: (e) => this.setState({ clientId: e.target.value }),
+      onRemise: (e) => this.setState({ remise: parseFloat(e.target.value)||0 }),
+      addLigne: () => {
+        const id = Date.now();
+        this.setState({ lignes: [...s.lignes, { id, prestationId:'', quantite:1, prixUnit:0 }] });
+      },
+      onSave: () => {
+        if (!s.clientId) { alert('Veuillez sélectionner un client.'); return; }
+        if (s.lignes.length === 0) { alert('Ajoutez au moins une prestation.'); return; }
+        alert('✅ Devis ' + s.devisRef + ' enregistré — Total TTC : ' + this._fmt(ttc));
+      },
+      statutOptions: statutDefs.map(opt => ({
+        ...opt,
+        onClick: () => this.setState({ statut: opt.id }),
+        dot: { width:10, height:10, borderRadius:'50%', background: s.statut===opt.id ? opt.color : '#E2E8F0', flexShrink:0, marginTop:3, transition:'background 0.15s' },
+        style: { display:'flex', alignItems:'flex-start', gap:10, padding:'9px 12px', borderRadius:9, cursor:'pointer', background: s.statut===opt.id ? opt.color+'10' : 'transparent', border: s.statut===opt.id ? '1.5px solid '+opt.color+'30' : '1.5px solid transparent' },
+      })),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

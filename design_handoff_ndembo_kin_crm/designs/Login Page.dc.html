@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #07101A; }
+    * { box-sizing: border-box; }
+    input:-webkit-autofill { -webkit-box-shadow: 0 0 0 40px #fff inset !important; -webkit-text-fill-color: #0F172A !important; }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 100vh; font-family: Plus Jakarta Sans, sans-serif;">
+
+  <!-- ═══ PANNEAU GAUCHE — BRAND ═══ -->
+  <div style="width: 42%; background: #07101A; display: flex; flex-direction: column; justify-content: space-between; padding: 48px 52px; position: relative; overflow: hidden; flex-shrink: 0;">
+
+    <!-- Cercles décoratifs -->
+    <div style="position: absolute; top: -120px; right: -80px; width: 380px; height: 380px; border-radius: 50%; border: 1px solid rgba(252,209,22,0.06); pointer-events: none;"></div>
+    <div style="position: absolute; top: -60px; right: -20px; width: 220px; height: 220px; border-radius: 50%; border: 1px solid rgba(252,209,22,0.08); pointer-events: none;"></div>
+    <div style="position: absolute; bottom: -100px; left: -60px; width: 300px; height: 300px; border-radius: 50%; border: 1px solid rgba(58,107,132,0.15); pointer-events: none;"></div>
+
+    <!-- Logo -->
+    <div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="background: #fff; border-radius: 12px; padding: 6px 8px; flex-shrink: 0;">
+          <img src="assets/logo.png" style="height: 36px; width: auto; display: block;" />
+        </div>
+        <div>
+          <div style="font-size: 16px; font-weight: 800; color: #fff; line-height: 1.15;">Ndembo Kin</div>
+          <div style="font-size: 9px; color: rgba(252,209,22,0.55); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px;">Connect SARL</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message central -->
+    <div>
+      <div style="width: 40px; height: 3px; background: #FCD116; border-radius: 2px; margin-bottom: 28px;"></div>
+      <div style="font-size: 34px; font-weight: 800; color: #fff; line-height: 1.2; letter-spacing: -0.8px; margin-bottom: 16px;">Gérez vos athlètes,<br/>clients et contrats<br/>depuis Kinshasa.</div>
+      <div style="font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.7; max-width: 280px;">Plateforme CRM conçue pour l'agence sportive Ndembo Kin Connect — sport, business, excellence.</div>
+
+      <!-- Stats -->
+      <div style="display: flex; gap: 32px; margin-top: 40px;">
+        <div>
+          <div style="font-size: 26px; font-weight: 800; color: #FCD116; letter-spacing: -0.5px;">14</div>
+          <div style="font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px;">modules actifs</div>
+        </div>
+        <div style="width: 1px; background: rgba(255,255,255,0.07);"></div>
+        <div>
+          <div style="font-size: 26px; font-weight: 800; color: #FCD116; letter-spacing: -0.5px;">5</div>
+          <div style="font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px;">rôles d'accès</div>
+        </div>
+        <div style="width: 1px; background: rgba(255,255,255,0.07);"></div>
+        <div>
+          <div style="font-size: 26px; font-weight: 800; color: #FCD116; letter-spacing: -0.5px;">PWA</div>
+          <div style="font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px;">offline-first</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="font-size: 11px; color: rgba(255,255,255,0.2);">© 2026 Ndembo Kin Connect SARL · Kinshasa, RDC</div>
+  </div>
+
+  <!-- ═══ PANNEAU DROIT — FORMULAIRE ═══ -->
+  <div style="flex: 1; background: #F0F2F5; display: flex; align-items: center; justify-content: center; padding: 48px 40px;">
+    <div style="width: 100%; max-width: 400px;">
+
+      <!-- En-tête form -->
+      <div style="margin-bottom: 36px;">
+        <div style="font-size: 26px; font-weight: 800; color: #0F172A; letter-spacing: -0.5px; margin-bottom: 8px;">Bienvenue 👋</div>
+        <div style="font-size: 14px; color: #64748B;">Connectez-vous à votre espace de travail</div>
+      </div>
+
+      <!-- Card form -->
+      <div style="background: #fff; border-radius: 20px; padding: 32px; box-shadow: 0 4px 24px rgba(15,23,42,0.06); border: 1px solid #E8ECF1;">
+
+        <!-- Email -->
+        <div style="margin-bottom: 18px;">
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 7px;">Adresse e-mail</label>
+          <div style="position: relative;">
+            <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 18px; color: #94A3B8; pointer-events: none;">email</span>
+            <input
+              type="email"
+              placeholder="admin@ndembokin.cd"
+              value="{{ email }}"
+              onInput="{{ onEmailInput }}"
+              style="width: 100%; padding: 13px 14px 13px 44px; border: 1.5px solid #E2E8F0; border-radius: 11px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC; transition: border-color 0.15s;"
+              style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);"
+            />
+          </div>
+        </div>
+
+        <!-- Mot de passe -->
+        <div style="margin-bottom: 10px;">
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 7px;">Mot de passe</label>
+          <div style="position: relative;">
+            <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 18px; color: #94A3B8; pointer-events: none;">lock</span>
+            <input
+              type="{{ inputType }}"
+              placeholder="••••••••"
+              value="{{ password }}"
+              onInput="{{ onPasswordInput }}"
+              style="width: 100%; padding: 13px 44px 13px 44px; border: 1.5px solid #E2E8F0; border-radius: 11px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC; transition: border-color 0.15s;"
+              style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);"
+            />
+            <button onClick="{{ togglePw }}" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center;">
+              <span style="font-family: Material Icons Outlined; font-size: 18px; color: #94A3B8;">{{ pwIcon }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mot de passe oublié -->
+        <div style="text-align: right; margin-bottom: 24px;">
+          <a href="#" style="font-size: 12px; color: #3A6B84; font-weight: 600; text-decoration: none;">Mot de passe oublié ?</a>
+        </div>
+
+        <!-- Erreur -->
+        <sc-if value="{{ showError }}" hint-placeholder-val="{{ false }}">
+          <div style="background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 9px; padding: 10px 14px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-family: Material Icons Outlined; font-size: 16px; color: #BE123C; flex-shrink: 0;">error_outline</span>
+            <div style="font-size: 13px; color: #BE123C;">{{ errorMsg }}</div>
+          </div>
+        </sc-if>
+
+        <!-- Bouton -->
+        <button
+          onClick="{{ onLogin }}"
+          style="width: 100%; padding: 14px; background: #07101A; color: #FCD116; font-size: 15px; font-weight: 700; border: none; border-radius: 11px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; letter-spacing: -0.2px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.15s;"
+          style-hover="background: #132730;"
+        >
+          <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+            <span style="width: 16px; height: 16px; border: 2px solid rgba(252,209,22,0.3); border-top-color: #FCD116; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block;"></span>
+          </sc-if>
+          <sc-if value="{{ notLoading }}" hint-placeholder-val="{{ true }}">
+            <span>Se connecter</span>
+            <span style="font-family: Material Icons Outlined; font-size: 18px;">arrow_forward</span>
+          </sc-if>
+        </button>
+      </div>
+
+      <!-- Comptes de démo -->
+      <div style="margin-top: 24px; background: #fff; border: 1px solid #E8ECF1; border-radius: 14px; padding: 16px 20px;">
+        <div style="font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">Comptes de démonstration</div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <sc-for list="{{ demoAccounts }}" as="acc" hint-placeholder-count="3">
+            <div onClick="{{ acc.onFill }}" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #F8FAFC; border-radius: 8px; cursor: pointer; border: 1px solid transparent;" style-hover="border-color: #E2E8F0; background: #F1F5F9;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="{{ acc.avatarStyle }}">{{ acc.initials }}</div>
+                <div>
+                  <div style="font-size: 12px; font-weight: 600; color: #334155;">{{ acc.role }}</div>
+                  <div style="font-size: 11px; color: #94A3B8;">{{ acc.email }}</div>
+                </div>
+              </div>
+              <span style="font-family: Material Icons Outlined; font-size: 14px; color: #CBD5E1;">arrow_forward_ios</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1280, &quot;height&quot;: 800 }
+}">
+
+class Component extends DCLogic {
+  state = {
+    email: '',
+    password: '',
+    showPw: false,
+    loading: false,
+    showError: false,
+    errorMsg: 'Identifiants incorrects. Vérifiez votre e-mail et mot de passe.',
+  };
+
+  renderVals() {
+    const s = this.state;
+    return {
+      email: s.email,
+      password: s.password,
+      showPw: s.showPw,
+      inputType: s.showPw ? 'text' : 'password',
+      pwIcon: s.showPw ? 'visibility_off' : 'visibility',
+      loading: s.loading,
+      notLoading: !s.loading,
+      showError: s.showError,
+      errorMsg: s.errorMsg,
+
+      onEmailInput: (e) => this.setState({ email: e.target.value, showError: false }),
+      onPasswordInput: (e) => this.setState({ password: e.target.value, showError: false }),
+      togglePw: () => this.setState(st => ({ showPw: !st.showPw })),
+
+      onLogin: () => {
+        if (!s.email || !s.password) {
+          this.setState({ showError: true, errorMsg: 'Veuillez remplir tous les champs.' });
+          return;
+        }
+        this.setState({ loading: true, showError: false });
+        // Simulation appel API
+        setTimeout(() => {
+          const valid = s.email === 'admin@ndembokin.cd' && s.password === 'admin123';
+          if (valid) {
+            this.setState({ loading: false });
+            alert('✅ Connexion réussie — redirection vers le dashboard');
+          } else {
+            this.setState({ loading: false, showError: true, errorMsg: 'Identifiants incorrects. Vérifiez votre e-mail et mot de passe.' });
+          }
+        }, 1200);
+      },
+
+      demoAccounts: [
+        {
+          role: 'Administrateur',
+          email: 'admin@ndembokin.cd',
+          initials: 'AD',
+          avatarStyle: { width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#DAA520,#FCD116)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#07101A', fontSize: 9, fontWeight: 800, flexShrink: 0 },
+          onFill: () => this.setState({ email: 'admin@ndembokin.cd', password: 'admin123', showError: false }),
+        },
+        {
+          role: 'Commercial',
+          email: 'commercial@ndembokin.cd',
+          initials: 'CO',
+          avatarStyle: { width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#3A6B84,#2563EB)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 9, fontWeight: 800, flexShrink: 0 },
+          onFill: () => this.setState({ email: 'commercial@ndembokin.cd', password: 'commercial123', showError: false }),
+        },
+        {
+          role: 'Coach',
+          email: 'coach@ndembokin.cd',
+          initials: 'CH',
+          avatarStyle: { width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#059669,#10B981)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 9, fontWeight: 800, flexShrink: 0 },
+          onFill: () => this.setState({ email: 'coach@ndembokin.cd', password: 'coach123', showError: false }),
+        },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

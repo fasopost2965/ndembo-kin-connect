@@ -13,9 +13,23 @@
     -webkit-font-smoothing: antialiased;
   }
   * { box-sizing: border-box; }
+
+  /* Autofill — évite le fond bleu du navigateur */
+  input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 40px #fff inset !important;
+    -webkit-text-fill-color: #0F172A !important;
+  }
 }
 
-/* Scrollbar */
+/* Scrollbar minimaliste (or sur fond sombre, gris sur fond clair) */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+
+/* Dans les zones sombres (sidebar, dashboard) */
+.dark-scroll ::-webkit-scrollbar-thumb { background: rgba(252,209,22,0.15); }
+
+/* Spin keyframe pour les spinners */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

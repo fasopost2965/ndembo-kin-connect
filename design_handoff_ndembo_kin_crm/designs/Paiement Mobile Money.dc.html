@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F0F2F5; }
+    * { box-sizing: border-box; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    @keyframes checkIn { from{transform:scale(0.4);opacity:0} to{transform:scale(1);opacity:1} }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; min-height: 100vh; background: #F0F2F5; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+  <div style="width: 100%; max-width: 480px;">
+
+    <!-- ÉTAPE : SAISIE -->
+    <sc-if value="{{ step === 'form' }}" hint-placeholder-val="{{ true }}">
+      <div style="background: #fff; border-radius: 24px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.1);">
+        <!-- Header -->
+        <div style="background: #07101A; padding: 24px 26px 20px; position: relative;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <div style="width: 44px; height: 44px; border-radius: 13px; background: rgba(252,209,22,0.1); border: 1px solid rgba(252,209,22,0.2); display: flex; align-items: center; justify-content: center;">
+              <span style="font-family: Material Icons Outlined; font-size: 22px; color: #FCD116; display: inline-flex; line-height: 1;">smartphone</span>
+            </div>
+            <div>
+              <div style="font-size: 16px; font-weight: 800; color: #fff;">Paiement Mobile Money</div>
+              <div style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px;">FlexPay · RDC</div>
+            </div>
+          </div>
+          <!-- Facture liée -->
+          <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 10px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">Facture</div>
+              <div style="font-size: 14px; font-weight: 700; color: #fff;">FAC-2026-009</div>
+              <div style="font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px;">AS Vita Club · 15 juin 2026</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 10px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">Solde restant</div>
+              <div style="font-size: 22px; font-weight: 800; color: #FCD116; letter-spacing: -0.4px;">$3 200</div>
+            </div>
+          </div>
+        </div>
+        <!-- Body -->
+        <div style="padding: 24px 26px;">
+          <!-- Opérateur -->
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Opérateur</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <sc-for list="{{ operateurs }}" as="op" hint-placeholder-count="2">
+                <div onClick="{{ op.onClick }}" style="{{ op.style }}">
+                  <div style="font-size: 20px; margin-bottom: 4px;">{{ op.emoji }}</div>
+                  <div style="font-size: 13px; font-weight: 700; color: #0F172A;">{{ op.name }}</div>
+                  <div style="font-size: 10px; color: #94A3B8;">{{ op.sub }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <!-- Numéro -->
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.5px;">Numéro {{ operateur }}</label>
+            <div style="position: relative;">
+              <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #94A3B8; font-weight: 600;">+243</span>
+              <input type="tel" placeholder="8X XXX XXXX" value="{{ phone }}" onInput="{{ onPhone }}" maxLength="10"
+                style="width: 100%; padding: 13px 14px 13px 56px; border: 1.5px solid #E2E8F0; border-radius: 12px; font-size: 15px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC; letter-spacing: 1px;"
+                style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+            </div>
+          </div>
+          <!-- Montant -->
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.5px;">Montant (USD)</label>
+            <div style="position: relative;">
+              <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; color: #94A3B8; font-weight: 700;">$</span>
+              <input type="number" placeholder="0.00" value="{{ montant }}" onInput="{{ onMontant }}" min="1" max="3200"
+                style="width: 100%; padding: 13px 14px 13px 32px; border: 1.5px solid #E2E8F0; border-radius: 12px; font-size: 16px; font-family: Plus Jakarta Sans, sans-serif; font-weight: 700; color: #0F172A; outline: none; background: #FAFBFC;"
+                style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+            </div>
+            <!-- Raccourcis montant -->
+            <div style="display: flex; gap: 6px; margin-top: 8px;">
+              <sc-for list="{{ montantShortcuts }}" as="sh" hint-placeholder-count="4">
+                <button onClick="{{ sh.onClick }}" style="flex: 1; padding: 6px 0; background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 11px; font-weight: 700; color: #475569; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif;" style-hover="background: #E2E8F0;">{{ sh.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <!-- Alerte solde dépassé -->
+          <sc-if value="{{ soldeDepasse }}" hint-placeholder-val="{{ false }}">
+            <div style="background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; display: flex; gap: 8px; align-items: center;">
+              <span style="font-family: Material Icons Outlined; font-size: 16px; color: #BE123C; display: inline-flex; line-height: 1; flex-shrink: 0;">warning</span>
+              <div style="font-size: 12px; color: #BE123C; font-weight: 600;">Le montant dépasse le solde restant ($3 200).</div>
+            </div>
+          </sc-if>
+          <!-- Bouton -->
+          <button onClick="{{ onPay }}" style="width: 100%; padding: 15px; background: #07101A; color: #FCD116; font-size: 15px; font-weight: 800; border: none; border-radius: 13px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; justify-content: center; gap: 9px;" style-hover="background: #132730;">
+            <span style="font-family: Material Icons Outlined; font-size: 20px; display: inline-flex; line-height: 1;">payment</span>
+            Initier le paiement
+          </button>
+          <div style="text-align: center; font-size: 11px; color: #94A3B8; margin-top: 10px;">Sécurisé par FlexPay · Confirmation par SMS</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ÉTAPE : EN ATTENTE -->
+    <sc-if value="{{ step === 'pending' }}" hint-placeholder-val="{{ false }}">
+      <div style="background: #fff; border-radius: 24px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.1);">
+        <div style="background: #07101A; padding: 24px 26px 20px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 44px; height: 44px; border-radius: 13px; background: rgba(252,209,22,0.1); border: 1px solid rgba(252,209,22,0.2); display: flex; align-items: center; justify-content: center;">
+              <span style="font-family: Material Icons Outlined; font-size: 22px; color: #FCD116; display: inline-flex; line-height: 1;">hourglass_top</span>
+            </div>
+            <div>
+              <div style="font-size: 16px; font-weight: 800; color: #fff;">Paiement en attente</div>
+              <div style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px;">Ordre N° {{ orderNumber }}</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding: 32px 26px; text-align: center;">
+          <!-- Spinner animé -->
+          <div style="width: 80px; height: 80px; border-radius: 50%; border: 4px solid #E8ECF1; border-top-color: #FCD116; animation: spin 1s linear infinite; margin: 0 auto 24px;"></div>
+          <div style="font-size: 18px; font-weight: 800; color: #0F172A; margin-bottom: 8px;">Confirmez sur votre téléphone</div>
+          <div style="font-size: 13px; color: #64748B; line-height: 1.6; margin-bottom: 24px;">
+            Un message de confirmation a été envoyé au<br/>
+            <strong style="color: #0F172A;">+243 {{ phone }}</strong><br/>
+            Tapez votre code PIN {{ operateur }} pour valider.
+          </div>
+          <!-- Montant -->
+          <div style="background: #F8FAFC; border: 1px solid #E8ECF1; border-radius: 14px; padding: 16px 20px; margin-bottom: 24px;">
+            <div style="font-size: 11px; color: #94A3B8; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Montant</div>
+            <div style="font-size: 28px; font-weight: 800; color: #0F172A; letter-spacing: -0.5px;">${{ montant }}</div>
+            <div style="font-size: 11px; color: #94A3B8; margin-top: 3px;">via {{ operateur }}</div>
+          </div>
+          <!-- Timer -->
+          <div style="font-size: 12px; color: #94A3B8; margin-bottom: 20px; animation: pulse 2s ease-in-out infinite;">
+            <span style="font-family: Material Icons Outlined; font-size: 14px; display: inline-flex; line-height: 1; vertical-align: middle; margin-right: 4px;">schedule</span>
+            Vérification automatique dans {{ timer }}s
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button onClick="{{ onSuccess }}" style="width: 100%; padding: 13px; background: #059669; color: #fff; font-size: 14px; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif;">✓ Simuler succès</button>
+            <button onClick="{{ onRetry }}" style="width: 100%; padding: 12px; background: #F1F5F9; color: #475569; font-size: 13px; font-weight: 600; border: 1px solid #E2E8F0; border-radius: 12px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif;">Réessayer / Annuler</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ÉTAPE : SUCCÈS -->
+    <sc-if value="{{ step === 'success' }}" hint-placeholder-val="{{ false }}">
+      <div style="background: #fff; border-radius: 24px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.1);">
+        <div style="background: #07101A; padding: 24px 26px 20px; text-align: center;">
+          <div style="width: 72px; height: 72px; border-radius: 50%; background: rgba(5,150,105,0.15); border: 2px solid rgba(5,150,105,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; animation: checkIn 0.4s ease-out;">
+            <span style="font-family: Material Icons Outlined; font-size: 36px; color: #34D399; display: inline-flex; line-height: 1;">check_circle</span>
+          </div>
+          <div style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 4px;">Paiement confirmé !</div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.4);">{{ orderNumber }}</div>
+        </div>
+        <div style="padding: 24px 26px;">
+          <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 14px; padding: 16px 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 12px; color: #64748B;">Montant payé</span>
+              <span style="font-size: 14px; font-weight: 800; color: #059669;">${{ montant }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 12px; color: #64748B;">Opérateur</span>
+              <span style="font-size: 13px; font-weight: 600; color: #0F172A;">{{ operateur }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 12px; color: #64748B;">Facture</span>
+              <span style="font-size: 13px; font-weight: 600; color: #0F172A;">FAC-2026-009</span>
+            </div>
+            <div style="height: 1px; background: #BBF7D0;"></div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 12px; color: #64748B;">Solde restant</span>
+              <span style="font-size: 14px; font-weight: 800; color: #0F172A;">{{ nouveauSolde }}</span>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button onClick="{{ onReset }}" style="width: 100%; padding: 13px; background: #07101A; color: #FCD116; font-size: 14px; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif;" style-hover="background: #132730;">Nouveau paiement</button>
+            <button style="width: 100%; padding: 12px; background: #F1F5F9; color: #475569; font-size: 13px; font-weight: 600; border: 1px solid #E2E8F0; border-radius: 12px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif;" style-hover="background: #E2E8F0;">Voir la facture</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:560,&quot;height&quot;:780}}">
+
+class Component extends DCLogic {
+  state = { step:'form', operateur:'M-PESA', phone:'', montant:'', timer:120, orderNumber:'FP-2026-'+Math.floor(Math.random()*90000+10000) };
+  _timerInt = null;
+
+  componentDidMount() {
+    this._startTimer();
+  }
+  componentWillUnmount() { clearInterval(this._timerInt); }
+  _startTimer() {
+    clearInterval(this._timerInt);
+    this._timerInt = setInterval(() => {
+      const t = this.state.timer - 1;
+      if (t <= 0) { clearInterval(this._timerInt); return; }
+      this.setState({ timer: t });
+    }, 1000);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const opStyle = (id) => ({
+      padding:'12px 10px', border: s.operateur===id ? '2px solid #3A6B84' : '1.5px solid #E2E8F0',
+      borderRadius:12, cursor:'pointer', textAlign:'center', background: s.operateur===id ? '#EFF6FF' : '#FAFBFC',
+      transition:'all 0.15s',
+    });
+    const operateurs = [
+      { id:'M-PESA', emoji:'🟩', name:'M-PESA', sub:'Vodacom', onClick:()=>this.setState({operateur:'M-PESA'}), style:opStyle('M-PESA') },
+      { id:'Airtel Money', emoji:'🟥', name:'Airtel Money', sub:'Airtel RDC', onClick:()=>this.setState({operateur:'Airtel Money'}), style:opStyle('Airtel Money') },
+    ];
+    const montantNum = parseFloat(s.montant)||0;
+    const montantShortcuts = [
+      { label:'$500', onClick:()=>this.setState({montant:'500'}) },
+      { label:'$1 000', onClick:()=>this.setState({montant:'1000'}) },
+      { label:'$1 600', onClick:()=>this.setState({montant:'1600'}) },
+      { label:'Tout', onClick:()=>this.setState({montant:'3200'}) },
+    ];
+    const nouveauSolde = montantNum >= 3200 ? '$0' : '$'+(3200-montantNum).toLocaleString('fr-FR');
+    return {
+      step: s.step, operateur: s.operateur, phone: s.phone, montant: s.montant,
+      timer: s.timer, orderNumber: s.orderNumber,
+      operateurs, montantShortcuts,
+      soldeDepasse: montantNum > 3200,
+      nouveauSolde,
+      onPhone: (e) => this.setState({ phone:e.target.value }),
+      onMontant: (e) => this.setState({ montant:e.target.value }),
+      onPay: () => {
+        if (!s.phone || s.phone.length < 9) { alert('Numéro invalide'); return; }
+        if (!s.montant || parseFloat(s.montant) <= 0) { alert('Montant invalide'); return; }
+        if (parseFloat(s.montant) > 3200) { alert('Montant dépasse le solde'); return; }
+        this.setState({ step:'pending', timer:120 });
+        this._startTimer();
+      },
+      onSuccess: () => this.setState({ step:'success' }),
+      onRetry: () => this.setState({ step:'form', timer:120 }),
+      onReset: () => this.setState({ step:'form', phone:'', montant:'', timer:120, orderNumber:'FP-2026-'+Math.floor(Math.random()*90000+10000) }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

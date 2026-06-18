@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F0F2F5; }
+    * { box-sizing: border-box; }
+    .task-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; transform: translateY(-1px); }
+    .task-card { transition: box-shadow 0.15s, transform 0.15s; }
+    .col-drop { transition: background 0.15s; }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; min-height: 100vh; background: #F0F2F5; display: flex; flex-direction: column;">
+
+  <!-- TOPBAR -->
+  <div style="background: #fff; border-bottom: 1px solid #E8ECF1; padding: 0 28px; display: flex; align-items: center; height: 60px; gap: 14px; flex-shrink: 0;">
+    <div style="background: #07101A; border-radius: 8px; padding: 4px 5px;">
+      <img src="assets/logo.png" style="height: 22px; width: auto; display: block;" />
+    </div>
+    <div style="font-size: 16px; font-weight: 800; color: #0F172A; letter-spacing: -0.3px;">Projets</div>
+    <div style="flex: 1;"></div>
+    <!-- Filtre projet -->
+    <div style="position: relative;">
+      <select value="{{ activeProject }}" onChange="{{ onProjectChange }}"
+        style="padding: 8px 32px 8px 12px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #F8FAFC; appearance: none; cursor: pointer;"
+        style-focus="border-color: #3A6B84;">
+        <option value="all">Tous les projets</option>
+        <option value="1">🏆 Transfert Lukaku → Europe</option>
+        <option value="2">🤝 Partenariat MTN 2026</option>
+        <option value="3">🏟️ Tournoi Kinshasa Cup</option>
+      </select>
+      <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 15px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+    </div>
+    <button onClick="{{ onAddTask }}" style="padding: 9px 18px; background: #07101A; color: #FCD116; font-size: 13px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 7px;" style-hover="background: #132730;">
+      <span style="font-family: Material Icons Outlined; font-size: 16px; display: inline-flex; line-height: 1;">add</span>
+      Nouvelle tâche
+    </button>
+  </div>
+
+  <!-- KANBAN BOARD -->
+  <div style="flex: 1; overflow-x: auto; padding: 24px 28px; display: flex; gap: 16px; align-items: flex-start;">
+    <sc-for list="{{ columns }}" as="col" hint-placeholder-count="4">
+      <div class="col-drop" style="flex: none; width: 300px; display: flex; flex-direction: column; gap: 12px;">
+
+        <!-- En-tête colonne -->
+        <div style="display: flex; align-items: center; gap: 8px; padding: 0 4px;">
+          <div style="{{ col.dot }}"></div>
+          <div style="font-size: 13px; font-weight: 700; color: #0F172A;">{{ col.label }}</div>
+          <div style="margin-left: auto; font-size: 11px; font-weight: 700; background: #E8ECF1; color: #64748B; padding: 2px 8px; border-radius: 10px;">{{ col.count }}</div>
+        </div>
+
+        <!-- Zone de drop -->
+        <div style="display: flex; flex-direction: column; gap: 8px; min-height: 80px;">
+          <sc-for list="{{ col.tasks }}" as="task" hint-placeholder-count="2">
+            <div class="task-card" onClick="{{ task.onClick }}" style="background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 14px 16px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <!-- Badge projet -->
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <span style="{{ task.projetStyle }}">{{ task.projet }}</span>
+                <span style="{{ task.prioriteStyle }}">{{ task.priorite }}</span>
+              </div>
+              <!-- Titre -->
+              <div style="font-size: 13px; font-weight: 700; color: #0F172A; line-height: 1.4; margin-bottom: 8px;">{{ task.titre }}</div>
+              <!-- Échéance -->
+              <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 10px;">
+                <span style="font-family: Material Icons Outlined; font-size: 13px; color: {{ task.echeanceColor }}; display: inline-flex; line-height: 1;">schedule</span>
+                <span style="font-size: 11px; color: {{ task.echeanceColor }}; font-weight: 600;">{{ task.echeance }}</span>
+              </div>
+              <!-- Footer -->
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; gap: 4px;">
+                  <sc-for list="{{ task.assignes }}" as="av" hint-placeholder-count="2">
+                    <div style="{{ av.style }}">{{ av.initials }}</div>
+                  </sc-for>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                  <sc-if value="{{ task.hasComments }}" hint-placeholder-val="{{ false }}">
+                    <div style="display: flex; align-items: center; gap: 3px;">
+                      <span style="font-family: Material Icons Outlined; font-size: 13px; color: #94A3B8; display: inline-flex; line-height: 1;">chat_bubble_outline</span>
+                      <span style="font-size: 11px; color: #94A3B8;">{{ task.commentCount }}</span>
+                    </div>
+                  </sc-if>
+                  <!-- Menu déplacer -->
+                  <div style="position: relative; display: flex; gap: 3px;">
+                    <sc-for list="{{ task.moveActions }}" as="ma" hint-placeholder-count="1">
+                      <div onClick="{{ ma.onClick }}" style="width: 22px; height: 22px; border-radius: 5px; background: #F1F5F9; display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background: #E2E8F0;" title="{{ ma.label }}">
+                        <span style="font-family: Material Icons Outlined; font-size: 13px; color: #64748B; display: inline-flex; line-height: 1;">{{ ma.icon }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+          <!-- Bouton ajouter dans la colonne -->
+          <button onClick="{{ col.onAdd }}" style="width: 100%; padding: 10px; background: transparent; border: 1.5px dashed #CBD5E1; border-radius: 12px; color: #94A3B8; font-size: 12px; font-weight: 600; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; justify-content: center; gap: 6px;" style-hover="background: rgba(255,255,255,0.6); border-color: #3A6B84; color: #3A6B84;">
+            <span style="font-family: Material Icons Outlined; font-size: 15px; display: inline-flex; line-height: 1;">add</span>
+            Ajouter
+          </button>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- MODAL DÉTAIL TÂCHE -->
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 24px;">
+      <div onClick="{{ closeModal }}" style="position: absolute; inset: 0; background: rgba(7,16,26,0.5); backdrop-filter: blur(3px);"></div>
+      <div style="position: relative; background: #fff; border-radius: 20px; width: 100%; max-width: 500px; box-shadow: 0 24px 64px rgba(0,0,0,0.2); overflow: hidden;">
+        <!-- Header -->
+        <div style="background: #07101A; padding: 22px 24px 18px;">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+            <div>
+              <span style="font-size: 10px; font-weight: 700; color: rgba(252,209,22,0.7); text-transform: uppercase; letter-spacing: 1.5px;">{{ selectedTask.projet }}</span>
+              <div style="font-size: 17px; font-weight: 800; color: #fff; margin-top: 4px; line-height: 1.3;">{{ selectedTask.titre }}</div>
+            </div>
+            <div onClick="{{ closeModal }}" style="width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; margin-left: 12px;" style-hover="background: rgba(255,255,255,0.18);">
+              <span style="font-family: Material Icons Outlined; font-size: 15px; color: #fff; display: inline-flex; line-height: 1;">close</span>
+            </div>
+          </div>
+        </div>
+        <!-- Body -->
+        <div style="padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="font-size: 13px; color: #64748B; line-height: 1.6;">{{ selectedTask.description }}</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div style="background: #F8FAFC; border: 1px solid #E8ECF1; border-radius: 10px; padding: 12px;">
+              <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Échéance</div>
+              <div style="font-size: 13px; font-weight: 700; color: #0F172A;">{{ selectedTask.echeance }}</div>
+            </div>
+            <div style="background: #F8FAFC; border: 1px solid #E8ECF1; border-radius: 10px; padding: 12px;">
+              <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Priorité</div>
+              <span style="{{ selectedTask.prioriteStyle }}">{{ selectedTask.priorite }}</span>
+            </div>
+          </div>
+          <!-- Déplacer vers -->
+          <div>
+            <div style="font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 8px;">Déplacer vers</div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <sc-for list="{{ moveTargets }}" as="mt" hint-placeholder-count="3">
+                <button onClick="{{ mt.onClick }}" style="{{ mt.style }}" style-hover="opacity: 0.85;">{{ mt.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+
+class Component extends DCLogic {
+  state = { activeProject:'all', modalOpen:false, selectedTaskId:null,
+    tasks:[
+      { id:1, titre:'Contacter agent Club Bruges', projet:'Transfert Lukaku', colonne:'TODO', priorite:'HAUTE', echeance:'20 juin 2026', assignes:['AM','JK'], commentCount:2, description:'Prendre contact avec Maikel Vanden Berg, agent officiel. Préparer dossier valorisation + rapport médical.' },
+      { id:2, titre:'Préparer dossier médical', projet:'Transfert Lukaku', colonne:'EN_COURS', priorite:'HAUTE', echeance:'18 juin 2026', assignes:['AM'], commentCount:0, description:'Rassembler tous les documents médicaux des 3 dernières années. Scanner + envoyer format PDF sécurisé.' },
+      { id:3, titre:'Réunion MTN Kinshasa', projet:'Partenariat MTN 2026', colonne:'EN_COURS', priorite:'MOYENNE', echeance:'25 juin 2026', assignes:['JK','MC'], commentCount:3, description:'Présentation du plan de sponsoring annuel. Préparer deck + démonstration ROI campagne 2025.' },
+      { id:4, titre:'Validation budget tournoi', projet:'Tournoi Kinshasa Cup', colonne:'EN_ATTENTE', priorite:'MOYENNE', echeance:'30 juin 2026', assignes:['MC'], commentCount:1, description:'Obtenir validation du budget prévisionnel auprès de la direction. Montant estimé : $45 000.' },
+      { id:5, titre:'Signer accord préliminaire', projet:'Transfert Lukaku', colonne:'EN_ATTENTE', priorite:'HAUTE', echeance:'22 juin 2026', assignes:['AM','JK'], commentCount:0, description:'Signature de la lettre d\'intention avec le club acquéreur avant ouverture du mercato estival.' },
+      { id:6, titre:'Brief communication presse', projet:'Partenariat MTN 2026', colonne:'TODO', priorite:'FAIBLE', echeance:'10 juil 2026', assignes:['MC'], commentCount:0, description:'Rédiger communiqué de presse pour annonce du partenariat. Valider avec service com MTN.' },
+      { id:7, titre:'Contrats joueurs tournoi', projet:'Tournoi Kinshasa Cup', colonne:'TERMINÉ', priorite:'HAUTE', echeance:'5 juin 2026', assignes:['AM','JK','MC'], commentCount:4, description:'Collecte et validation de tous les contrats des 12 équipes participantes.' },
+      { id:8, titre:'Logistique terrain Stade des Martyrs', projet:'Tournoi Kinshasa Cup', colonne:'TERMINÉ', priorite:'MOYENNE', echeance:'3 juin 2026', assignes:['JK'], commentCount:1, description:'Réservation officielle du Stade des Martyrs pour les 3 journées du tournoi.' },
+    ]
+  };
+
+  _colDefs = [
+    { id:'TODO', label:'À faire', color:'#94A3B8' },
+    { id:'EN_COURS', label:'En cours', color:'#3A6B84' },
+    { id:'EN_ATTENTE', label:'En attente', color:'#B45309' },
+    { id:'TERMINÉ', label:'Terminé', color:'#059669' },
+  ];
+
+  _prioriteStyle(p) {
+    const m = { HAUTE:{bg:'#FFF1F2',c:'#BE123C'}, MOYENNE:{bg:'#FEF9EE',c:'#B45309'}, FAIBLE:{bg:'#F0FDF4',c:'#059669'} };
+    const x = m[p]||m.FAIBLE;
+    return { fontSize:10, fontWeight:700, background:x.bg, color:x.c, padding:'2px 8px', borderRadius:8, display:'inline-block' };
+  }
+
+  _moveTask(taskId, newCol) {
+    this.setState({ tasks: this.state.tasks.map(t => t.id===taskId ? {...t, colonne:newCol} : t), modalOpen:false });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const avatarColors = ['#07101A','#3A6B84','#1D4ED8','#059669','#B45309'];
+    const avatarStyle = (i) => ({ width:26, height:26, borderRadius:'50%', background:avatarColors[i%5], display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, color:'#FCD116', border:'2px solid #fff', flexShrink:0 });
+
+    const columns = this._colDefs.map(col => {
+      const tasks = s.tasks.filter(t => t.colonne===col.id).map(task => {
+        const isLate = task.colonne !== 'TERMINÉ';
+        return {
+          ...task,
+          projetStyle: { fontSize:10, fontWeight:700, background:'rgba(58,107,132,0.1)', color:'#3A6B84', padding:'2px 8px', borderRadius:8, display:'inline-block' },
+          prioriteStyle: this._prioriteStyle(task.priorite),
+          echeanceColor: isLate && task.priorite==='HAUTE' ? '#BE123C' : '#94A3B8',
+          hasComments: task.commentCount > 0,
+          assignes: task.assignes.map((a,i) => ({ initials:a, style:avatarStyle(i) })),
+          moveActions: this._colDefs.filter(c=>c.id!==col.id).slice(0,1).map(c => ({
+            icon: this._colDefs.indexOf(c) > this._colDefs.indexOf(col) ? 'arrow_forward' : 'arrow_back',
+            label: c.label,
+            onClick: (e) => { e.stopPropagation(); this._moveTask(task.id, c.id); },
+          })),
+          onClick: () => this.setState({ selectedTaskId:task.id, modalOpen:true }),
+        };
+      });
+      return {
+        ...col,
+        tasks,
+        count: tasks.length,
+        dot: { width:10, height:10, borderRadius:'50%', background:col.color, flexShrink:0 },
+        onAdd: () => alert('+ Nouvelle tâche dans "'+col.label+'"'),
+      };
+    });
+
+    const selTask = s.tasks.find(t=>t.id===s.selectedTaskId)||s.tasks[0];
+
+    const moveTargets = selTask ? this._colDefs.filter(c=>c.id!==selTask.colonne).map(c => ({
+      label: c.label,
+      onClick: () => this._moveTask(selTask.id, c.id),
+      style: { padding:'8px 14px', background:'#F1F5F9', color:'#334155', fontSize:12, fontWeight:700, border:'1.5px solid #E2E8F0', borderRadius:9, cursor:'pointer', fontFamily:'Plus Jakarta Sans, sans-serif' },
+    })) : [];
+
+    return {
+      activeProject: s.activeProject,
+      columns,
+      modalOpen: s.modalOpen,
+      selectedTask: selTask ? { ...selTask, prioriteStyle: this._prioriteStyle(selTask.priorite) } : {},
+      moveTargets,
+      onProjectChange: (e) => this.setState({ activeProject: e.target.value }),
+      onAddTask: () => alert('+ Nouvelle tâche'),
+      closeModal: () => this.setState({ modalOpen:false }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #07101A; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 100vh; font-family: Plus Jakarta Sans, sans-serif;">
+
+  <!-- PANNEAU GAUCHE -->
+  <div style="width: 42%; background: #07101A; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 48px 52px; position: relative; overflow: hidden; flex-shrink: 0;">
+    <div style="position: absolute; top: -100px; right: -80px; width: 340px; height: 340px; border-radius: 50%; border: 1px solid rgba(252,209,22,0.06); pointer-events: none;"></div>
+    <div style="position: absolute; bottom: -80px; left: -60px; width: 260px; height: 260px; border-radius: 50%; border: 1px solid rgba(58,107,132,0.12); pointer-events: none;"></div>
+    <div style="text-align: center;">
+      <div style="background: #fff; border-radius: 16px; padding: 10px 13px; display: inline-block; margin-bottom: 32px;">
+        <img src="assets/logo.png" style="height: 44px; width: auto; display: block;" />
+      </div>
+      <div style="width: 72px; height: 72px; border-radius: 20px; background: rgba(252,209,22,0.08); border: 1px solid rgba(252,209,22,0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+        <span style="font-family: Material Icons Outlined; font-size: 32px; color: #FCD116; display: inline-flex; line-height: 1;">lock_reset</span>
+      </div>
+      <div style="font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 10px; letter-spacing: -0.4px;">Réinitialisation<br/>sécurisée</div>
+      <div style="font-size: 13px; color: rgba(255,255,255,0.35); line-height: 1.6; max-width: 240px; margin: 0 auto;">Un lien de réinitialisation sera envoyé à votre adresse e-mail enregistrée.</div>
+    </div>
+  </div>
+
+  <!-- PANNEAU DROIT -->
+  <div style="flex: 1; background: #F0F2F5; display: flex; align-items: center; justify-content: center; padding: 48px 40px;">
+    <div style="width: 100%; max-width: 400px;">
+
+      <!-- Étape 1 : saisie email -->
+      <sc-if value="{{ step === 'email' }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-bottom: 32px;">
+          <a href="#" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #64748B; text-decoration: none; margin-bottom: 24px;" style-hover="color: #3A6B84;">
+            <span style="font-family: Material Icons Outlined; font-size: 16px; display: inline-flex; line-height: 1;">arrow_back</span>
+            Retour à la connexion
+          </a>
+          <div style="font-size: 26px; font-weight: 800; color: #0F172A; letter-spacing: -0.5px; margin-bottom: 8px;">Mot de passe oublié ?</div>
+          <div style="font-size: 14px; color: #64748B;">Entrez votre e-mail et nous vous enverrons un lien de réinitialisation.</div>
+        </div>
+        <div style="background: #fff; border-radius: 20px; padding: 32px; box-shadow: 0 4px 24px rgba(15,23,42,0.06); border: 1px solid #E8ECF1;">
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 7px;">Adresse e-mail</label>
+            <div style="position: relative;">
+              <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 18px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">email</span>
+              <input type="email" placeholder="votre@email.cd" value="{{ email }}" onInput="{{ onEmailInput }}"
+                style="width: 100%; padding: 13px 14px 13px 44px; border: 1.5px solid #E2E8F0; border-radius: 11px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;"
+                style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+            </div>
+          </div>
+          <sc-if value="{{ showError }}" hint-placeholder-val="{{ false }}">
+            <div style="background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 9px; padding: 10px 14px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
+              <span style="font-family: Material Icons Outlined; font-size: 16px; color: #BE123C; flex-shrink: 0; display: inline-flex; line-height: 1;">error_outline</span>
+              <div style="font-size: 13px; color: #BE123C;">E-mail non reconnu. Vérifiez votre saisie.</div>
+            </div>
+          </sc-if>
+          <button onClick="{{ onSend }}" style="width: 100%; padding: 14px; background: #07101A; color: #FCD116; font-size: 15px; font-weight: 700; border: none; border-radius: 11px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px;" style-hover="background: #132730;">
+            <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+              <span style="width: 16px; height: 16px; border: 2px solid rgba(252,209,22,0.3); border-top-color: #FCD116; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block;"></span>
+            </sc-if>
+            <sc-if value="{{ notLoading }}" hint-placeholder-val="{{ true }}">
+              <span>Envoyer le lien</span>
+              <span style="font-family: Material Icons Outlined; font-size: 18px; display: inline-flex; line-height: 1;">send</span>
+            </sc-if>
+          </button>
+        </div>
+      </sc-if>
+
+      <!-- Étape 2 : confirmation -->
+      <sc-if value="{{ step === 'sent' }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #fff; border-radius: 20px; padding: 40px 32px; box-shadow: 0 4px 24px rgba(15,23,42,0.06); border: 1px solid #E8ECF1; text-align: center;">
+          <div style="width: 64px; height: 64px; border-radius: 50%; background: #F0FDF4; border: 1px solid #BBF7D0; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+            <span style="font-family: Material Icons Outlined; font-size: 28px; color: #059669; display: inline-flex; line-height: 1;">mark_email_read</span>
+          </div>
+          <div style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 10px; letter-spacing: -0.3px;">E-mail envoyé !</div>
+          <div style="font-size: 14px; color: #64748B; line-height: 1.6; margin-bottom: 8px;">Vérifiez votre boîte de réception à</div>
+          <div style="font-size: 14px; font-weight: 700; color: #3A6B84; margin-bottom: 24px;">{{ email }}</div>
+          <div style="font-size: 12px; color: #94A3B8; margin-bottom: 24px; line-height: 1.6;">Le lien expire dans <strong style="color: #334155;">30 minutes</strong>. Vérifiez également vos spams.</div>
+          <button onClick="{{ onResend }}" style="width: 100%; padding: 12px; background: #F1F5F9; color: #334155; font-size: 14px; font-weight: 600; border: 1px solid #E2E8F0; border-radius: 10px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif;" style-hover="background: #E2E8F0;">
+            Renvoyer l'e-mail
+          </button>
+          <a href="#" style="display: block; margin-top: 14px; font-size: 13px; color: #3A6B84; font-weight: 600; text-decoration: none;">← Retour à la connexion</a>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1280, &quot;height&quot;: 800}}">
+
+class Component extends DCLogic {
+  state = { email: '', step: 'email', loading: false, showError: false };
+  renderVals() {
+    const s = this.state;
+    return {
+      email: s.email,
+      step: s.step,
+      loading: s.loading,
+      notLoading: !s.loading,
+      showError: s.showError,
+      onEmailInput: (e) => this.setState({ email: e.target.value, showError: false }),
+      onSend: () => {
+        if (!s.email || !s.email.includes('@')) { this.setState({ showError: true }); return; }
+        this.setState({ loading: true, showError: false });
+        setTimeout(() => this.setState({ loading: false, step: 'sent' }), 1400);
+      },
+      onResend: () => this.setState({ step: 'email' }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
