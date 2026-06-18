@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { reglementsApi } from '@/lib/api';
 
 function MI({ name, size = 16, color }: { name: string; size?: number; color?: string }) {
   return (
@@ -13,27 +14,30 @@ function MI({ name, size = 16, color }: { name: string; size?: number; color?: s
   );
 }
 
-const METHODES: Record<string, { short: string; bg: string }> = {
-  'M-Pesa':       { short: 'MP', bg: '#E30613' },
-  'Airtel Money': { short: 'AM', bg: '#ED1C24' },
-  'Orange Money': { short: 'OM', bg: '#FF7900' },
-  'Virement':     { short: 'VB', bg: '#3A6B84' },
-  'Espèces':      { short: 'ES', bg: '#64748B' },
+// Clés = enum MoyenPaiement Prisma
+const METHODES: Record<string, { label: string; short: string; bg: string; mobile: boolean }> = {
+  MTN_MONEY:    { label: 'MTN Money',    short: 'MTN', bg: '#FFC107', mobile: true },
+  AIRTEL_MONEY: { label: 'Airtel Money', short: 'AM',  bg: '#ED1C24', mobile: true },
+  ORANGE_MONEY: { label: 'Orange Money', short: 'OM',  bg: '#FF7900', mobile: true },
+  BANK:         { label: 'Virement',     short: 'VB',  bg: '#3A6B84', mobile: false },
+  CARTE:        { label: 'Carte',        short: 'CB',  bg: '#64748B', mobile: false },
 };
 
-const DATA = [
-  { id: 1, ref: 'REG-2026-051', facture: 'FAC-2026-0042', client: 'AS Vita Club',       methode: 'M-Pesa',       montant: 8500,  date: '17 juin 2026' },
-  { id: 2, ref: 'REG-2026-050', facture: 'FAC-2026-0041', client: 'MTN RDC',            methode: 'Virement',     montant: 24000, date: '15 juin 2026' },
-  { id: 3, ref: 'REG-2026-049', facture: 'FAC-2026-0039', client: 'TP Mazembe',         methode: 'Airtel Money', montant: 6200,  date: '12 juin 2026' },
-  { id: 4, ref: 'REG-2026-048', facture: 'FAC-2026-0038', client: 'Académie Élan',      methode: 'M-Pesa',       montant: 3800,  date: '9 juin 2026'  },
-  { id: 5, ref: 'REG-2026-047', facture: 'FAC-2026-0036', client: 'DC Motema Pembe',    methode: 'Espèces',      montant: 2500,  date: '5 juin 2026'  },
-  { id: 6, ref: 'REG-2026-046', facture: 'FAC-2026-0035', client: 'AS Vita Club',       methode: 'Airtel Money', montant: 5600,  date: '2 juin 2026'  },
-  { id: 7, ref: 'REG-2026-045', facture: 'FAC-2026-0033', client: 'Airtel Congo',       methode: 'Virement',     montant: 18000, date: '28 mai 2026'  },
-  { id: 8, ref: 'REG-2026-044', facture: 'FAC-2026-0031', client: 'BC Kinshasa',        methode: 'Orange Money', montant: 4500,  date: '24 mai 2026'  },
-];
+interface Reglement {
+  id: string;
+  ref: string;
+  facture: string;
+  client: string;
+  methode: string;   // enum key
+  montant: number;
+  date: Date | null;
+}
 
 function fmtMontant(n: number) {
   return '$' + n.toLocaleString('fr-FR');
+}
+function fmtDate(d: Date | null) {
+  return d ? d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 }
 
 const HEADERS = ['Référence', 'Facture', 'Client', 'Méthode', 'Montant', 'Date'];
@@ -41,23 +45,44 @@ const HEADERS = ['Référence', 'Facture', 'Client', 'Méthode', 'Montant', 'Dat
 export default function ReglementsPage() {
   const [search, setSearch]           = useState('');
   const [filterMethode, setFilterMethode] = useState('');
+  const [data, setData] = useState<Reglement[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = DATA.filter(r => {
+  useEffect(() => {
+    reglementsApi.list()
+      .then(({ data }) => {
+        const rows: Reglement[] = (data || []).map((r: any) => ({
+          id: r.id,
+          ref: r.reference || r.orderNumber || r.id.slice(0, 10).toUpperCase(),
+          facture: r.facture?.numero ?? '—',
+          client: r.facture?.client?.nom ?? '—',
+          methode: r.moyenPaiement,
+          montant: r.montant ?? 0,
+          date: r.dateReglement ? new Date(r.dateReglement) : null,
+        }));
+        setData(rows);
+      })
+      .catch(() => setData([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = data.filter(r => {
     const q = search.toLowerCase();
     return (!q || r.ref.toLowerCase().includes(q) || r.facture.toLowerCase().includes(q) || r.client.toLowerCase().includes(q))
       && (!filterMethode || r.methode === filterMethode);
   });
 
-  const total = DATA.reduce((a, r) => a + r.montant, 0);
-  const mobileMoney = DATA.filter(r => ['M-Pesa', 'Airtel Money', 'Orange Money'].includes(r.methode)).reduce((a, r) => a + r.montant, 0);
-  const moisCount = DATA.filter(r => r.date.includes('juin')).length;
+  const now = new Date();
+  const total = data.reduce((a, r) => a + r.montant, 0);
+  const mobileMoney = data.filter(r => METHODES[r.methode]?.mobile).reduce((a, r) => a + r.montant, 0);
+  const moisCount = data.filter(r => r.date && r.date.getMonth() === now.getMonth() && r.date.getFullYear() === now.getFullYear()).length;
   const sumShown = filtered.reduce((a, r) => a + r.montant, 0);
 
   const stats = [
     { icon: 'account_balance_wallet', color: '#059669', iBox: { bg: '#F0FDF4', border: '#BBF7D0' }, value: '$' + (total / 1000).toFixed(1) + 'k', label: 'Total encaissé' },
     { icon: 'calendar_month',         color: '#3A6B84', iBox: { bg: '#EFF6FF', border: '#BFDBFE' }, value: String(moisCount),                     label: 'Règlements ce mois' },
     { icon: 'smartphone',             color: '#B45309', iBox: { bg: '#FEF9EE', border: '#FDE68A' }, value: '$' + (mobileMoney / 1000).toFixed(1) + 'k', label: 'Via Mobile Money' },
-    { icon: 'receipt_long',           color: '#2563EB', iBox: { bg: '#EFF6FF', border: '#BFDBFE' }, value: String(DATA.length),                   label: 'Total règlements' },
+    { icon: 'receipt_long',           color: '#2563EB', iBox: { bg: '#EFF6FF', border: '#BFDBFE' }, value: String(data.length),                   label: 'Total règlements' },
   ];
 
   return (
@@ -67,7 +92,7 @@ export default function ReglementsPage() {
       <div style={{ background: '#fff', borderBottom: '1px solid #E8ECF1', padding: '0 28px', display: 'flex', alignItems: 'center', height: 60, gap: 16, flexShrink: 0 }}>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 16, fontWeight: 800, color: '#0F172A', letterSpacing: '-0.3px' }}>Règlements</span>
-          <span style={{ fontSize: 12, fontWeight: 700, background: '#07101A', color: '#FCD116', padding: '2px 9px', borderRadius: 20 }}>{DATA.length}</span>
+          <span style={{ fontSize: 12, fontWeight: 700, background: '#07101A', color: '#FCD116', padding: '2px 9px', borderRadius: 20 }}>{data.length}</span>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <div style={{ position: 'relative' }}>
@@ -91,11 +116,11 @@ export default function ReglementsPage() {
               style={{ padding: '9px 32px 9px 12px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 13, fontFamily: 'inherit', color: '#0F172A', outline: 'none', background: '#F8FAFC', appearance: 'none', cursor: 'pointer' }}
             >
               <option value="">Toutes méthodes</option>
-              <option value="M-Pesa">M-Pesa</option>
-              <option value="Airtel Money">Airtel Money</option>
-              <option value="Orange Money">Orange Money</option>
-              <option value="Virement">Virement bancaire</option>
-              <option value="Espèces">Espèces</option>
+              <option value="MTN_MONEY">MTN Money</option>
+              <option value="AIRTEL_MONEY">Airtel Money</option>
+              <option value="ORANGE_MONEY">Orange Money</option>
+              <option value="BANK">Virement bancaire</option>
+              <option value="CARTE">Carte</option>
             </select>
             <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'inline-flex' }}>
               <MI name="expand_more" size={15} color="#94A3B8" />
@@ -137,15 +162,17 @@ export default function ReglementsPage() {
             ))}
           </div>
           {/* Rows */}
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div style={{ padding: '56px 20px', textAlign: 'center', color: '#94A3B8', fontSize: 13 }}>Chargement…</div>
+          ) : filtered.length === 0 ? (
             <div style={{ padding: '56px 20px', textAlign: 'center' }}>
               <MI name="search_off" size={42} color="#CBD5E1" />
               <div style={{ fontSize: 14, fontWeight: 700, color: '#334155', marginTop: 10 }}>Aucun règlement trouvé</div>
-              <div style={{ fontSize: 13, color: '#94A3B8', marginTop: 4 }}>Essayez d'ajuster la recherche ou le filtre de méthode.</div>
+              <div style={{ fontSize: 13, color: '#94A3B8', marginTop: 4 }}>Les paiements enregistrés apparaîtront ici.</div>
             </div>
           ) : (
             filtered.map(r => {
-              const m = METHODES[r.methode] ?? METHODES['Espèces'];
+              const m = METHODES[r.methode] ?? METHODES['CARTE'];
               return (
                 <div
                   key={r.id}
@@ -160,10 +187,10 @@ export default function ReglementsPage() {
                     <div style={{ width: 26, height: 26, borderRadius: 7, background: m.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
                       {m.short}
                     </div>
-                    <span style={{ fontSize: 12, color: '#475569', fontWeight: 500 }}>{r.methode}</span>
+                    <span style={{ fontSize: 12, color: '#475569', fontWeight: 500 }}>{m.label}</span>
                   </div>
                   <div style={{ fontSize: 14, fontWeight: 700, color: '#059669', fontFamily: 'monospace' }}>{fmtMontant(r.montant)}</div>
-                  <div style={{ fontSize: 12, color: '#64748B' }}>{r.date}</div>
+                  <div style={{ fontSize: 12, color: '#64748B' }}>{fmtDate(r.date)}</div>
                 </div>
               );
             })

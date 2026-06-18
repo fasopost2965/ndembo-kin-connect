@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { clientsApi, prestationsApi, devisApi } from '@/lib/api';
 
 const DRAFT_KEY = 'nkc:draft:devis';
 
@@ -14,13 +15,8 @@ function MI({ name, size = 16, color }: { name: string; size?: number; color?: s
   );
 }
 
-const PRESTATIONS = [
-  { id: '1', nom: 'Représentation sportive internationale', prix: 5000 },
-  { id: '2', nom: 'Négociation de transfert',              prix: 8500 },
-  { id: '3', nom: 'Coaching tactique (session)',           prix: 800 },
-  { id: '4', nom: "Organisation d'événement sportif",     prix: 6200 },
-  { id: '5', nom: 'Scouting & recrutement',               prix: 4500 },
-];
+interface PrestationOpt { id: string; nom: string; prix: number }
+interface ClientOpt { id: string; nom: string; type: string; ville: string }
 
 const STATUT_OPTS = [
   { val: 'BROUILLON',  label: 'Brouillon',  desc: 'En cours de rédaction',  dot: '#94A3B8' },
@@ -73,7 +69,20 @@ export default function DevisNouveauPage() {
   const [remise, setRemise] = useState(0);
   const [statut, setStatut] = useState('BROUILLON');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [clients, setClients] = useState<ClientOpt[]>([]);
+  const [prestations, setPrestations] = useState<PrestationOpt[]>([]);
   const draftTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  // Charge clients + prestations réels depuis l'API
+  useEffect(() => {
+    clientsApi.list()
+      .then(({ data }) => setClients((data?.data || []).map((c: any) => ({ id: c.id, nom: c.nom, type: c.type, ville: c.ville }))))
+      .catch(() => {});
+    prestationsApi.list(true)
+      .then(({ data }) => setPrestations((data || []).map((p: any) => ({ id: p.id, nom: p.nom, prix: p.prixBase ?? 0 }))))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const raw = localStorage.getItem(DRAFT_KEY);
@@ -103,7 +112,7 @@ export default function DevisNouveauPage() {
     setLignes(prev => {
       const next = prev.map(l => l.id === id ? { ...l, ...patch } : l);
       if (patch.prestationId !== undefined) {
-        const p = PRESTATIONS.find(p => p.id === patch.prestationId);
+        const p = prestations.find(p => p.id === patch.prestationId);
         if (p) return prev.map(l => l.id === id ? { ...l, prestationId: patch.prestationId!, prixUnit: p.prix } : l);
       }
       scheduleDraft({ lignes: next, notes, remise });
@@ -121,13 +130,25 @@ export default function DevisNouveauPage() {
   const ttc = ht + tvaAmt - remiseAmt;
 
   async function handleSave() {
-    if (!selectedClient || lignes.every(l => !l.prestationId)) return;
+    setError('');
+    if (!selectedClient) { setError('Veuillez sélectionner un client.'); return; }
+    const validLignes = lignes.filter(l => l.prestationId);
+    if (validLignes.length === 0) { setError('Ajoutez au moins une prestation.'); return; }
     setSaving(true);
     try {
-      // POST to API when connected — for now navigate back
+      const diffJours = Math.round((new Date(dateValidite).getTime() - new Date(dateEmission).getTime()) / 86_400_000);
+      const validiteJours = diffJours > 0 ? diffJours : 30;
+      await devisApi.create({
+        clientId: selectedClient,
+        lignes: validLignes.map(l => ({ prestationId: l.prestationId, quantite: l.quantite, prixUnit: l.prixUnit })),
+        tva: 16,
+        notes: notes || undefined,
+        validiteJours,
+      });
       localStorage.removeItem(DRAFT_KEY);
       router.push('/devis');
-    } finally {
+    } catch (e: any) {
+      setError(e?.response?.data?.message || "Erreur lors de l'enregistrement du devis.");
       setSaving(false);
     }
   }
@@ -169,6 +190,16 @@ export default function DevisNouveauPage() {
         </div>
       </div>
 
+      {/* Bannière d'erreur */}
+      {error && (
+        <div style={{ maxWidth: 1200, margin: '16px auto 0', width: '100%', padding: '0 32px' }}>
+          <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', color: '#BE123C', borderRadius: 10, padding: '11px 16px', fontSize: 13, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <MI name="error_outline" size={16} color="#BE123C" />
+            {error}
+          </div>
+        </div>
+      )}
+
       {/* 2-COLUMN LAYOUT */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20, padding: '28px 32px', maxWidth: 1200, margin: '0 auto', width: '100%' }}>
 
@@ -199,10 +230,9 @@ export default function DevisNouveauPage() {
                 <div style={{ position: 'relative' }}>
                   <select value={selectedClient} onChange={e => setSelectedClient(e.target.value)} style={{ ...fieldStyle(), paddingRight: 36, appearance: 'none', cursor: 'pointer' }} onFocus={onFocus} onBlur={onBlur}>
                     <option value="">-- Sélectionner un client --</option>
-                    <option value="1">AS Vita Club — Club · Kinshasa</option>
-                    <option value="2">TP Mazembe — Club · Lubumbashi</option>
-                    <option value="3">MTN RDC — Sponsor</option>
-                    <option value="4">Académie Élan — Académie · Kinshasa</option>
+                    {clients.map(c => (
+                      <option key={c.id} value={c.id}>{c.nom}{c.type ? ` — ${c.type}` : ''}{c.ville ? ` · ${c.ville}` : ''}</option>
+                    ))}
                   </select>
                   <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'inline-flex' }}><MI name="expand_more" size={16} color="#94A3B8" /></span>
                 </div>
@@ -253,7 +283,7 @@ export default function DevisNouveauPage() {
                         style={{ width: '100%', padding: '9px 30px 9px 10px', border: '1.5px solid #E2E8F0', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', color: '#0F172A', outline: 'none', background: '#FAFBFC', cursor: 'pointer', appearance: 'none' }}
                         onFocus={onFocus} onBlur={onBlur}>
                         <option value="">-- Choisir --</option>
-                        {PRESTATIONS.map(p => <option key={p.id} value={p.id}>{p.nom}</option>)}
+                        {prestations.map(p => <option key={p.id} value={p.id}>{p.nom}</option>)}
                       </select>
                       <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'inline-flex' }}><MI name="expand_more" size={14} color="#94A3B8" /></span>
                     </div>

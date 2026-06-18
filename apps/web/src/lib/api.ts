@@ -81,7 +81,7 @@ export const prestationsApi = {
 
 // ── Devis ─────────────────────────────────────────────────────────────────────
 export interface DevisLigneInput { prestationId: string; quantite: number; prixUnit?: number }
-export interface DevisCreateInput { clientId: string; lignes: DevisLigneInput[]; tva?: number; notes?: string }
+export interface DevisCreateInput { clientId: string; lignes: DevisLigneInput[]; tva?: number; notes?: string; validiteJours?: number }
 
 export const devisApi = {
   list: (params?: Record<string, string | number>) => api.get('/devis', { params }),

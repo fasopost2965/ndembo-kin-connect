@@ -21,6 +21,7 @@ export interface Athlete {
   clubActuel?: string | null;
   valeurMarchande?: number | null;
   nationalite: string;
+  dateNaissance?: string | null;
   telephone?: string | null;
   email?: string | null;
   statut: string;

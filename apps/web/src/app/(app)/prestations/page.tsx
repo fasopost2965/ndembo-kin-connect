@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { prestationsApi } from '@/lib/api';
 
 function MI({ name, size = 16, color }: { name: string; size?: number; color?: string }) {
   return (
@@ -13,25 +14,28 @@ function MI({ name, size = 16, color }: { name: string; size?: number; color?: s
   );
 }
 
+// Mapping des types Prisma → libellé/couleur/icône d'affichage
 const CATS: Record<string, { color: string; bg: string; icon: string }> = {
-  Représentation: { color: '#2563EB', bg: '#EFF6FF', icon: 'badge' },
-  Coaching: { color: '#6D28D9', bg: '#F5F3FF', icon: 'sports' },
-  Événementiel: { color: '#B45309', bg: '#FEF9EE', icon: 'celebration' },
-  Scouting: { color: '#059669', bg: '#F0FDF4', icon: 'travel_explore' },
-  Image: { color: '#BE123C', bg: '#FFF1F2', icon: 'photo_camera' },
+  Gestion_carriere: { color: '#2563EB', bg: '#EFF6FF', icon: 'badge' },
+  Conseil:          { color: '#6D28D9', bg: '#F5F3FF', icon: 'sports' },
+  Camp:             { color: '#059669', bg: '#F0FDF4', icon: 'travel_explore' },
+  Stage:            { color: '#B45309', bg: '#FEF9EE', icon: 'school' },
+};
+const CAT_LABEL: Record<string, string> = {
+  Gestion_carriere: 'Gestion de carrière',
+  Conseil: 'Conseil',
+  Camp: 'Camp',
+  Stage: 'Stage',
 };
 
-const DATA = [
-  { id: 1, nom: 'Représentation sportive internationale', categorie: 'Représentation', prix: 5000, unite: '/ saison', description: "Mandat de représentation et gestion de carrière à l'international." },
-  { id: 2, nom: 'Négociation de transfert', categorie: 'Représentation', prix: 8500, unite: '/ opération', description: "Négociation et finalisation d'un transfert vers un club partenaire." },
-  { id: 3, nom: 'Coaching tactique', categorie: 'Coaching', prix: 800, unite: '/ session', description: "Séance individuelle d'encadrement technique et tactique." },
-  { id: 4, nom: 'Préparation physique', categorie: 'Coaching', prix: 600, unite: '/ session', description: 'Programme de préparation physique personnalisé.' },
-  { id: 5, nom: "Organisation d'événement sportif", categorie: 'Événementiel', prix: 6200, unite: '/ événement', description: "Logistique complète d'un tournoi ou match de gala." },
-  { id: 6, nom: 'Scouting & recrutement', categorie: 'Scouting', prix: 4500, unite: '/ mission', description: 'Détection et évaluation de jeunes talents sur le terrain.' },
-  { id: 7, nom: 'Production de contenu image', categorie: 'Image', prix: 1500, unite: '/ shooting', description: "Shooting photo/vidéo pour la communication de l'athlète." },
-  { id: 8, nom: 'Gestion de partenariat sponsor', categorie: 'Représentation', prix: 3200, unite: '/ contrat', description: "Mise en relation et suivi d'un contrat de sponsoring." },
-  { id: 9, nom: 'Stage de détection', categorie: 'Scouting', prix: 2800, unite: '/ stage', description: 'Organisation d\'un stage de détection multi-clubs.' },
-];
+interface Prestation {
+  id: string;
+  nom: string;
+  categorie: string;       // <- type API
+  prix: number;            // <- prixBase
+  unite: string;           // <- dureeEstimee
+  description: string;
+}
 
 function fmtPrix(n: number) {
   return '$' + n.toLocaleString('fr-FR');
@@ -51,16 +55,37 @@ const CAT_FILTER_IDLE: React.CSSProperties = {
 export default function PrestationsPage() {
   const [search, setSearch] = useState('');
   const [cat, setCat] = useState('');
+  const [data, setData] = useState<Prestation[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = DATA.filter(p => {
+  useEffect(() => {
+    prestationsApi.list(false)
+      .then(({ data }) => {
+        const rows: Prestation[] = (data || []).map((p: any) => ({
+          id: p.id,
+          nom: p.nom,
+          categorie: p.type,
+          prix: p.prixBase ?? 0,
+          unite: p.dureeEstimee ? `/ ${p.dureeEstimee}` : '',
+          description: p.description ?? '',
+        }));
+        setData(rows);
+      })
+      .catch(() => setData([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = data.filter(p => {
     const q = search.toLowerCase();
     return (!q || p.nom.toLowerCase().includes(q) || p.description.toLowerCase().includes(q))
       && (!cat || p.categorie === cat);
   });
 
   const catFilters = [
-    { id: '', label: 'Toutes', count: DATA.length },
-    ...Object.keys(CATS).map(c => ({ id: c, label: c, count: DATA.filter(p => p.categorie === c).length })),
+    { id: '', label: 'Toutes', count: data.length },
+    ...Object.keys(CATS)
+      .filter(c => data.some(p => p.categorie === c))
+      .map(c => ({ id: c, label: CAT_LABEL[c] ?? c, count: data.filter(p => p.categorie === c).length })),
   ];
 
   return (
@@ -70,7 +95,7 @@ export default function PrestationsPage() {
       <div style={{ background: '#fff', borderBottom: '1px solid #E8ECF1', padding: '0 28px', display: 'flex', alignItems: 'center', height: 60, gap: 16, flexShrink: 0 }}>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 16, fontWeight: 800, color: '#0F172A', letterSpacing: '-0.3px' }}>Catalogue de prestations</span>
-          <span style={{ fontSize: 12, fontWeight: 700, background: '#07101A', color: '#FCD116', padding: '2px 9px', borderRadius: 20 }}>{DATA.length}</span>
+          <span style={{ fontSize: 12, fontWeight: 700, background: '#07101A', color: '#FCD116', padding: '2px 9px', borderRadius: 20 }}>{data.length}</span>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <div style={{ position: 'relative' }}>
@@ -113,7 +138,13 @@ export default function PrestationsPage() {
 
       {/* GRID */}
       <div style={{ padding: '18px 28px 32px', flex: 1 }}>
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+            {[...Array(6)].map((_, i) => (
+              <div key={i} style={{ height: 180, background: '#fff', border: '1px solid #E2E8F0', borderRadius: 16 }} className="animate-pulse" />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
           <div style={{ padding: '56px 20px', textAlign: 'center', background: '#fff', border: '1px solid #E2E8F0', borderRadius: 16 }}>
             <MI name="search_off" size={42} color="#CBD5E1" />
             <div style={{ fontSize: 14, fontWeight: 700, color: '#334155', marginTop: 10 }}>Aucune prestation trouvée</div>
@@ -122,7 +153,7 @@ export default function PrestationsPage() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
             {filtered.map(p => {
-              const c = CATS[p.categorie] ?? CATS['Représentation'];
+              const c = CATS[p.categorie] ?? { color: '#64748B', bg: '#F1F5F9', icon: 'category' };
               return (
                 <PrestationCard key={p.id} p={p} c={c} />
               );
@@ -134,7 +165,7 @@ export default function PrestationsPage() {
   );
 }
 
-function PrestationCard({ p, c }: { p: typeof DATA[0]; c: typeof CATS['Représentation'] }) {
+function PrestationCard({ p, c }: { p: Prestation; c: { color: string; bg: string; icon: string } }) {
   return (
     <div
       style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 16, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: 12, transition: 'border-color 0.15s, box-shadow 0.15s' }}
@@ -146,7 +177,7 @@ function PrestationCard({ p, c }: { p: typeof DATA[0]; c: typeof CATS['Représen
           <MI name={c.icon} size={20} color={c.color} />
         </div>
         <span style={{ fontSize: 10, fontWeight: 700, color: c.color, background: c.bg, padding: '3px 9px', borderRadius: 20, display: 'inline-block', whiteSpace: 'nowrap' }}>
-          {p.categorie}
+          {CAT_LABEL[p.categorie] ?? p.categorie}
         </span>
       </div>
       <div>

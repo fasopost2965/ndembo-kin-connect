@@ -43,6 +43,9 @@ export async function reglementRoutes(server: FastifyInstance) {
     return prisma.reglement.findMany({
       where: { ...(factureId && { factureId }) },
       orderBy: { dateReglement: 'desc' },
+      include: {
+        facture: { select: { numero: true, client: { select: { nom: true } } } },
+      },
     });
   });
 
