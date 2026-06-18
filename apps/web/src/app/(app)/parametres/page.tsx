@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { settingsApi } from '@/lib/api';
 
 function MI({ name, size = 16, style }: { name: string; size?: number; style?: React.CSSProperties }) {
@@ -34,11 +34,11 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 ];
 
 const ROLE_META: Record<string, { label: string; bg: string; color: string }> = {
-  PLANIFICATEUR: { label: 'Admin',      bg: '#FEF9EE', color: '#B45309' },
-  SUPERVISEUR:   { label: 'Manager',    bg: '#EFF6FF', color: '#2563EB' },
-  COMMERCIAL:    { label: 'Commercial', bg: '#F0FDF4', color: '#059669' },
-  COACH:         { label: 'Coach',      bg: '#F5F3FF', color: '#6D28D9' },
-  OBSERVATEUR:   { label: 'Observateur',bg: '#FEF2F2', color: '#B91C1C' },
+  ADMIN:      { label: 'Admin',      bg: '#FEF9EE', color: '#B45309' },
+  MANAGER:    { label: 'Manager',    bg: '#EFF6FF', color: '#2563EB' },
+  COMMERCIAL: { label: 'Commercial', bg: '#F0FDF4', color: '#059669' },
+  COACH:      { label: 'Coach',      bg: '#F5F3FF', color: '#6D28D9' },
+  COMPTABLE:  { label: 'Comptable',  bg: '#FEF2F2', color: '#B91C1C' },
 };
 
 const RBAC = [
@@ -52,7 +52,7 @@ const RBAC = [
   { module: 'Paramètres',        perms: ['full','none','none','none','none'] },
 ];
 
-const ROLE_COLS = ['PLANIFICATEUR', 'SUPERVISEUR', 'COMMERCIAL', 'COACH', 'OBSERVATEUR'];
+const ROLE_COLS = ['ADMIN', 'MANAGER', 'COMMERCIAL', 'COACH', 'COMPTABLE'];
 
 const AVATAR_COLORS = ['#07101A', '#3A6B84', '#059669', '#6D28D9', '#B45309'];
 function avatarColor(id: string) {
