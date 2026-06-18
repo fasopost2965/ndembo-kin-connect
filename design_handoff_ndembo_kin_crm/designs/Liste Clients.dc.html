@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F0F2F5; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; min-height: 100vh; background: #F0F2F5; display: flex; flex-direction: column;">
+
+  <!-- TOPBAR -->
+  <div style="background: #fff; border-bottom: 1px solid #E8ECF1; padding: 0 28px; display: flex; align-items: center; height: 60px; gap: 16px; flex-shrink: 0;">
+    <div style="background: #07101A; border-radius: 8px; padding: 4px 5px;">
+      <img src="assets/logo.png" style="height: 22px; width: auto; display: block;" />
+    </div>
+    <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 16px; font-weight: 800; color: #0F172A; letter-spacing: -0.3px;">Clients</span>
+      <span style="font-size: 12px; font-weight: 700; background: #07101A; color: #FCD116; padding: 2px 9px; border-radius: 20px;">{{ totalCount }}</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <div style="position: relative;">
+        <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 17px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">search</span>
+        <input type="text" placeholder="Rechercher un client…" value="{{ search }}" onInput="{{ onSearch }}"
+          style="padding: 9px 14px 9px 38px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #F8FAFC; width: 240px;"
+          style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+      </div>
+      <div style="position: relative;">
+        <select value="{{ filterType }}" onChange="{{ onFilterType }}"
+          style="padding: 9px 32px 9px 12px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #F8FAFC; appearance: none; cursor: pointer;"
+          style-focus="border-color: #3A6B84; background: #fff;">
+          <option value="">Tous les types</option>
+          <option value="Club">Club</option>
+          <option value="Académie">Académie</option>
+          <option value="Sponsor">Sponsor</option>
+          <option value="Partenaire">Partenaire</option>
+        </select>
+        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 15px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+      </div>
+      <div style="position: relative;">
+        <select value="{{ filterVille }}" onChange="{{ onFilterVille }}"
+          style="padding: 9px 32px 9px 12px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #F8FAFC; appearance: none; cursor: pointer;"
+          style-focus="border-color: #3A6B84; background: #fff;">
+          <option value="">Toutes les villes</option>
+          <option value="Kinshasa">Kinshasa</option>
+          <option value="Lubumbashi">Lubumbashi</option>
+          <option value="Goma">Goma</option>
+        </select>
+        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 15px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+      </div>
+      <button onClick="{{ onAdd }}" style="padding: 9px 18px; background: #07101A; color: #FCD116; font-size: 13px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 7px; white-space: nowrap;" style-hover="background: #132730;">
+        <span style="font-family: Material Icons Outlined; font-size: 16px; display: inline-flex; line-height: 1;">add</span>
+        Nouveau client
+      </button>
+    </div>
+  </div>
+
+  <!-- STATS RAPIDES -->
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px 28px 0;">
+    <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+      <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 14px;">
+        <div style="{{ s.iBox }}">
+          <span style="font-family: Material Icons Outlined; font-size: 20px; display: inline-flex; line-height: 1; color: {{ s.iColor }};">{{ s.icon }}</span>
+        </div>
+        <div>
+          <div style="font-size: 22px; font-weight: 800; color: #0F172A; letter-spacing: -0.4px;">{{ s.value }}</div>
+          <div style="font-size: 11px; color: #94A3B8; font-weight: 500; margin-top: 1px;">{{ s.label }}</div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- TABLE -->
+  <div style="padding: 16px 28px 32px; flex: 1;">
+    <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+      <div style="display: grid; grid-template-columns: 2.6fr 1.1fr 1fr 0.8fr 0.9fr 1.2fr 1.1fr 70px; gap: 8px; padding: 11px 20px; background: #F8FAFC; border-bottom: 1px solid #E8ECF1;">
+        <sc-for list="{{ headers }}" as="h" hint-placeholder-count="8">
+          <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 4px;">{{ h.label }}</div>
+        </sc-for>
+      </div>
+      <sc-for list="{{ clients }}" as="c" hint-placeholder-count="8">
+        <div onClick="{{ c.onClick }}" style="display: grid; grid-template-columns: 2.6fr 1.1fr 1fr 0.8fr 0.9fr 1.2fr 1.1fr 70px; gap: 8px; padding: 13px 20px; border-bottom: 1px solid #F8FAFC; align-items: center; cursor: pointer; transition: background 0.1s;" style-hover="background: #F8FAFC;">
+          <div style="display: flex; align-items: center; gap: 11px;">
+            <div style="{{ c.logoStyle }}">{{ c.initials }}</div>
+            <div>
+              <div style="font-size: 14px; font-weight: 700; color: #0F172A;">{{ c.nom }}</div>
+              <div style="font-size: 11px; color: #94A3B8; margin-top: 1px;">{{ c.contact }}</div>
+            </div>
+          </div>
+          <div><span style="{{ c.typeStyle }}">{{ c.type }}</span></div>
+          <div style="font-size: 13px; color: #334155;">{{ c.ville }}</div>
+          <div style="font-size: 13px; color: #334155; font-weight: 600;">{{ c.devis }}</div>
+          <div style="font-size: 13px; color: #334155; font-weight: 600;">{{ c.factures }}</div>
+          <div style="font-size: 14px; font-weight: 700; color: #059669;">{{ c.caFmt }}</div>
+          <div><span style="{{ c.statutStyle }}">{{ c.statut }}</span></div>
+          <div style="display: flex; gap: 6px; justify-content: flex-end;">
+            <div style="width: 30px; height: 30px; border-radius: 8px; background: #F1F5F9; border: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background: #EFF6FF; border-color: #BFDBFE;">
+              <span style="font-family: Material Icons Outlined; font-size: 15px; color: #64748B; display: inline-flex; line-height: 1;">visibility</span>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid #E8ECF1; background: #FAFBFC;">
+        <div style="font-size: 12px; color: #94A3B8;">{{ paginationInfo }}</div>
+        <div style="display: flex; gap: 4px;">
+          <sc-for list="{{ pages }}" as="p" hint-placeholder-count="3">
+            <div onClick="{{ p.onClick }}" style="{{ p.style }}">{{ p.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRAWER DÉTAIL CLIENT -->
+  <sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 50; display: flex;">
+      <div onClick="{{ closeDrawer }}" style="flex: 1; background: rgba(7,16,26,0.4); backdrop-filter: blur(2px);"></div>
+      <div style="width: 420px; background: #fff; height: 100%; overflow-y: auto; box-shadow: -8px 0 40px rgba(0,0,0,0.15); display: flex; flex-direction: column;">
+        <div style="background: #07101A; padding: 24px 22px 20px; position: relative;">
+          <div style="position: absolute; right: 16px; top: 16px; width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer;" onClick="{{ closeDrawer }}" style-hover="background: rgba(255,255,255,0.18);">
+            <span style="font-family: Material Icons Outlined; font-size: 16px; color: #fff; display: inline-flex; line-height: 1;">close</span>
+          </div>
+          <div style="{{ selected.logoLgStyle }}">{{ selected.initials }}</div>
+          <div style="font-size: 18px; font-weight: 800; color: #fff; margin-top: 14px;">{{ selected.nom }}</div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px;">{{ selected.type }} · {{ selected.ville }}</div>
+          <div style="margin-top: 12px; display: flex; gap: 6px;">
+            <span style="{{ selected.statutStyle }}">{{ selected.statut }}</span>
+          </div>
+        </div>
+        <div style="padding: 20px 22px; display: flex; flex-direction: column; gap: 16px; flex: 1;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <sc-for list="{{ selected.kpis }}" as="k" hint-placeholder-count="3">
+              <div style="background: #F8FAFC; border: 1px solid #E8ECF1; border-radius: 11px; padding: 12px; text-align: center;">
+                <div style="font-size: 18px; font-weight: 800; color: #0F172A; letter-spacing: -0.3px;">{{ k.value }}</div>
+                <div style="font-size: 9px; color: #94A3B8; margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">{{ k.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <sc-for list="{{ selected.infos }}" as="i" hint-placeholder-count="4">
+            <div style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #F1F5F9;">
+              <span style="font-family: Material Icons Outlined; font-size: 16px; color: #94A3B8; flex-shrink: 0; display: inline-flex; line-height: 1;">{{ i.icon }}</span>
+              <div>
+                <div style="font-size: 10px; color: #94A3B8;">{{ i.label }}</div>
+                <div style="font-size: 13px; font-weight: 600; color: #334155;">{{ i.value }}</div>
+              </div>
+            </div>
+          </sc-for>
+          <!-- Mini timeline -->
+          <div>
+            <div style="font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Activité récente</div>
+            <div style="display: flex; flex-direction: column; gap: 0;">
+              <sc-for list="{{ selected.timeline }}" as="t" hint-placeholder-count="4">
+                <div style="display: flex; gap: 12px;">
+                  <div style="display: flex; flex-direction: column; align-items: center;">
+                    <div style="{{ t.dotStyle }}"><span style="font-family: Material Icons Outlined; font-size: 12px; color: #fff; display: inline-flex; line-height: 1;">{{ t.icon }}</span></div>
+                    <div style="{{ t.lineStyle }}"></div>
+                  </div>
+                  <div style="padding-bottom: 14px;">
+                    <div style="font-size: 13px; font-weight: 600; color: #334155;">{{ t.title }}</div>
+                    <div style="font-size: 11px; color: #94A3B8; margin-top: 1px;">{{ t.date }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="padding: 16px 22px; border-top: 1px solid #E8ECF1; display: flex; flex-direction: column; gap: 8px;">
+          <button style="width: 100%; padding: 12px; background: #07101A; color: #FCD116; font-size: 13px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px;" style-hover="background: #132730;">
+            <span style="font-family: Material Icons Outlined; font-size: 16px; display: inline-flex; line-height: 1;">open_in_new</span>
+            Voir la fiche complète
+          </button>
+          <button style="width: 100%; padding: 11px; background: #F1F5F9; color: #475569; font-size: 13px; font-weight: 600; border: 1px solid #E2E8F0; border-radius: 10px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif;" style-hover="background: #E2E8F0;">Créer un devis</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1440, &quot;height&quot;: 900}}">
+class Component extends DCLogic {
+  state = { search:'', filterType:'', filterVille:'', page:1, drawerOpen:false, selectedId:null };
+
+  data = [
+    { id:1, nom:'AS Vita Club', type:'Club', ville:'Kinshasa', contact:'admin@asvitaclub.cd', tel:'+243 99 555 1122', devis:6, factures:4, ca:42500, statut:'Actif' },
+    { id:2, nom:'TP Mazembe', type:'Club', ville:'Lubumbashi', contact:'contact@tpmazembe.cd', tel:'+243 97 333 4455', devis:9, factures:7, ca:88000, statut:'Actif' },
+    { id:3, nom:'MTN RDC', type:'Sponsor', ville:'Kinshasa', contact:'partenariats@mtn.cd', tel:'+243 81 100 2030', devis:3, factures:3, ca:65000, statut:'Actif' },
+    { id:4, nom:'Académie Élan', type:'Académie', ville:'Kinshasa', contact:'direction@elan.cd', tel:'+243 82 901 4455', devis:4, factures:2, ca:14200, statut:'Actif' },
+    { id:5, nom:'Airtel Congo', type:'Sponsor', ville:'Kinshasa', contact:'sponsoring@airtel.cd', tel:'+243 99 700 8090', devis:2, factures:2, ca:38000, statut:'Prospect' },
+    { id:6, nom:'DC Motema Pembe', type:'Club', ville:'Kinshasa', contact:'secretariat@dcmp.cd', tel:'+243 81 654 9900', devis:5, factures:3, ca:31000, statut:'Actif' },
+    { id:7, nom:'Bracongo', type:'Partenaire', ville:'Kinshasa', contact:'marketing@bracongo.cd', tel:'+243 97 222 3344', devis:1, factures:0, ca:0, statut:'Prospect' },
+    { id:8, nom:'FC Goma', type:'Club', ville:'Goma', contact:'info@fcgoma.cd', tel:'+243 82 808 1010', devis:2, factures:1, ca:9500, statut:'Inactif' },
+  ];
+
+  _typeStyle(t) {
+    const m = { Club:{bg:'#EFF6FF',c:'#2563EB'}, 'Académie':{bg:'#F5F3FF',c:'#6D28D9'}, Sponsor:{bg:'#FEF9EE',c:'#B45309'}, Partenaire:{bg:'#ECFEFF',c:'#0E7490'} };
+    const x = m[t]||m.Club;
+    return { fontSize:10, fontWeight:700, background:x.bg, color:x.c, padding:'3px 9px', borderRadius:20, display:'inline-block', whiteSpace:'nowrap' };
+  }
+  _statutStyle(s) {
+    const m = { Actif:{bg:'#F0FDF4',c:'#059669'}, Prospect:{bg:'#EFF6FF',c:'#2563EB'}, Inactif:{bg:'#F1F5F9',c:'#64748B'} };
+    const x = m[s]||m.Inactif;
+    return { fontSize:10, fontWeight:700, background:x.bg, color:x.c, padding:'3px 9px', borderRadius:20, display:'inline-block', whiteSpace:'nowrap' };
+  }
+  _initials(nom) { const w = nom.split(' ').filter(Boolean); return ((w[0]||'')[0]||'') + ((w[1]||'')[0]||''); }
+  _logoColors = ['#07101A','#3A6B84','#1D4ED8','#059669','#B45309','#6D28D9'];
+  _logoStyle(id, size) {
+    const c = this._logoColors[id % this._logoColors.length];
+    return { width:size, height:size, borderRadius:10, background:c, display:'flex', alignItems:'center', justifyContent:'center', fontSize:size*0.34, fontWeight:800, color:'#FCD116', flexShrink:0, letterSpacing:'-0.5px' };
+  }
+  _fmt(n) { return n ? '$'+n.toLocaleString('fr-FR') : '—'; }
+
+  renderVals() {
+    const s = this.state;
+    let filtered = this.data.filter(c => {
+      const q = s.search.toLowerCase();
+      const matchQ = !q || c.nom.toLowerCase().includes(q) || c.contact.toLowerCase().includes(q);
+      return matchQ && (!s.filterType || c.type===s.filterType) && (!s.filterVille || c.ville===s.filterVille);
+    });
+    const PER = 6;
+    const totalPages = Math.ceil(filtered.length/PER) || 1;
+    const page = Math.min(s.page, totalPages);
+    const paginated = filtered.slice((page-1)*PER, page*PER);
+    const sel = this.data.find(c => c.id===s.selectedId) || this.data[0];
+
+    const totalCA = this.data.reduce((a,c)=>a+c.ca,0);
+    const stats = [
+      { icon:'apartment', iColor:'#3A6B84', iBox:{width:44,height:44,borderRadius:12,background:'#EFF6FF',border:'1px solid #BFDBFE',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}, value:this.data.length, label:'Total clients' },
+      { icon:'sports_soccer', iColor:'#2563EB', iBox:{width:44,height:44,borderRadius:12,background:'#EFF6FF',border:'1px solid #BFDBFE',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}, value:this.data.filter(c=>c.type==='Club').length, label:'Clubs' },
+      { icon:'handshake', iColor:'#B45309', iBox:{width:44,height:44,borderRadius:12,background:'#FEF9EE',border:'1px solid #FDE68A',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}, value:this.data.filter(c=>c.type==='Sponsor').length, label:'Sponsors' },
+      { icon:'payments', iColor:'#059669', iBox:{width:44,height:44,borderRadius:12,background:'#F0FDF4',border:'1px solid #BBF7D0',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}, value:'$'+(totalCA/1000).toFixed(0)+'k', label:'CA total réalisé' },
+    ];
+
+    const clients = paginated.map(c => ({
+      ...c,
+      initials: this._initials(c.nom),
+      logoStyle: this._logoStyle(c.id, 38),
+      caFmt: this._fmt(c.ca),
+      typeStyle: this._typeStyle(c.type),
+      statutStyle: this._statutStyle(c.statut),
+      onClick: () => this.setState({ selectedId:c.id, drawerOpen:true }),
+    }));
+
+    const pages = Array.from({length:totalPages}, (_,i)=>({
+      label:i+1,
+      onClick:()=>this.setState({page:i+1}),
+      style:{ width:32,height:32,borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:600,cursor:'pointer',background:page===i+1?'#07101A':'#F1F5F9',color:page===i+1?'#FCD116':'#64748B',border:page===i+1?'none':'1px solid #E2E8F0' },
+    }));
+
+    const tlDot = (c) => ({ width:24,height:24,borderRadius:'50%',background:c,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 });
+    const tlLine = { width:2, flex:1, background:'#E8ECF1', minHeight:8 };
+    const selected = sel ? {
+      ...sel,
+      initials: this._initials(sel.nom),
+      logoLgStyle: this._logoStyle(sel.id, 60),
+      statutStyle: this._statutStyle(sel.statut),
+      kpis: [
+        { value:sel.devis, label:'Devis' },
+        { value:sel.factures, label:'Factures' },
+        { value:this._fmt(sel.ca), label:'CA' },
+      ],
+      infos: [
+        { icon:'mail', label:'Email', value:sel.contact },
+        { icon:'phone', label:'Téléphone', value:sel.tel },
+        { icon:'place', label:'Ville', value:sel.ville },
+        { icon:'category', label:'Type', value:sel.type },
+      ],
+      timeline: [
+        { icon:'receipt_long', title:'Facture FAC-2026-0042 émise', date:'12 juin 2026', dotStyle:tlDot('#2563EB'), lineStyle:tlLine },
+        { icon:'description', title:'Devis DEV-2026-014 validé', date:'4 juin 2026', dotStyle:tlDot('#059669'), lineStyle:tlLine },
+        { icon:'call', title:'Appel — suivi commercial', date:'28 mai 2026', dotStyle:tlDot('#B45309'), lineStyle:tlLine },
+        { icon:'person_add', title:'Client créé', date:'15 mai 2026', dotStyle:tlDot('#94A3B8'), lineStyle:{ width:2, background:'transparent' } },
+      ],
+    } : {};
+
+    return {
+      search:s.search, filterType:s.filterType, filterVille:s.filterVille,
+      totalCount:this.data.length, stats, clients, pages,
+      paginationInfo: filtered.length+' client'+(filtered.length>1?'s':'')+' · page '+page+'/'+totalPages,
+      headers:[{label:'Client'},{label:'Type'},{label:'Ville'},{label:'Devis'},{label:'Factures'},{label:'CA réalisé'},{label:'Statut'},{label:''}],
+      drawerOpen:s.drawerOpen, selected,
+      onSearch:(e)=>this.setState({search:e.target.value,page:1}),
+      onFilterType:(e)=>this.setState({filterType:e.target.value,page:1}),
+      onFilterVille:(e)=>this.setState({filterVille:e.target.value,page:1}),
+      closeDrawer:()=>this.setState({drawerOpen:false}),
+      onAdd:()=>alert('→ Ouvre Formulaire Nouveau Client'),
+    };
+  }
+}
+</script>
+</body>
+</html>

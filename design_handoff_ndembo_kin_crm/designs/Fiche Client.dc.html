@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F0F2F5; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; min-height: 100vh; background: #F0F2F5;">
+
+  <!-- TOPBAR -->
+  <div style="background: #fff; border-bottom: 1px solid #E8ECF1; padding: 0 32px; display: flex; align-items: center; height: 60px; gap: 8px;">
+    <div style="background: #07101A; border-radius: 8px; padding: 4px 5px;">
+      <img src="assets/logo.png" style="height: 22px; width: auto; display: block;" />
+    </div>
+    <span style="font-size: 13px; color: #94A3B8;">/</span>
+    <span style="font-size: 13px; color: #94A3B8; cursor: pointer;" style-hover="color: #3A6B84;">Clients</span>
+    <span style="font-size: 13px; color: #94A3B8;">/</span>
+    <span style="font-size: 13px; font-weight: 600; color: #0F172A;">{{ client.nom }}</span>
+    <div style="flex: 1;"></div>
+    <div style="display: flex; gap: 8px;">
+      <button style="padding: 7px 14px; background: #F1F5F9; color: #475569; font-size: 12px; font-weight: 600; border: 1px solid #E2E8F0; border-radius: 8px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 6px;" style-hover="background: #E2E8F0;">
+        <span style="font-family: Material Icons Outlined; font-size: 15px; display: inline-flex; line-height: 1;">edit</span>Modifier
+      </button>
+      <button style="padding: 7px 14px; background: #07101A; color: #FCD116; font-size: 12px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 6px;" style-hover="background: #132730;">
+        <span style="font-family: Material Icons Outlined; font-size: 15px; display: inline-flex; line-height: 1;">add</span>Nouveau devis
+      </button>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 300px 1fr; gap: 20px; padding: 28px 32px; max-width: 1200px; margin: 0 auto;">
+
+    <!-- COLONNE GAUCHE -->
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+
+      <div style="background: #07101A; border-radius: 18px; padding: 28px 22px; text-align: center; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -40px; right: -40px; width: 140px; height: 140px; border-radius: 50%; border: 1px solid rgba(124,200,232,0.1); pointer-events: none;"></div>
+        <div style="width: 72px; height: 72px; border-radius: 16px; background: linear-gradient(135deg,#3A6B84,#7CC8E8); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; font-weight: 800; margin: 0 auto 14px; letter-spacing: -0.5px;">{{ client.initials }}</div>
+        <div style="font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -0.3px;">{{ client.nom }}</div>
+        <div style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px;">{{ client.type }} · {{ client.ville }}</div>
+        <div style="display: flex; justify-content: center; gap: 6px; margin-top: 14px;">
+          <span style="{{ client.statutStyle }}">{{ client.statut }}</span>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+          <div style="font-size: 22px; font-weight: 800; color: #2563EB; letter-spacing: -0.4px;">{{ client.devis }}</div>
+          <div style="font-size: 10px; color: #94A3B8; margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Devis</div>
+        </div>
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+          <div style="font-size: 22px; font-weight: 800; color: #3A6B84; letter-spacing: -0.4px;">{{ client.factures }}</div>
+          <div style="font-size: 10px; color: #94A3B8; margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Factures</div>
+        </div>
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+          <div style="font-size: 18px; font-weight: 800; color: #059669; letter-spacing: -0.3px;">{{ client.caFmt }}</div>
+          <div style="font-size: 10px; color: #94A3B8; margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">CA réalisé</div>
+        </div>
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+          <div style="font-size: 22px; font-weight: 800; color: #0F172A; letter-spacing: -0.4px;">{{ client.projets }}</div>
+          <div style="font-size: 10px; color: #94A3B8; margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Projets</div>
+        </div>
+      </div>
+
+      <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+        <div style="font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px;">Coordonnées</div>
+        <sc-for list="{{ contactItems }}" as="c" hint-placeholder-count="5">
+          <div style="display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #F8FAFC;">
+            <span style="font-family: Material Icons Outlined; font-size: 16px; color: #94A3B8; display: inline-flex; line-height: 1; flex-shrink: 0;">{{ c.icon }}</span>
+            <div>
+              <div style="font-size: 10px; color: #94A3B8;">{{ c.label }}</div>
+              <div style="font-size: 13px; color: #334155; font-weight: 500;">{{ c.value }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+        <div style="font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">Infos légales</div>
+        <div style="font-size: 12px; color: #64748B; line-height: 1.8; font-family: monospace;">{{ client.rccm }}<br/>NIF · {{ client.nif }}</div>
+      </div>
+    </div>
+
+    <!-- COLONNE DROITE -->
+    <div>
+      <div style="display: flex; gap: 2px; background: #E8ECF1; border-radius: 12px; padding: 4px; margin-bottom: 20px; width: fit-content;">
+        <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="4">
+          <div onClick="{{ tab.onClick }}" style="{{ tab.style }}">{{ tab.label }}</div>
+        </sc-for>
+      </div>
+
+      <!-- Tab: Aperçu -->
+      <sc-if value="{{ isApercu }}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 22px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 16px;">Synthèse commerciale</div>
+            <div style="display: grid; grid-template-columns: repeat(3,1fr); gap: 12px;">
+              <sc-for list="{{ synthese }}" as="m" hint-placeholder-count="3">
+                <div style="background: #F8FAFC; border: 1px solid #E8ECF1; border-radius: 12px; padding: 16px 18px;">
+                  <div style="font-size: 11px; color: #94A3B8; font-weight: 600;">{{ m.label }}</div>
+                  <div style="font-size: 20px; font-weight: 800; color: {{ m.color }}; letter-spacing: -0.4px; margin-top: 6px;">{{ m.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 22px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 8px;">À propos</div>
+            <div style="font-size: 13px; color: #64748B; line-height: 1.7;">{{ client.apropos }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Tab: Devis -->
+      <sc-if value="{{ isDevis }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+          <div style="display: grid; grid-template-columns: 1.2fr 1.4fr 1fr 1fr; gap: 8px; padding: 11px 22px; background: #F8FAFC; border-bottom: 1px solid #E8ECF1;">
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Référence</div>
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Date</div>
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; text-align: right;">Montant</div>
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; text-align: right;">Statut</div>
+          </div>
+          <sc-for list="{{ devisList }}" as="d" hint-placeholder-count="4">
+            <div style="display: grid; grid-template-columns: 1.2fr 1.4fr 1fr 1fr; gap: 8px; padding: 14px 22px; border-bottom: 1px solid #F8FAFC; align-items: center;">
+              <div style="font-size: 13px; font-weight: 700; color: #0F172A; font-family: monospace;">{{ d.ref }}</div>
+              <div style="font-size: 13px; color: #64748B;">{{ d.date }}</div>
+              <div style="font-size: 14px; font-weight: 700; color: #059669; text-align: right; font-family: monospace;">{{ d.montant }}</div>
+              <div style="text-align: right;"><span style="{{ d.statutStyle }}">{{ d.statut }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- Tab: Factures -->
+      <sc-if value="{{ isFactures }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+          <div style="display: grid; grid-template-columns: 1.2fr 1.4fr 1fr 1fr; gap: 8px; padding: 11px 22px; background: #F8FAFC; border-bottom: 1px solid #E8ECF1;">
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Référence</div>
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Échéance</div>
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; text-align: right;">Montant</div>
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; text-align: right;">Statut</div>
+          </div>
+          <sc-for list="{{ facturesList }}" as="f" hint-placeholder-count="4">
+            <div style="display: grid; grid-template-columns: 1.2fr 1.4fr 1fr 1fr; gap: 8px; padding: 14px 22px; border-bottom: 1px solid #F8FAFC; align-items: center;">
+              <div style="font-size: 13px; font-weight: 700; color: #0F172A; font-family: monospace;">{{ f.ref }}</div>
+              <div style="font-size: 13px; color: #64748B;">{{ f.echeance }}</div>
+              <div style="font-size: 14px; font-weight: 700; color: #0F172A; text-align: right; font-family: monospace;">{{ f.montant }}</div>
+              <div style="text-align: right;"><span style="{{ f.statutStyle }}">{{ f.statut }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- Tab: Activité -->
+      <sc-if value="{{ isActivite }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 22px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+          <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 18px;">Journal CRM</div>
+          <div style="position: relative; padding-left: 24px;">
+            <div style="position: absolute; left: 7px; top: 4px; bottom: 8px; width: 2px; background: #E8ECF1;"></div>
+            <sc-for list="{{ activites }}" as="a" hint-placeholder-count="5">
+              <div style="position: relative; margin-bottom: 22px;">
+                <div style="{{ a.dot }}"></div>
+                <div style="font-size: 13px; font-weight: 600; color: #334155;">{{ a.title }}</div>
+                <div style="font-size: 11px; color: #94A3B8; margin-top: 2px;">{{ a.date }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1280, &quot;height&quot;: 920}}">
+class Component extends DCLogic {
+  state = { tab:'apercu' };
+
+  _statutDevis(s) {
+    const m = { 'Validé':{bg:'#F0FDF4',c:'#059669'}, 'En attente':{bg:'#FEF9EE',c:'#C9960C'}, 'Refusé':{bg:'#FEF2F2',c:'#DC2626'}, 'Converti':{bg:'#EFF6FF',c:'#2563EB'} };
+    const x = m[s]||m['En attente'];
+    return { fontSize:10, fontWeight:700, background:x.bg, color:x.c, padding:'3px 9px', borderRadius:20, display:'inline-block', whiteSpace:'nowrap' };
+  }
+  _statutFacture(s) {
+    const m = { 'Payée':{bg:'#ECFDF5',c:'#0D9668'}, 'Partielle':{bg:'#FEF9EE',c:'#C9960C'}, 'Impayée':{bg:'#FEF2F2',c:'#DC2626'} };
+    const x = m[s]||m['Impayée'];
+    return { fontSize:10, fontWeight:700, background:x.bg, color:x.c, padding:'3px 9px', borderRadius:20, display:'inline-block', whiteSpace:'nowrap' };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const tabStyle = (id) => s.tab === id
+      ? { padding:'8px 18px', borderRadius:9, background:'#fff', fontSize:13, fontWeight:700, color:'#0F172A', cursor:'pointer', boxShadow:'0 1px 3px rgba(0,0,0,0.08)' }
+      : { padding:'8px 18px', borderRadius:9, fontSize:13, fontWeight:500, color:'#64748B', cursor:'pointer' };
+
+    const client = {
+      nom:'AS Vita Club', initials:'AV', type:'Club', ville:'Kinshasa', statut:'Actif',
+      devis:6, factures:4, projets:2, caFmt:'$42.5K',
+      email:'admin@asvitaclub.cd', tel:'+243 99 555 1122', adresse:'Stade des Martyrs, Kinshasa',
+      contactNom:'Patrick Lelo — Directeur sportif',
+      rccm:'RCCM CD/KIN/12-A-1199', nif:'A1190055K',
+      apropos:'Club de football professionnel évoluant en Linafoot. Partenaire historique de l\'agence depuis 2022 pour la représentation de joueurs et l\'organisation d\'événements. Relation commerciale active avec un fort potentiel de renouvellement.',
+      statutStyle:{ fontSize:11, fontWeight:700, background:'rgba(5,150,105,0.15)', color:'#34D399', padding:'3px 12px', borderRadius:20, display:'inline-block' },
+    };
+
+    const contactItems = [
+      { icon:'person', label:'Contact principal', value:client.contactNom },
+      { icon:'mail', label:'E-mail', value:client.email },
+      { icon:'phone', label:'Téléphone', value:client.tel },
+      { icon:'location_on', label:'Adresse', value:client.adresse },
+    ];
+
+    const tabDefs = [
+      { id:'apercu', label:'Aperçu' },
+      { id:'devis', label:'Devis' },
+      { id:'factures', label:'Factures' },
+      { id:'activite', label:'Activité' },
+    ];
+    const tabs = tabDefs.map(t => ({ ...t, style:tabStyle(t.id), onClick:()=>this.setState({tab:t.id}) }));
+
+    const synthese = [
+      { label:'CA réalisé', value:'$42 500', color:'#059669' },
+      { label:'En attente de paiement', value:'$19 372', color:'#C9960C' },
+      { label:'Taux conversion devis', value:'67 %', color:'#2563EB' },
+    ];
+
+    const devisList = [
+      { ref:'DEV-2026-014', date:'12 juin 2026', montant:'$19 372', statut:'En attente' },
+      { ref:'DEV-2026-008', date:'28 mai 2026', montant:'$8 200', statut:'Converti' },
+      { ref:'DEV-2026-003', date:'14 avr. 2026', montant:'$12 400', statut:'Validé' },
+      { ref:'DEV-2025-061', date:'9 déc. 2025', montant:'$5 600', statut:'Refusé' },
+    ].map(d => ({ ...d, statutStyle:this._statutDevis(d.statut) }));
+
+    const facturesList = [
+      { ref:'FAC-2026-0042', echeance:'12 juil. 2026', montant:'$19 372', statut:'Impayée' },
+      { ref:'FAC-2026-0031', echeance:'30 mai 2026', montant:'$8 200', statut:'Payée' },
+      { ref:'FAC-2026-0019', echeance:'2 mai 2026', montant:'$12 400', statut:'Partielle' },
+      { ref:'FAC-2025-0140', echeance:'5 jan. 2026', montant:'$5 600', statut:'Payée' },
+    ].map(f => ({ ...f, statutStyle:this._statutFacture(f.statut) }));
+
+    const dot = (c) => ({ position:'absolute', left:'-21px', top:'4px', width:'10px', height:'10px', borderRadius:'50%', background:c, border:'2px solid #fff', boxShadow:'0 0 0 2px '+c });
+    const activites = [
+      { title:'Facture FAC-2026-0042 émise — $19 372', date:"Aujourd'hui, 09h20", dot:dot('#2563EB') },
+      { title:'Devis DEV-2026-014 envoyé pour validation', date:'4 juin 2026', dot:dot('#059669') },
+      { title:'Appel — suivi commercial saison 2026', date:'28 mai 2026', dot:dot('#B45309') },
+      { title:'Projet « Tournoi présaison » démarré', date:'15 mai 2026', dot:dot('#6D28D9') },
+      { title:'Client créé dans le CRM', date:'10 mars 2022', dot:dot('#94A3B8') },
+    ];
+
+    return {
+      client, contactItems, tabs,
+      isApercu:s.tab==='apercu', isDevis:s.tab==='devis', isFactures:s.tab==='factures', isActivite:s.tab==='activite',
+      synthese, devisList, facturesList, activites,
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -145,6 +145,11 @@ Les fichiers de `designs/` sont des prototypes écrits en HTML. **La tâche n'es
 | 08 | `Pipeline Factures` | Pipeline | Onglets Devis/Factures, KPIs, conversion, action paiement |
 | 09 | `Kanban Projets` | Projets | 4 colonnes, déplacement de tâches, modal détail, filtre projet |
 | 10 | `Paiement Mobile Money` | Paiement | 3 étapes : saisie → en attente (polling) → succès (M-PESA/Airtel) |
+| 11 | `Liste Clients` | Clients | Table + filtres type/ville + stats + drawer détail avec mini-timeline |
+| 12 | `Fiche Client` | Clients | Profil 360° : aperçu, devis, factures, journal CRM (timeline) |
+| 13 | `Liste Contrats` | Contrats | Table + filtres statut + stats + drawer avec suivi de signature |
+| 14 | `Parametres` | Paramètres | Agence (RCCM/NIF/IBAN), Utilisateurs, **matrice RBAC**, Facturation, Mobile Money |
+| 15 | `Modeles Facture & Devis` | Documents | Modèles A4 prêts pour PDF — facture + devis (2 colonnes, lignes, totaux, signature) |
 | — | `Design System` | Réf. | Palette, typo, composants, rayons & ombres |
 
 ### Comportements clés par écran
@@ -417,7 +422,12 @@ design_handoff_ndembo_kin_crm/
     ├── Formulaire Nouveau Devis.dc.html
     ├── Pipeline Factures.dc.html
     ├── Kanban Projets.dc.html
-    └── Paiement Mobile Money.dc.html
+    ├── Paiement Mobile Money.dc.html
+    ├── Liste Clients.dc.html
+    ├── Fiche Client.dc.html
+    ├── Liste Contrats.dc.html
+    ├── Parametres.dc.html
+    └── Modeles Facture & Devis.dc.html
 ```
 
 > **Assets de marque** : le logo est dans `designs/assets/logo.png`. Réutiliser le système de marque existant si la codebase en a déjà un, sinon repartir des tokens du §3.

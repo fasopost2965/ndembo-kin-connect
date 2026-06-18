@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F0F2F5; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; min-height: 100vh; background: #F0F2F5; display: flex; flex-direction: column;">
+
+  <!-- TOPBAR -->
+  <div style="background: #fff; border-bottom: 1px solid #E8ECF1; padding: 0 28px; display: flex; align-items: center; height: 60px; gap: 12px; flex-shrink: 0;">
+    <div style="background: #07101A; border-radius: 8px; padding: 4px 5px;">
+      <img src="assets/logo.png" style="height: 22px; width: auto; display: block;" />
+    </div>
+    <span style="font-size: 13px; color: #94A3B8;">/</span>
+    <span style="font-size: 16px; font-weight: 800; color: #0F172A; letter-spacing: -0.3px;">Paramètres</span>
+    <div style="flex: 1;"></div>
+    <span style="font-size: 11px; font-weight: 700; color: #B45309; background: #FEF9EE; border: 1px solid #FDE68A; padding: 5px 11px; border-radius: 8px; display: flex; align-items: center; gap: 6px;">
+      <span style="font-family: Material Icons Outlined; font-size: 14px; display: inline-flex; line-height: 1;">admin_panel_settings</span>
+      Accès Administrateur
+    </span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 220px 1fr; gap: 24px; padding: 24px 28px 48px; max-width: 1180px; margin: 0 auto; width: 100%;">
+
+    <!-- NAV LATÉRALE -->
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+        <div onClick="{{ t.onClick }}" style="{{ t.style }}">
+          <span style="font-family: Material Icons Outlined; font-size: 18px; display: inline-flex; line-height: 1;">{{ t.icon }}</span>
+          {{ t.label }}
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- CONTENU -->
+    <div>
+
+      <!-- ░░ AGENCE ░░ -->
+      <sc-if value="{{ isAgence }}" hint-placeholder-val="{{ true }}">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); overflow: hidden;">
+          <div style="padding: 20px 26px; border-bottom: 1px solid #F1F5F9;">
+            <div style="font-size: 16px; font-weight: 800; color: #0F172A;">Informations de l'agence</div>
+            <div style="font-size: 13px; color: #94A3B8; margin-top: 2px;">Ces données apparaissent sur les devis, factures et contrats générés.</div>
+          </div>
+          <div style="padding: 24px 26px;">
+            <div style="display: flex; align-items: center; gap: 18px; padding-bottom: 22px; margin-bottom: 22px; border-bottom: 1px solid #F1F5F9;">
+              <div style="width: 72px; height: 72px; border-radius: 14px; background: #07101A; display: flex; align-items: center; justify-content: center;">
+                <img src="assets/logo.png" style="height: 42px; width: auto; display: block;" />
+              </div>
+              <div>
+                <button style="padding: 8px 16px; background: #F1F5F9; color: #475569; font-size: 13px; font-weight: 600; border: 1px solid #E2E8F0; border-radius: 9px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 7px;" style-hover="background: #E2E8F0;">
+                  <span style="font-family: Material Icons Outlined; font-size: 15px; display: inline-flex; line-height: 1;">upload</span>
+                  Changer le logo
+                </button>
+                <div style="font-size: 11px; color: #94A3B8; margin-top: 7px;">PNG ou SVG, fond transparent, max 1 Mo.</div>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <sc-for list="{{ agenceFields }}" as="f" hint-placeholder-count="8">
+                <div style="{{ f.wrap }}">
+                  <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">{{ f.label }}</label>
+                  <input type="text" value="{{ f.value }}"
+                    style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;"
+                    style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding: 16px 26px; border-top: 1px solid #F1F5F9; background: #FAFBFC; display: flex; justify-content: flex-end; gap: 10px;">
+            <button style="padding: 10px 18px; background: #F1F5F9; color: #475569; font-size: 13px; font-weight: 600; border: 1px solid #E2E8F0; border-radius: 9px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif;" style-hover="background: #E2E8F0;">Annuler</button>
+            <button style="padding: 10px 22px; background: #07101A; color: #FCD116; font-size: 13px; font-weight: 700; border: none; border-radius: 9px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif;" style-hover="background: #132730;">Enregistrer</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ░░ UTILISATEURS ░░ -->
+      <sc-if value="{{ isUsers }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); overflow: hidden;">
+          <div style="padding: 20px 26px; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-size: 16px; font-weight: 800; color: #0F172A;">Utilisateurs &amp; accès</div>
+              <div style="font-size: 13px; color: #94A3B8; margin-top: 2px;">Gérez les membres de l'équipe et leur rôle.</div>
+            </div>
+            <button style="padding: 9px 18px; background: #07101A; color: #FCD116; font-size: 13px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 7px;" style-hover="background: #132730;">
+              <span style="font-family: Material Icons Outlined; font-size: 16px; display: inline-flex; line-height: 1;">person_add</span>
+              Inviter un membre
+            </button>
+          </div>
+          <div style="display: grid; grid-template-columns: 2.4fr 1.4fr 1fr 0.8fr 60px; gap: 8px; padding: 11px 26px; background: #F8FAFC; border-bottom: 1px solid #E8ECF1;">
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Membre</div>
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Rôle</div>
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Dernière connexion</div>
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">Statut</div>
+            <div></div>
+          </div>
+          <sc-for list="{{ users }}" as="u" hint-placeholder-count="5">
+            <div style="display: grid; grid-template-columns: 2.4fr 1.4fr 1fr 0.8fr 60px; gap: 8px; padding: 13px 26px; border-bottom: 1px solid #F8FAFC; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 11px;">
+                <div style="{{ u.avatarStyle }}">{{ u.initials }}</div>
+                <div>
+                  <div style="font-size: 14px; font-weight: 700; color: #0F172A;">{{ u.name }}</div>
+                  <div style="font-size: 11px; color: #94A3B8;">{{ u.email }}</div>
+                </div>
+              </div>
+              <div><span style="{{ u.roleStyle }}">{{ u.roleLabel }}</span></div>
+              <div style="font-size: 13px; color: #64748B;">{{ u.lastSeen }}</div>
+              <div><span style="{{ u.statutStyle }}">{{ u.statut }}</span></div>
+              <div style="display: flex; justify-content: flex-end;">
+                <div style="width: 30px; height: 30px; border-radius: 8px; background: #F1F5F9; border: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background: #E2E8F0;">
+                  <span style="font-family: Material Icons Outlined; font-size: 16px; color: #64748B; display: inline-flex; line-height: 1;">more_horiz</span>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ░░ RÔLES & PERMISSIONS ░░ -->
+      <sc-if value="{{ isRoles }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); overflow: hidden;">
+          <div style="padding: 20px 26px; border-bottom: 1px solid #F1F5F9;">
+            <div style="font-size: 16px; font-weight: 800; color: #0F172A;">Rôles &amp; permissions</div>
+            <div style="font-size: 13px; color: #94A3B8; margin-top: 2px;">Matrice d'accès par module. <span style="color:#059669;font-weight:600;">✓ complet</span> · <span style="color:#3A6B84;font-weight:600;">◐ lecture seule</span> · <span style="color:#CBD5E1;font-weight:600;">— aucun</span></div>
+          </div>
+          <div style="padding: 8px 26px 26px;">
+            <div style="display: grid; grid-template-columns: 1.6fr repeat(5,1fr); padding: 14px 0 12px; border-bottom: 1px solid #E8ECF1;">
+              <div style="font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px;">Module</div>
+              <sc-for list="{{ roleCols }}" as="r" hint-placeholder-count="5">
+                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; color: {{ r.color }};">{{ r.name }}</div>
+              </sc-for>
+            </div>
+            <sc-for list="{{ rbacRows }}" as="row" hint-placeholder-count="8">
+              <div style="display: grid; grid-template-columns: 1.6fr repeat(5,1fr); padding: 12px 0; border-bottom: 1px solid #F1F5F9; align-items: center;">
+                <div style="font-size: 13px; font-weight: 600; color: #334155;">{{ row.module }}</div>
+                <sc-for list="{{ row.cells }}" as="cell" hint-placeholder-count="5">
+                  <div style="text-align: center;"><span style="{{ cell.style }}">{{ cell.glyph }}</span></div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ░░ FACTURATION ░░ -->
+      <sc-if value="{{ isBilling }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); overflow: hidden;">
+          <div style="padding: 20px 26px; border-bottom: 1px solid #F1F5F9;">
+            <div style="font-size: 16px; font-weight: 800; color: #0F172A;">Facturation</div>
+            <div style="font-size: 13px; color: #94A3B8; margin-top: 2px;">Numérotation automatique et taxe par défaut.</div>
+          </div>
+          <div style="padding: 24px 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Préfixe devis</label>
+              <input type="text" value="DEV-{AAAA}-{NNN}" style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;" style-focus="border-color: #3A6B84; background: #fff;" />
+            </div>
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Préfixe facture</label>
+              <input type="text" value="FAC-{AAAA}-{NNNN}" style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;" style-focus="border-color: #3A6B84; background: #fff;" />
+            </div>
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">TVA par défaut (%)</label>
+              <input type="text" value="16" style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;" style-focus="border-color: #3A6B84; background: #fff;" />
+            </div>
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Devise</label>
+              <input type="text" value="USD ($)" style="width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;" style-focus="border-color: #3A6B84; background: #fff;" />
+            </div>
+            <div style="grid-column: span 2;">
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Validité par défaut des devis (jours)</label>
+              <input type="text" value="30" style="width: 200px; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px; font-size: 14px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #FAFBFC;" style-focus="border-color: #3A6B84; background: #fff;" />
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ░░ MOBILE MONEY ░░ -->
+      <sc-if value="{{ isPay }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); overflow: hidden;">
+          <div style="padding: 20px 26px; border-bottom: 1px solid #F1F5F9;">
+            <div style="font-size: 16px; font-weight: 800; color: #0F172A;">Mobile Money</div>
+            <div style="font-size: 13px; color: #94A3B8; margin-top: 2px;">Comptes marchands pour l'encaissement via FlexPay.</div>
+          </div>
+          <div style="padding: 20px 26px; display: flex; flex-direction: column; gap: 12px;">
+            <sc-for list="{{ payAccounts }}" as="p" hint-placeholder-count="3">
+              <div style="display: flex; align-items: center; gap: 16px; padding: 16px 18px; border: 1px solid #E2E8F0; border-radius: 12px; background: #FAFBFC;">
+                <div style="{{ p.badge }}">{{ p.short }}</div>
+                <div style="flex: 1;">
+                  <div style="font-size: 14px; font-weight: 700; color: #0F172A;">{{ p.name }}</div>
+                  <div style="font-size: 12px; color: #94A3B8; font-family: monospace; margin-top: 2px;">{{ p.number }}</div>
+                </div>
+                <span style="{{ p.statutStyle }}">{{ p.statut }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1180, &quot;height&quot;: 880}}">
+class Component extends DCLogic {
+  state = { tab:'agence' };
+
+  renderVals() {
+    const s = this.state;
+    const tabDefs = [
+      { id:'agence', label:'Agence', icon:'business' },
+      { id:'users', label:'Utilisateurs', icon:'group' },
+      { id:'roles', label:'Rôles & permissions', icon:'shield' },
+      { id:'billing', label:'Facturation', icon:'receipt_long' },
+      { id:'pay', label:'Mobile Money', icon:'smartphone' },
+    ];
+    const tabs = tabDefs.map(t => ({
+      ...t,
+      onClick: () => this.setState({ tab:t.id }),
+      style: {
+        display:'flex', alignItems:'center', gap:11, padding:'11px 14px', borderRadius:10, fontSize:13.5,
+        fontWeight: s.tab===t.id ? 700 : 600, cursor:'pointer',
+        background: s.tab===t.id ? '#07101A' : 'transparent',
+        color: s.tab===t.id ? '#FCD116' : '#475569',
+      },
+    }));
+
+    const agenceFields = [
+      { label:'Raison sociale', value:'Ndembo Kin Connect SARL', wrap:{ gridColumn:'span 2' } },
+      { label:'Adresse', value:'12, Avenue du Commerce — Gombe, Kinshasa', wrap:{ gridColumn:'span 2' } },
+      { label:'Téléphone', value:'+243 81 000 00 00', wrap:{} },
+      { label:'Email', value:'contact@ndembokin.cd', wrap:{} },
+      { label:'RCCM', value:'CD/KIN/RCCM/26-B-0042', wrap:{} },
+      { label:'ID. Nationale', value:'01-K4500-N00420F', wrap:{} },
+      { label:'NIF', value:'A2604200P', wrap:{} },
+      { label:'IBAN (Rawbank)', value:'CD12 0050 1000 4200 0042', wrap:{} },
+    ];
+
+    const roleMeta = {
+      ADMIN:{name:'Admin',color:'#B45309',bg:'#FEF9EE'},
+      MANAGER:{name:'Manager',color:'#2563EB',bg:'#EFF6FF'},
+      COMMERCIAL:{name:'Commercial',color:'#059669',bg:'#F0FDF4'},
+      COACH:{name:'Coach',color:'#6D28D9',bg:'#F5F3FF'},
+      COMPTABLE:{name:'Comptable',color:'#B91C1C',bg:'#FEF2F2'},
+    };
+    const avatarColors = ['#07101A','#3A6B84','#059669','#6D28D9','#B45309'];
+    const usersData = [
+      { name:'Amadou Sanogo', email:'amadou@ndembokin.cd', role:'ADMIN', lastSeen:"Aujourd'hui", statut:'Actif' },
+      { name:'Jean-Pierre Kasa', email:'jp.kasa@ndembokin.cd', role:'MANAGER', lastSeen:'Hier', statut:'Actif' },
+      { name:'Marie-Claire Nzuzi', email:'mc.nzuzi@ndembokin.cd', role:'COMMERCIAL', lastSeen:'Il y a 2 j', statut:'Actif' },
+      { name:'Didier Mukendi', email:'d.mukendi@ndembokin.cd', role:'COACH', lastSeen:'Il y a 5 j', statut:'Actif' },
+      { name:'Esther Bolingo', email:'e.bolingo@ndembokin.cd', role:'COMPTABLE', lastSeen:'Il y a 1 sem', statut:'Invité' },
+    ];
+    const users = usersData.map((u,i) => {
+      const rm = roleMeta[u.role];
+      const st = u.statut==='Actif' ? {bg:'#F0FDF4',c:'#059669'} : {bg:'#FEF9EE',c:'#B45309'};
+      return {
+        ...u,
+        initials: u.name.split(' ').map(w=>w[0]).slice(0,2).join(''),
+        avatarStyle:{ width:38,height:38,borderRadius:'50%',background:avatarColors[i%avatarColors.length],display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:800,color:'#FCD116',flexShrink:0 },
+        roleLabel: rm.name,
+        roleStyle:{ fontSize:11,fontWeight:700,color:rm.color,background:rm.bg,padding:'4px 11px',borderRadius:20,display:'inline-block' },
+        statutStyle:{ fontSize:10,fontWeight:700,color:st.c,background:st.bg,padding:'3px 9px',borderRadius:20,display:'inline-block' },
+      };
+    });
+
+    const roleCols = ['ADMIN','MANAGER','COMMERCIAL','COACH','COMPTABLE'].map(r => roleMeta[r]);
+    const P = { full:'✓', read:'◐', none:'—' };
+    const cellStyle = (v) => {
+      if (v==='full') return { fontSize:15, fontWeight:800, color:'#059669' };
+      if (v==='read') return { fontSize:14, fontWeight:700, color:'#3A6B84' };
+      return { fontSize:14, color:'#CBD5E1' };
+    };
+    const rbacData = [
+      { module:'Utilisateurs', perms:['full','read','none','none','none'] },
+      { module:'Athlètes', perms:['full','full','read','full','read'] },
+      { module:'Clients', perms:['full','full','full','read','read'] },
+      { module:'Devis / Factures', perms:['full','full','full','none','full'] },
+      { module:'Projets / Tâches', perms:['full','full','read','full','read'] },
+      { module:'Contrats', perms:['full','full','none','none','read'] },
+      { module:'Règlements', perms:['full','full','none','none','full'] },
+      { module:'Paramètres', perms:['full','none','none','none','none'] },
+    ];
+    const rbacRows = rbacData.map(r => ({
+      module:r.module,
+      cells:r.perms.map(v => ({ glyph:P[v], style:cellStyle(v) })),
+    }));
+
+    const payBadge = (bg) => ({ width:48,height:48,borderRadius:11,background:bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:800,color:'#fff',flexShrink:0,letterSpacing:'-0.5px' });
+    const connected = { fontSize:11,fontWeight:700,color:'#059669',background:'#F0FDF4',padding:'5px 11px',borderRadius:20 };
+    const off = { fontSize:11,fontWeight:700,color:'#64748B',background:'#F1F5F9',padding:'5px 11px',borderRadius:20 };
+    const payAccounts = [
+      { name:'M-Pesa (Vodacom)', short:'MP', number:'+243 815 000 000', badge:payBadge('#E30613'), statut:'Connecté', statutStyle:connected },
+      { name:'Airtel Money', short:'AM', number:'+243 995 000 000', badge:payBadge('#ED1C24'), statut:'Connecté', statutStyle:connected },
+      { name:'Orange Money', short:'OM', number:'—', badge:payBadge('#FF7900'), statut:'Non configuré', statutStyle:off },
+    ];
+
+    return {
+      tabs,
+      isAgence: s.tab==='agence', isUsers: s.tab==='users', isRoles: s.tab==='roles', isBilling: s.tab==='billing', isPay: s.tab==='pay',
+      agenceFields, users, roleCols, rbacRows, payAccounts,
+    };
+  }
+}
+</script>
+</body>
+</html>

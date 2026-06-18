@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F0F2F5; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; min-height: 100vh; background: #F0F2F5; display: flex; flex-direction: column;">
+
+  <!-- TOPBAR -->
+  <div style="background: #fff; border-bottom: 1px solid #E8ECF1; padding: 0 28px; display: flex; align-items: center; height: 60px; gap: 16px; flex-shrink: 0;">
+    <div style="background: #07101A; border-radius: 8px; padding: 4px 5px;">
+      <img src="assets/logo.png" style="height: 22px; width: auto; display: block;" />
+    </div>
+    <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 16px; font-weight: 800; color: #0F172A; letter-spacing: -0.3px;">Contrats</span>
+      <span style="font-size: 12px; font-weight: 700; background: #07101A; color: #FCD116; padding: 2px 9px; border-radius: 20px;">{{ totalCount }}</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <div style="position: relative;">
+        <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 17px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">search</span>
+        <input type="text" placeholder="Rechercher un contrat…" value="{{ search }}" onInput="{{ onSearch }}"
+          style="padding: 9px 14px 9px 38px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #F8FAFC; width: 240px;"
+          style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+      </div>
+      <div style="position: relative;">
+        <select value="{{ filterStatut }}" onChange="{{ onFilterStatut }}"
+          style="padding: 9px 32px 9px 12px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #F8FAFC; appearance: none; cursor: pointer;"
+          style-focus="border-color: #3A6B84; background: #fff;">
+          <option value="">Tous les statuts</option>
+          <option value="EN_PREPARATION">En préparation</option>
+          <option value="SIGNE">Signé</option>
+          <option value="EN_COURS">En cours</option>
+          <option value="EXPIRE">Expiré</option>
+        </select>
+        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 15px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+      </div>
+      <button onClick="{{ onAdd }}" style="padding: 9px 18px; background: #07101A; color: #FCD116; font-size: 13px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 7px; white-space: nowrap;" style-hover="background: #132730;">
+        <span style="font-family: Material Icons Outlined; font-size: 16px; display: inline-flex; line-height: 1;">add</span>
+        Générer un contrat
+      </button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px 28px 0;">
+    <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+      <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 14px;">
+        <div style="{{ s.iBox }}">
+          <span style="font-family: Material Icons Outlined; font-size: 20px; display: inline-flex; line-height: 1; color: {{ s.iColor }};">{{ s.icon }}</span>
+        </div>
+        <div>
+          <div style="font-size: 22px; font-weight: 800; color: #0F172A; letter-spacing: -0.4px;">{{ s.value }}</div>
+          <div style="font-size: 11px; color: #94A3B8; font-weight: 500; margin-top: 1px;">{{ s.label }}</div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- TABLE -->
+  <div style="padding: 16px 28px 32px; flex: 1;">
+    <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+      <div style="display: grid; grid-template-columns: 1.2fr 2fr 1.4fr 1.4fr 1fr 1.2fr; gap: 8px; padding: 11px 22px; background: #F8FAFC; border-bottom: 1px solid #E8ECF1;">
+        <sc-for list="{{ headers }}" as="h" hint-placeholder-count="6">
+          <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">{{ h.label }}</div>
+        </sc-for>
+      </div>
+      <sc-for list="{{ contrats }}" as="c" hint-placeholder-count="7">
+        <div onClick="{{ c.onClick }}" style="display: grid; grid-template-columns: 1.2fr 2fr 1.4fr 1.4fr 1fr 1.2fr; gap: 8px; padding: 13px 22px; border-bottom: 1px solid #F8FAFC; align-items: center; cursor: pointer; transition: background 0.1s;" style-hover="background: #F8FAFC;">
+          <div style="font-size: 13px; font-weight: 700; color: #0F172A; font-family: monospace;">{{ c.ref }}</div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="{{ c.avatarStyle }}">{{ c.initials }}</div>
+            <div>
+              <div style="font-size: 13px; font-weight: 700; color: #0F172A;">{{ c.athlete }}</div>
+              <div style="font-size: 11px; color: #94A3B8;">{{ c.client }}</div>
+            </div>
+          </div>
+          <div style="font-size: 13px; color: #334155;">{{ c.type }}</div>
+          <div style="font-size: 12px; color: #64748B;">{{ c.periode }}</div>
+          <div style="font-size: 14px; font-weight: 700; color: #059669; font-family: monospace;">{{ c.montant }}</div>
+          <div><span style="{{ c.statutStyle }}">{{ c.statutLabel }}</span></div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- DRAWER DÉTAIL CONTRAT -->
+  <sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 50; display: flex;">
+      <div onClick="{{ closeDrawer }}" style="flex: 1; background: rgba(7,16,26,0.4); backdrop-filter: blur(2px);"></div>
+      <div style="width: 440px; background: #fff; height: 100%; overflow-y: auto; box-shadow: -8px 0 40px rgba(0,0,0,0.15); display: flex; flex-direction: column;">
+        <div style="background: #07101A; padding: 24px 24px 22px; position: relative;">
+          <div style="position: absolute; right: 16px; top: 16px; width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer;" onClick="{{ closeDrawer }}" style-hover="background: rgba(255,255,255,0.18);">
+            <span style="font-family: Material Icons Outlined; font-size: 16px; color: #fff; display: inline-flex; line-height: 1;">close</span>
+          </div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.4); font-family: monospace; margin-bottom: 6px;">{{ selected.ref }}</div>
+          <div style="font-size: 19px; font-weight: 800; color: #fff;">{{ selected.type }}</div>
+          <div style="font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 4px;">{{ selected.athlete }} · {{ selected.client }}</div>
+          <div style="margin-top: 14px; display: flex; gap: 8px; align-items: center;">
+            <span style="{{ selected.statutStyle }}">{{ selected.statutLabel }}</span>
+            <span style="font-size: 22px; font-weight: 800; color: #FCD116; font-family: monospace; margin-left: auto;">{{ selected.montant }}</span>
+          </div>
+        </div>
+        <div style="padding: 22px 24px; display: flex; flex-direction: column; gap: 18px; flex: 1;">
+          <sc-for list="{{ selected.infos }}" as="i" hint-placeholder-count="4">
+            <div style="display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #F1F5F9;">
+              <span style="font-family: Material Icons Outlined; font-size: 18px; color: #94A3B8; flex-shrink: 0; display: inline-flex; line-height: 1;">{{ i.icon }}</span>
+              <div style="flex: 1; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; color: #94A3B8;">{{ i.label }}</span>
+                <span style="font-size: 13px; font-weight: 600; color: #334155;">{{ i.value }}</span>
+              </div>
+            </div>
+          </sc-for>
+
+          <!-- Étapes de signature -->
+          <div>
+            <div style="font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px;">Suivi de signature</div>
+            <div style="position: relative; padding-left: 24px;">
+              <div style="position: absolute; left: 7px; top: 4px; bottom: 8px; width: 2px; background: #E8ECF1;"></div>
+              <sc-for list="{{ selected.steps }}" as="st" hint-placeholder-count="4">
+                <div style="position: relative; margin-bottom: 18px;">
+                  <div style="{{ st.dot }}"></div>
+                  <div style="font-size: 13px; font-weight: 600; color: {{ st.color }};">{{ st.title }}</div>
+                  <div style="font-size: 11px; color: #94A3B8; margin-top: 2px;">{{ st.date }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="padding: 16px 24px; border-top: 1px solid #E8ECF1; display: flex; flex-direction: column; gap: 8px;">
+          <button style="width: 100%; padding: 12px; background: #07101A; color: #FCD116; font-size: 13px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px;" style-hover="background: #132730;">
+            <span style="font-family: Material Icons Outlined; font-size: 16px; display: inline-flex; line-height: 1;">draw</span>
+            Envoyer pour signature
+          </button>
+          <button style="width: 100%; padding: 11px; background: #F1F5F9; color: #475569; font-size: 13px; font-weight: 600; border: 1px solid #E2E8F0; border-radius: 10px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; justify-content: center; gap: 7px;" style-hover="background: #E2E8F0;">
+            <span style="font-family: Material Icons Outlined; font-size: 15px; display: inline-flex; line-height: 1;">picture_as_pdf</span>
+            Télécharger le PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1440, &quot;height&quot;: 900}}">
+class Component extends DCLogic {
+  state = { search:'', filterStatut:'', drawerOpen:false, selectedId:null };
+
+  data = [
+    { id:1, ref:'CTR-2024-007', athlete:'Joël Mbuyi', client:'AS Vita Club', type:'Représentation', debut:'Jan 2024', fin:'Déc 2025', montant:24000, statut:'EN_COURS', signe:'14 jan. 2024' },
+    { id:2, ref:'CTR-2026-014', athlete:'Théo Lukaku', client:'TP Mazembe', type:'Transfert', debut:'Juin 2026', fin:'Juin 2028', montant:130000, statut:'EN_PREPARATION', signe:null },
+    { id:3, ref:'CTR-2026-009', athlete:'Patricia Kabongo', client:'FCA Kinshasa', type:'Sponsoring', debut:'Mars 2026', fin:'Mars 2027', montant:45000, statut:'SIGNE', signe:'2 mars 2026' },
+    { id:4, ref:'CTR-2025-022', athlete:'Grâce Tshisekedi', client:'BC Kinshasa', type:'Représentation', debut:'Sep 2025', fin:'Sep 2026', montant:22000, statut:'EN_COURS', signe:'1 sep. 2025' },
+    { id:5, ref:'CTR-2026-018', athlete:'Christian Pasi', client:'AC Leopards', type:'Image', debut:'Avr 2026', fin:'Avr 2027', montant:18000, statut:'SIGNE', signe:'10 avr. 2026' },
+    { id:6, ref:'CTR-2023-003', athlete:'Joël Mbuyi', client:'AS Vita Club', type:'Représentation', debut:'Juil 2023', fin:'Jan 2024', montant:8500, statut:'EXPIRE', signe:'5 juil. 2023' },
+    { id:7, ref:'CTR-2026-021', athlete:'Brice Mutombo', client:'Gym Elite KIN', type:'Sponsoring', debut:'Juin 2026', fin:'Déc 2026', montant:12000, statut:'EN_PREPARATION', signe:null },
+  ];
+
+  _statutMeta(s) {
+    const m = {
+      EN_PREPARATION:{label:'En préparation', bg:'#FEF9EE', c:'#C9960C'},
+      SIGNE:{label:'Signé', bg:'#F0FDF4', c:'#059669'},
+      EN_COURS:{label:'En cours', bg:'#EFF6FF', c:'#2563EB'},
+      EXPIRE:{label:'Expiré', bg:'#F1F5F9', c:'#94A3B8'},
+    };
+    return m[s] || m.EN_PREPARATION;
+  }
+  _statutStyle(s) {
+    const x = this._statutMeta(s);
+    return { fontSize:10, fontWeight:700, background:x.bg, color:x.c, padding:'3px 10px', borderRadius:20, display:'inline-block', whiteSpace:'nowrap' };
+  }
+  _initials(name) { const w = name.split(' '); return ((w[0]||'')[0]||'')+((w[1]||'')[0]||''); }
+  _avatarColors = ['#07101A','#3A6B84','#1D4ED8','#059669','#B45309','#6D28D9'];
+  _avatarStyle(id) {
+    return { width:34, height:34, borderRadius:'50%', background:this._avatarColors[id%this._avatarColors.length], display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:800, color:'#FCD116', flexShrink:0 };
+  }
+  _fmt(n) { return '$'+n.toLocaleString('fr-FR'); }
+
+  renderVals() {
+    const s = this.state;
+    const filtered = this.data.filter(c => {
+      const q = s.search.toLowerCase();
+      const matchQ = !q || c.ref.toLowerCase().includes(q) || c.athlete.toLowerCase().includes(q) || c.client.toLowerCase().includes(q);
+      return matchQ && (!s.filterStatut || c.statut===s.filterStatut);
+    });
+    const sel = this.data.find(c => c.id===s.selectedId) || this.data[0];
+
+    const totalVal = this.data.filter(c=>c.statut==='EN_COURS'||c.statut==='SIGNE').reduce((a,c)=>a+c.montant,0);
+    const stats = [
+      { icon:'description', iColor:'#3A6B84', iBox:{width:44,height:44,borderRadius:12,background:'#EFF6FF',border:'1px solid #BFDBFE',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}, value:this.data.length, label:'Total contrats' },
+      { icon:'autorenew', iColor:'#2563EB', iBox:{width:44,height:44,borderRadius:12,background:'#EFF6FF',border:'1px solid #BFDBFE',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}, value:this.data.filter(c=>c.statut==='EN_COURS').length, label:'En cours' },
+      { icon:'edit_note', iColor:'#C9960C', iBox:{width:44,height:44,borderRadius:12,background:'#FEF9EE',border:'1px solid #FDE68A',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}, value:this.data.filter(c=>c.statut==='EN_PREPARATION').length, label:'À signer' },
+      { icon:'payments', iColor:'#059669', iBox:{width:44,height:44,borderRadius:12,background:'#F0FDF4',border:'1px solid #BBF7D0',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}, value:'$'+(totalVal/1000).toFixed(0)+'k', label:'Valeur active' },
+    ];
+
+    const contrats = filtered.map(c => ({
+      ...c,
+      initials:this._initials(c.athlete),
+      avatarStyle:this._avatarStyle(c.id),
+      periode:c.debut+' → '+c.fin,
+      montant:this._fmt(c.montant),
+      statutLabel:this._statutMeta(c.statut).label,
+      statutStyle:this._statutStyle(c.statut),
+      onClick:()=>this.setState({selectedId:c.id, drawerOpen:true}),
+    }));
+
+    const stepDot = (done) => ({ position:'absolute', left:'-21px', top:'3px', width:'10px', height:'10px', borderRadius:'50%', background: done?'#059669':'#E2E8F0', border:'2px solid #fff', boxShadow:'0 0 0 2px '+(done?'#059669':'#E2E8F0') });
+    const selSteps = (() => {
+      const signed = sel.statut==='SIGNE'||sel.statut==='EN_COURS'||sel.statut==='EXPIRE';
+      return [
+        { title:'Contrat généré', date:'Document créé', done:true },
+        { title:'Envoyé au client', date: signed||sel.statut==='EN_PREPARATION' ? 'Notifié par e-mail' : 'En attente', done: signed || sel.statut!=='EN_PREPARATION' },
+        { title:'Signé électroniquement', date: sel.signe || 'En attente de signature', done: signed },
+        { title:'Contrat actif', date: sel.statut==='EN_COURS' ? 'En cours d\'exécution' : (sel.statut==='EXPIRE'?'Échu':'—'), done: sel.statut==='EN_COURS'||sel.statut==='EXPIRE' },
+      ].map(st => ({ ...st, dot:stepDot(st.done), color: st.done?'#334155':'#94A3B8' }));
+    })();
+
+    const selected = sel ? {
+      ...sel,
+      initials:this._initials(sel.athlete),
+      montant:this._fmt(sel.montant),
+      statutLabel:this._statutMeta(sel.statut).label,
+      statutStyle:{ fontSize:11, fontWeight:700, background:'rgba(255,255,255,0.12)', color:'#fff', padding:'4px 11px', borderRadius:20, display:'inline-block' },
+      infos:[
+        { icon:'sports', label:'Athlète', value:sel.athlete },
+        { icon:'apartment', label:'Client', value:sel.client },
+        { icon:'category', label:'Type', value:sel.type },
+        { icon:'date_range', label:'Période', value:sel.debut+' → '+sel.fin },
+      ],
+      steps:selSteps,
+    } : {};
+
+    return {
+      search:s.search, filterStatut:s.filterStatut,
+      totalCount:this.data.length, stats, contrats,
+      headers:[{label:'Référence'},{label:'Athlète / Client'},{label:'Type'},{label:'Période'},{label:'Montant'},{label:'Statut'}],
+      drawerOpen:s.drawerOpen, selected,
+      onSearch:(e)=>this.setState({search:e.target.value}),
+      onFilterStatut:(e)=>this.setState({filterStatut:e.target.value}),
+      closeDrawer:()=>this.setState({drawerOpen:false}),
+      onAdd:()=>alert('→ Générer un nouveau contrat'),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="background: #E7E5DF; min-width: 100%; min-height: 100vh; width: max-content; padding: 48px; box-sizing: border-box; font-family: Plus Jakarta Sans, sans-serif;">
+
+  <div style="display: flex; gap: 56px; align-items: flex-start;">
+
+    <!-- ════════════════ FACTURE ════════════════ -->
+    <div style="flex: none; width: 794px;">
+      <div style="font-size: 12px; font-weight: 700; color: #6B6862; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;">Modèle — Facture</div>
+
+      <div style="width: 794px; min-height: 1123px; background: #fff; box-shadow: 0 6px 28px rgba(0,0,0,0.12); border-radius: 2px; overflow: hidden; display: flex; flex-direction: column;">
+
+        <!-- Bandeau header -->
+        <div style="background: #07101A; padding: 36px 48px 30px; position: relative;">
+          <div style="height: 4px; background: #FCD116; position: absolute; top: 0; left: 0; right: 0;"></div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 11px; padding: 9px 11px;">
+                <img src="assets/logo.png" style="height: 40px; width: auto; display: block;" />
+              </div>
+              <div>
+                <div style="font-size: 19px; font-weight: 800; color: #fff; letter-spacing: -0.3px;">Ndembo Kin Connect</div>
+                <div style="font-size: 12px; color: #7CC8E8; font-weight: 600; margin-top: 2px;">Management & Représentation Sportive</div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 30px; font-weight: 800; color: #FCD116; letter-spacing: 2px; line-height: 1;">FACTURE</div>
+              <div style="font-size: 13px; color: rgba(255,255,255,0.55); margin-top: 8px; font-family: JetBrains Mono, monospace;">N° FAC-2026-0042</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Meta row -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid #EEF1F4;">
+          <div style="padding: 16px 48px 16px; border-right: 1px solid #EEF1F4;">
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Date d'émission</div>
+            <div style="font-size: 14px; font-weight: 600; color: #0F172A;">12 juin 2026</div>
+          </div>
+          <div style="padding: 16px 24px; border-right: 1px solid #EEF1F4;">
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Échéance</div>
+            <div style="font-size: 14px; font-weight: 600; color: #0F172A;">12 juillet 2026</div>
+          </div>
+          <div style="padding: 16px 24px; display: flex; align-items: center;">
+            <span style="font-size: 12px; font-weight: 700; color: #C9960C; background: #FEF9EE; border: 1px solid #FCE7B0; padding: 6px 13px; border-radius: 8px;">● En attente de paiement</span>
+          </div>
+        </div>
+
+        <!-- Émetteur / Client -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; padding: 28px 48px 22px; gap: 40px;">
+          <div>
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 10px;">Émis par</div>
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">Ndembo Kin Connect SARL</div>
+            <div style="font-size: 13px; color: #475569; line-height: 1.7;">12, Avenue du Commerce — Gombe<br/>Kinshasa, République Démocratique du Congo<br/>+243 81 000 00 00 · contact@ndembokin.cd</div>
+            <div style="font-size: 11px; color: #94A3B8; line-height: 1.7; margin-top: 8px; font-family: JetBrains Mono, monospace;">RCCM CD/KIN/RCCM/26-B-0042<br/>ID. Nat. 01-K4500-N00420F · NIF A2604200P</div>
+          </div>
+          <div style="background: #F7F9FB; border: 1px solid #EEF1F4; border-radius: 12px; padding: 18px 20px;">
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 10px;">Facturé à</div>
+            <div style="font-size: 15px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">AS Vita Club</div>
+            <div style="font-size: 13px; color: #475569; line-height: 1.7;">Club de football professionnel<br/>Stade des Martyrs — Kinshasa<br/>+243 99 555 11 22 · admin@asvitaclub.cd</div>
+            <div style="font-size: 11px; color: #94A3B8; line-height: 1.7; margin-top: 8px; font-family: JetBrains Mono, monospace;">RCCM CD/KIN/12-A-1199</div>
+          </div>
+        </div>
+
+        <!-- Tableau prestations -->
+        <div style="padding: 0 48px;">
+          <div style="display: grid; grid-template-columns: 3.4fr 0.7fr 1.3fr 1.3fr; background: #07101A; border-radius: 10px 10px 0 0; padding: 12px 18px;">
+            <div style="font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 1px;">Désignation</div>
+            <div style="font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 1px; text-align: center;">Qté</div>
+            <div style="font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 1px; text-align: right;">P. unitaire</div>
+            <div style="font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 1px; text-align: right;">Total HT</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 3.4fr 0.7fr 1.3fr 1.3fr; padding: 15px 18px; border-bottom: 1px solid #F1F5F9; align-items: center;">
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: #0F172A;">Négociation de transfert — J. Mbala</div>
+              <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">Commission sur transfert vers club partenaire</div>
+            </div>
+            <div style="font-size: 14px; color: #334155; text-align: center;">1</div>
+            <div style="font-size: 14px; color: #334155; text-align: right; font-family: JetBrains Mono, monospace;">$8 500</div>
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A; text-align: right; font-family: JetBrains Mono, monospace;">$8 500</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 3.4fr 0.7fr 1.3fr 1.3fr; padding: 15px 18px; border-bottom: 1px solid #F1F5F9; align-items: center; background: #FAFBFC;">
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: #0F172A;">Représentation sportive internationale</div>
+              <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">Mandat annuel — saison 2026</div>
+            </div>
+            <div style="font-size: 14px; color: #334155; text-align: center;">1</div>
+            <div style="font-size: 14px; color: #334155; text-align: right; font-family: JetBrains Mono, monospace;">$5 000</div>
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A; text-align: right; font-family: JetBrains Mono, monospace;">$5 000</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 3.4fr 0.7fr 1.3fr 1.3fr; padding: 15px 18px; border-bottom: 1px solid #F1F5F9; align-items: center;">
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: #0F172A;">Coaching tactique (session)</div>
+              <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">Préparation pré-saison — 4 sessions</div>
+            </div>
+            <div style="font-size: 14px; color: #334155; text-align: center;">4</div>
+            <div style="font-size: 14px; color: #334155; text-align: right; font-family: JetBrains Mono, monospace;">$800</div>
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A; text-align: right; font-family: JetBrains Mono, monospace;">$3 200</div>
+          </div>
+        </div>
+
+        <!-- Totaux + paiement -->
+        <div style="display: grid; grid-template-columns: 1fr 320px; gap: 28px; padding: 24px 48px 0; align-items: start;">
+          <div style="background: #F7F9FB; border: 1px solid #EEF1F4; border-radius: 12px; padding: 16px 18px;">
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 9px;">Modalités de paiement</div>
+            <div style="font-size: 12px; color: #475569; line-height: 1.7;">Paiement à 30 jours. Mobile Money accepté :</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
+              <span style="font-size: 11px; font-weight: 600; color: #B45309; background: #FEF9EE; padding: 4px 9px; border-radius: 6px;">M-Pesa · 0815 000 000</span>
+              <span style="font-size: 11px; font-weight: 600; color: #BE123C; background: #FFF1F2; padding: 4px 9px; border-radius: 6px;">Airtel · 0995 000 000</span>
+            </div>
+            <div style="font-size: 11px; color: #94A3B8; line-height: 1.7; margin-top: 10px; font-family: JetBrains Mono, monospace;">Banque : Rawbank — Cpte 05010-0042<br/>IBAN CD12 0050 1000 4200 0042</div>
+          </div>
+
+          <div>
+            <div style="display: flex; justify-content: space-between; padding: 7px 0; font-size: 13px;">
+              <span style="color: #64748B;">Sous-total HT</span>
+              <span style="font-weight: 600; color: #0F172A; font-family: JetBrains Mono, monospace;">$16 700</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 7px 0; font-size: 13px; border-top: 1px solid #F1F5F9;">
+              <span style="color: #64748B;">TVA (16 %)</span>
+              <span style="font-weight: 600; color: #0F172A; font-family: JetBrains Mono, monospace;">$2 672</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 7px 0; font-size: 13px; border-top: 1px solid #F1F5F9;">
+              <span style="color: #64748B;">Remise</span>
+              <span style="font-weight: 600; color: #059669; font-family: JetBrains Mono, monospace;">− $0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #07101A; border-radius: 11px; padding: 14px 18px; margin-top: 10px;">
+              <span style="font-size: 14px; font-weight: 700; color: #fff;">Total TTC</span>
+              <span style="font-size: 23px; font-weight: 800; color: #FCD116; letter-spacing: -0.5px; font-family: JetBrains Mono, monospace;">$19 372</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="margin-top: auto; padding: 22px 48px 28px;">
+          <div style="border-top: 1px solid #EEF1F4; padding-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 11px; color: #94A3B8; line-height: 1.6;">Merci de votre confiance. Tout retard de paiement entraîne une pénalité de 1,5 % / mois.</div>
+            <div style="font-size: 11px; color: #CBD5E1; font-family: JetBrains Mono, monospace;">ndembokin.cd</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ DEVIS ════════════════ -->
+    <div style="flex: none; width: 794px;">
+      <div style="font-size: 12px; font-weight: 700; color: #6B6862; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;">Modèle — Devis</div>
+
+      <div style="width: 794px; min-height: 1123px; background: #fff; box-shadow: 0 6px 28px rgba(0,0,0,0.12); border-radius: 2px; overflow: hidden; display: flex; flex-direction: column;">
+
+        <!-- Bandeau header (clair pour différencier) -->
+        <div style="background: #fff; padding: 36px 48px 26px; border-bottom: 2px solid #07101A; position: relative;">
+          <div style="height: 4px; background: #7CC8E8; position: absolute; top: 0; left: 0; right: 0;"></div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="background: #07101A; border-radius: 11px; padding: 9px 11px;">
+                <img src="assets/logo.png" style="height: 40px; width: auto; display: block;" />
+              </div>
+              <div>
+                <div style="font-size: 19px; font-weight: 800; color: #0F172A; letter-spacing: -0.3px;">Ndembo Kin Connect</div>
+                <div style="font-size: 12px; color: #3A6B84; font-weight: 600; margin-top: 2px;">Management & Représentation Sportive</div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 30px; font-weight: 800; color: #07101A; letter-spacing: 2px; line-height: 1;">DEVIS</div>
+              <div style="font-size: 13px; color: #94A3B8; margin-top: 8px; font-family: JetBrains Mono, monospace;">N° DEV-2026-014</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Meta row -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid #EEF1F4;">
+          <div style="padding: 16px 48px; border-right: 1px solid #EEF1F4;">
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Date d'émission</div>
+            <div style="font-size: 14px; font-weight: 600; color: #0F172A;">12 juin 2026</div>
+          </div>
+          <div style="padding: 16px 24px; border-right: 1px solid #EEF1F4;">
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Valable jusqu'au</div>
+            <div style="font-size: 14px; font-weight: 600; color: #0F172A;">12 juillet 2026</div>
+          </div>
+          <div style="padding: 16px 24px; display: flex; align-items: center;">
+            <span style="font-size: 12px; font-weight: 700; color: #3A6B84; background: #EBF6FB; border: 1px solid #C4E4F2; padding: 6px 13px; border-radius: 8px;">● Proposition commerciale</span>
+          </div>
+        </div>
+
+        <!-- Émetteur / Client -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; padding: 28px 48px 22px; gap: 40px;">
+          <div>
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 10px;">Émis par</div>
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">Ndembo Kin Connect SARL</div>
+            <div style="font-size: 13px; color: #475569; line-height: 1.7;">12, Avenue du Commerce — Gombe<br/>Kinshasa, République Démocratique du Congo<br/>+243 81 000 00 00 · contact@ndembokin.cd</div>
+            <div style="font-size: 11px; color: #94A3B8; line-height: 1.7; margin-top: 8px; font-family: JetBrains Mono, monospace;">RCCM CD/KIN/RCCM/26-B-0042<br/>NIF A2604200P</div>
+          </div>
+          <div style="background: #F7F9FB; border: 1px solid #EEF1F4; border-radius: 12px; padding: 18px 20px;">
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 10px;">À l'attention de</div>
+            <div style="font-size: 15px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">TP Mazembe</div>
+            <div style="font-size: 13px; color: #475569; line-height: 1.7;">Club de football professionnel<br/>Stade TP Mazembe — Lubumbashi<br/>+243 97 333 44 55 · contact@tpmazembe.cd</div>
+            <div style="font-size: 11px; color: #94A3B8; line-height: 1.7; margin-top: 8px; font-family: JetBrains Mono, monospace;">RCCM CD/LSH/08-A-0455</div>
+          </div>
+        </div>
+
+        <!-- Tableau prestations -->
+        <div style="padding: 0 48px;">
+          <div style="display: grid; grid-template-columns: 3.4fr 0.7fr 1.3fr 1.3fr; background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 10px 10px 0 0; padding: 12px 18px;">
+            <div style="font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 1px;">Désignation</div>
+            <div style="font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Qté</div>
+            <div style="font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 1px; text-align: right;">P. unitaire</div>
+            <div style="font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 1px; text-align: right;">Total HT</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 3.4fr 0.7fr 1.3fr 1.3fr; padding: 15px 18px; border-bottom: 1px solid #F1F5F9; border-left: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; align-items: center;">
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: #0F172A;">Scouting & recrutement</div>
+              <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">Détection de 3 jeunes talents — académies Katanga</div>
+            </div>
+            <div style="font-size: 14px; color: #334155; text-align: center;">1</div>
+            <div style="font-size: 14px; color: #334155; text-align: right; font-family: JetBrains Mono, monospace;">$4 500</div>
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A; text-align: right; font-family: JetBrains Mono, monospace;">$4 500</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 3.4fr 0.7fr 1.3fr 1.3fr; padding: 15px 18px; border-bottom: 1px solid #F1F5F9; border-left: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; align-items: center; background: #FAFBFC;">
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: #0F172A;">Organisation d'événement sportif</div>
+              <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">Tournoi de présaison — logistique complète</div>
+            </div>
+            <div style="font-size: 14px; color: #334155; text-align: center;">1</div>
+            <div style="font-size: 14px; color: #334155; text-align: right; font-family: JetBrains Mono, monospace;">$6 200</div>
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A; text-align: right; font-family: JetBrains Mono, monospace;">$6 200</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 3.4fr 0.7fr 1.3fr 1.3fr; padding: 15px 18px; border-bottom: 1px solid #E2E8F0; border-left: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; align-items: center;">
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: #0F172A;">Coaching tactique (session)</div>
+              <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">Encadrement technique — 6 sessions</div>
+            </div>
+            <div style="font-size: 14px; color: #334155; text-align: center;">6</div>
+            <div style="font-size: 14px; color: #334155; text-align: right; font-family: JetBrains Mono, monospace;">$800</div>
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A; text-align: right; font-family: JetBrains Mono, monospace;">$4 800</div>
+          </div>
+        </div>
+
+        <!-- Totaux + signature -->
+        <div style="display: grid; grid-template-columns: 1fr 320px; gap: 28px; padding: 24px 48px 0; align-items: start;">
+          <div style="border: 1.5px dashed #CBD5E1; border-radius: 12px; padding: 16px 18px;">
+            <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 9px;">Bon pour accord</div>
+            <div style="font-size: 12px; color: #475569; line-height: 1.7;">Date, nom et signature du client précédés de la mention « Bon pour accord ».</div>
+            <div style="height: 56px; border-bottom: 1px solid #E2E8F0; margin-top: 14px;"></div>
+            <div style="font-size: 11px; color: #94A3B8; margin-top: 6px;">Signature</div>
+          </div>
+
+          <div>
+            <div style="display: flex; justify-content: space-between; padding: 7px 0; font-size: 13px;">
+              <span style="color: #64748B;">Sous-total HT</span>
+              <span style="font-weight: 600; color: #0F172A; font-family: JetBrains Mono, monospace;">$15 500</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 7px 0; font-size: 13px; border-top: 1px solid #F1F5F9;">
+              <span style="color: #64748B;">TVA (16 %)</span>
+              <span style="font-weight: 600; color: #0F172A; font-family: JetBrains Mono, monospace;">$2 480</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 7px 0; font-size: 13px; border-top: 1px solid #F1F5F9;">
+              <span style="color: #64748B;">Remise (5 %)</span>
+              <span style="font-weight: 600; color: #059669; font-family: JetBrains Mono, monospace;">− $775</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #07101A; border-radius: 11px; padding: 14px 18px; margin-top: 10px;">
+              <span style="font-size: 14px; font-weight: 700; color: #fff;">Total TTC</span>
+              <span style="font-size: 23px; font-weight: 800; color: #FCD116; letter-spacing: -0.5px; font-family: JetBrains Mono, monospace;">$17 205</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="margin-top: auto; padding: 22px 48px 28px;">
+          <div style="border-top: 1px solid #EEF1F4; padding-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 11px; color: #94A3B8; line-height: 1.6;">Devis valable 30 jours. Les prix s'entendent hors frais de déplacement éventuels.</div>
+            <div style="font-size: 11px; color: #CBD5E1; font-family: JetBrains Mono, monospace;">ndembokin.cd</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1700, &quot;height&quot;: 1240}}"></script>
+</body>
+</html>
