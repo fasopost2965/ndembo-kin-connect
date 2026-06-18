@@ -54,8 +54,8 @@ export default function ProjetsPage() {
 
       {/* ── Topbar ── */}
       <div
-        className="flex items-center gap-4 px-6 shrink-0"
-        style={{ background: '#fff', borderBottom: '1px solid #E8ECF1', height: 60 }}
+        className="flex items-center gap-4 shrink-0"
+        style={{ background: '#fff', borderBottom: '1px solid #E8ECF1', height: 60, padding: '0 28px' }}
       >
         <div className="flex items-center gap-2.5">
           <span className="text-[18px] font-extrabold tracking-[-0.3px]" style={{ color: '#0F172A' }}>Projets</span>

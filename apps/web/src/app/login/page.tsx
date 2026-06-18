@@ -70,56 +70,60 @@ export default function LoginPage() {
       {/* ── Left panel (42%) ── */}
       <div
         className="hidden lg:flex flex-col justify-between relative overflow-hidden shrink-0"
-        style={{ width: '42%', background: '#07101A', padding: '48px 40px' }}
+        style={{ width: '42%', background: '#07101A', padding: '48px 52px' }}
       >
-        {/* Halos décoratifs */}
-        <div className="absolute top-0 right-0 w-72 h-72 rounded-full pointer-events-none"
-          style={{ background: 'rgba(58,107,132,0.08)', filter: 'blur(60px)' }} />
-        <div className="absolute bottom-0 left-0 w-56 h-56 rounded-full pointer-events-none"
-          style={{ background: 'rgba(252,209,22,0.05)', filter: 'blur(50px)' }} />
+        {/* Anneaux décoratifs concentriques */}
+        <div style={{ position: 'absolute', top: -120, right: -80, width: 380, height: 380, borderRadius: '50%', border: '1px solid rgba(252,209,22,0.06)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: -60, right: -20, width: 220, height: 220, borderRadius: '50%', border: '1px solid rgba(252,209,22,0.08)', pointerEvents: 'none' }} />
 
         {/* Brand */}
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-12">
-            <div className="bg-white rounded-[10px] px-1.5 py-1 flex items-center justify-center"
-              style={{ height: 40 }}>
+          <div className="flex items-center gap-3 mb-10">
+            <div style={{ background: '#fff', borderRadius: 12, padding: '6px 8px', flexShrink: 0 }}>
               <img src="/logo.png" alt="NKC" className="h-7 w-auto" />
             </div>
             <div>
               <div className="font-extrabold text-white text-[15px] leading-tight">Ndembo Kin</div>
-              <div className="font-bold text-[9px] tracking-[1.5px] uppercase" style={{ color: 'rgba(252,209,22,0.55)' }}>
-                CONNECT SARL
+              <div className="font-bold text-[9px] tracking-[2px] uppercase" style={{ color: 'rgba(252,209,22,0.55)', marginTop: 2 }}>
+                Connect SARL
               </div>
             </div>
           </div>
-
-          <h2 className="text-white font-extrabold text-[32px] leading-[1.15] tracking-[-0.6px] mb-4">
-            Gérez vos athlètes,<br />clients et contrats<br />depuis Kinshasa.
-          </h2>
-          <p className="text-[14px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Plateforme CRM conçue pour l'agence sportive<br />Ndembo Kin Connect — sport, business, excellence.
-          </p>
         </div>
 
-        {/* Stats */}
-        <div className="relative z-10 grid grid-cols-3 gap-5">
-          {[
-            { value: '14', label: 'Modules actifs' },
-            { value: '5', label: "Rôles d'accès" },
-            { value: 'PWA', label: 'Offline-first' },
-          ].map(s => (
-            <div
-              key={s.label}
-              className="rounded-xl p-4"
-              style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(252,209,22,0.08)',
-              }}
-            >
-              <div className="text-[28px] font-black leading-none mb-1" style={{ color: '#FCD116' }}>{s.value}</div>
-              <div className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>{s.label}</div>
-            </div>
-          ))}
+        {/* Message central */}
+        <div className="relative z-10">
+          <div style={{ width: 40, height: 3, background: '#FCD116', borderRadius: 2, marginBottom: 28 }} />
+          <h2 style={{ fontSize: 34, fontWeight: 800, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.8px', marginBottom: 16 }}>
+            Gérez vos athlètes,<br />clients et contrats<br />depuis Kinshasa.
+          </h2>
+          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', lineHeight: 1.7, maxWidth: 280 }}>
+            Plateforme CRM conçue pour l'agence sportive Ndembo Kin Connect — sport, business, excellence.
+          </p>
+
+          {/* Stats flex sans cards */}
+          <div style={{ display: 'flex', gap: 32, marginTop: 40, alignItems: 'center' }}>
+            {[
+              { value: '14', label: 'modules actifs' },
+              null,
+              { value: '5', label: "rôles d'accès" },
+              null,
+              { value: 'PWA', label: 'offline-first' },
+            ].map((s, i) => s === null
+              ? <div key={i} style={{ width: 1, alignSelf: 'stretch', background: 'rgba(255,255,255,0.07)' }} />
+              : (
+                <div key={s.label}>
+                  <div style={{ fontSize: 26, fontWeight: 800, color: '#FCD116', letterSpacing: '-0.5px' }}>{s.value}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>{s.label}</div>
+                </div>
+              )
+            )}
+          </div>
+        </div>
+
+        {/* Footer copyright */}
+        <div className="relative z-10" style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)' }}>
+          © 2026 Ndembo Kin Connect SARL · Kinshasa, RDC
         </div>
       </div>
 
@@ -149,12 +153,13 @@ export default function LoginPage() {
             background: '#fff',
             borderRadius: 20,
             boxShadow: '0 4px 24px rgba(15,23,42,0.06)',
-            padding: 40,
+            border: '1px solid #E8ECF1',
+            padding: 32,
           }}
         >
           <div className="mb-7">
-            <div className="text-[24px] font-extrabold mb-1" style={{ color: '#0F172A' }}>
-              Connexion
+            <div className="text-[26px] font-extrabold mb-1" style={{ color: '#0F172A', letterSpacing: '-0.5px' }}>
+              Bienvenue 👋
             </div>
             <div className="text-[14px]" style={{ color: '#64748B' }}>
               Accédez à votre espace de gestion
@@ -179,7 +184,7 @@ export default function LoginPage() {
               </label>
               <div className="relative">
                 <div className="absolute left-3.5 top-0 bottom-0 flex items-center pointer-events-none">
-                  <MI name="mail_outline" size={16} style={{ color: '#94A3B8' }} />
+                  <MI name="email" size={18} style={{ color: '#94A3B8' }} />
                 </div>
                 <input
                   type="email"

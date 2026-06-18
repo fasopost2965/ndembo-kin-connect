@@ -39,6 +39,13 @@ const NIVEAU_FILTERS = [
   { key: 'AMATEUR', label: 'Amateur' },
 ];
 
+const STATUT_META: Record<string, { label: string; bg: string; color: string }> = {
+  ACTIF:        { label: 'Actif',        bg: '#F0FDF4', color: '#059669' },
+  EN_TRANSFERT: { label: 'En transfert', bg: '#EFF6FF', color: '#2563EB' },
+  BLESSE:       { label: 'Blessé',       bg: '#FFF7ED', color: '#EA580C' },
+  INACTIF:      { label: 'Inactif',      bg: '#F1F5F9', color: '#64748B' },
+};
+
 const AV_GRADIENTS = [
   'linear-gradient(135deg,#3A6B84,#7CC8E8)',
   'linear-gradient(135deg,#C9960C,#FCD116)',
@@ -102,11 +109,12 @@ export default function AthletesPage() {
 
       {/* ── Topbar ── */}
       <div
-        className="flex items-center gap-3 px-6 shrink-0"
+        className="flex items-center gap-3 shrink-0"
         style={{
           background: '#fff',
           borderBottom: '1px solid #E8ECF1',
           height: 60,
+          padding: '0 28px',
         }}
       >
         <div className="flex-1 flex items-center gap-3">
@@ -299,16 +307,18 @@ export default function AthletesPage() {
                       <TableCell className="text-sm capitalize" style={{ color: '#64748B' }}>{a.sport}</TableCell>
                       <TableCell className="text-sm" style={{ color: '#64748B' }}>{a.poste}</TableCell>
                       <TableCell><Badge variant={nb.variant}>{nb.label}</Badge></TableCell>
-                      <TableCell className="text-right text-[13px] font-bold" style={{ color: '#C9960C' }}>
+                      <TableCell className="text-right text-[13px] font-bold" style={{ color: '#059669' }}>
                         {formatValeur(a.valeurMarchande)}
                       </TableCell>
                       <TableCell>
-                        <span
-                          className="text-[11px] font-bold px-2.5 py-1 rounded-lg"
-                          style={{ background: '#ECFDF5', color: '#0D9668' }}
-                        >
-                          Actif
-                        </span>
+                        {(() => {
+                          const s = STATUT_META[a.statut] ?? STATUT_META['ACTIF'];
+                          return (
+                            <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg" style={{ background: s.bg, color: s.color }}>
+                              {s.label}
+                            </span>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
@@ -409,98 +419,52 @@ function AthleteDetail({ athlete, onEdit, onDelete }: {
         <Badge variant={nb.variant}>{nb.label}</Badge>
       </div>
 
-      {/* KPI mini-cards */}
-      <div className="grid grid-cols-3 gap-2.5 px-4 py-4 shrink-0"
-        style={{ borderBottom: '1px solid #E8ECF1' }}>
+      {/* KPI 2×2 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '20px 22px', borderBottom: '1px solid #E8ECF1', flexShrink: 0 }}>
         {[
-          { label: 'Valeur', value: formatValeur(athlete.valeurMarchande), color: '#C9960C' },
-          { label: 'Contrats', value: '2', color: '#3A6B84' },
-          { label: 'Activités', value: '14', color: '#10B981' },
+          { label: 'Contrats', value: '—' },
+          { label: 'Âge', value: athlete.dateNaissance ? String(new Date().getFullYear() - new Date(athlete.dateNaissance).getFullYear()) + ' ans' : '—' },
+          { label: 'Valeur', value: formatValeur(athlete.valeurMarchande) },
+          { label: 'Niveau', value: athlete.niveau.replace('_', ' ') },
         ].map(k => (
-          <div
-            key={k.label}
-            className="rounded-xl p-3 text-center"
-            style={{ background: '#F8FAFC', border: '1px solid #E8ECF1' }}
-          >
-            <div className="text-[15px] font-extrabold" style={{ color: k.color }}>{k.value}</div>
-            <div className="text-[10px] mt-0.5" style={{ color: '#94A3B8' }}>{k.label}</div>
+          <div key={k.label} style={{ background: '#F8FAFC', border: '1px solid #E8ECF1', borderRadius: 11, padding: 12, textAlign: 'center' }}>
+            <div style={{ fontSize: 20, fontWeight: 800, color: '#0F172A', letterSpacing: '-0.3px' }}>{k.value}</div>
+            <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 2, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{k.label}</div>
           </div>
         ))}
       </div>
 
       {/* Info rows */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div className="flex-1 overflow-y-auto" style={{ padding: '4px 22px 16px' }}>
         {[
-          { label: 'Club actuel', value: athlete.clubActuel ?? '—', bold: true },
-          { label: 'Nationalité', value: athlete.nationalite },
-          { label: 'Priorité scouting', value: athlete.priorityScouting ?? '—' },
-          { label: 'Téléphone', value: athlete.telephone ?? '—', icon: 'call' },
-          { label: 'Email', value: athlete.email ?? '—', icon: 'mail_outline', cyan: true },
+          { icon: 'phone', label: 'Téléphone', value: athlete.telephone ?? '—' },
+          { icon: 'sports', label: 'Sport', value: `${athlete.sport} · ${athlete.poste}` },
+          { icon: 'stadium', label: 'Club', value: athlete.clubActuel ?? '—' },
         ].map(row => (
-          <div
-            key={row.label}
-            className="flex items-center justify-between py-2.5"
-            style={{ borderBottom: '1px solid #F1F5F9' }}
-          >
-            <span className="text-[11px]" style={{ color: '#94A3B8' }}>{row.label}</span>
-            <span
-              className="flex items-center gap-1.5 text-[12px]"
-              style={{
-                color: row.cyan ? '#3A6B84' : row.bold ? '#0F172A' : '#64748B',
-                fontWeight: row.bold ? 600 : 400,
-              }}
-            >
-              {row.icon && <MI name={row.icon} size={12} style={{ color: '#94A3B8' }} />}
-              {row.value}
-            </span>
+          <div key={row.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #F1F5F9' }}>
+            <MI name={row.icon} size={16} style={{ color: '#94A3B8', flexShrink: 0 }} />
+            <div>
+              <div style={{ fontSize: 10, color: '#94A3B8' }}>{row.label}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#334155' }}>{row.value}</div>
+            </div>
           </div>
         ))}
       </div>
 
       {/* Actions */}
-      <div className="px-4 pb-5 pt-3 shrink-0" style={{ borderTop: '1px solid #E8ECF1' }}>
-        <button
-          className="w-full flex items-center justify-center gap-1.5 font-bold text-[13px] rounded-[10px] mb-2.5 transition-colors"
-          style={{
-            padding: '11px 0',
-            background: '#07101A',
-            color: '#FCD116',
-            border: 'none',
-            cursor: 'pointer',
-          }}
+      <div style={{ padding: '16px 22px', borderTop: '1px solid #E8ECF1', display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
+        <Link
+          href={`/athletes/${athlete.id}`}
+          style={{ width: '100%', padding: 12, background: '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, textDecoration: 'none' }}
         >
-          <MI name="description" size={15} style={{ color: '#FCD116' }} />
+          <MI name="open_in_new" size={16} style={{ color: '#FCD116' }} />
+          Voir la fiche complète
+        </Link>
+        <button
+          style={{ width: '100%', padding: 11, background: '#F1F5F9', color: '#475569', fontSize: 13, fontWeight: 600, border: '1px solid #E2E8F0', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit' }}
+        >
           Créer un contrat
         </button>
-        <div className="flex gap-2">
-          <button
-            onClick={onEdit}
-            className="flex-1 flex items-center justify-center gap-1.5 text-[13px] font-semibold rounded-[10px] transition-colors"
-            style={{
-              padding: '9px 0',
-              background: '#F1F5F9',
-              border: '1px solid #E2E8F0',
-              color: '#334155',
-              cursor: 'pointer',
-            }}
-          >
-            <MI name="edit" size={14} style={{ color: '#64748B' }} />
-            Modifier
-          </button>
-          <button
-            onClick={onDelete}
-            className="flex items-center justify-center gap-1 text-[13px] font-semibold rounded-[10px] transition-colors px-4"
-            style={{
-              padding: '9px 14px',
-              background: '#FFF1F2',
-              border: '1px solid #FECDD3',
-              color: '#BE123C',
-              cursor: 'pointer',
-            }}
-          >
-            <MI name="delete_outline" size={14} style={{ color: '#BE123C' }} />
-          </button>
-        </div>
       </div>
     </div>
   );

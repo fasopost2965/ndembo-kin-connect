@@ -75,11 +75,11 @@ export default function DevisPage() {
 
       {/* ── Topbar with tab toggle ── */}
       <div
-        className="flex items-center gap-4 px-6 shrink-0"
-        style={{ background: '#fff', borderBottom: '1px solid #E8ECF1', height: 60 }}
+        className="flex items-center gap-4 shrink-0"
+        style={{ background: '#fff', borderBottom: '1px solid #E8ECF1', height: 60, padding: '0 28px' }}
       >
         <div className="text-[18px] font-extrabold tracking-[-0.3px]" style={{ color: '#0F172A' }}>
-          Pipeline Commercial
+          Devis
         </div>
 
         {/* Tab toggle */}
@@ -134,7 +134,7 @@ export default function DevisPage() {
                 <MI name={k.icon} size={18} style={{ color: k.iconColor }} />
               </div>
               <div>
-                <div className="text-[20px] font-extrabold leading-none tracking-[-0.3px]" style={{ color: '#0F172A' }}>{k.value}</div>
+                <div className="text-[22px] font-extrabold leading-none tracking-[-0.4px]" style={{ color: '#0F172A' }}>{k.value}</div>
                 <div className="text-[11px] mt-0.5" style={{ color: '#94A3B8' }}>{k.label}</div>
               </div>
             </div>

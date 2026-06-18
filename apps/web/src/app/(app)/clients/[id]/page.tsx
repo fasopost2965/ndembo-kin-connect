@@ -179,13 +179,13 @@ export default function FicheClientPage() {
           {/* KPI mini grid */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             {[
-              { value: devisCount, label: 'Devis', color: '#2563EB' },
-              { value: facturesCount, label: 'Factures', color: '#3A6B84' },
-              { value: ca > 0 ? formatMontant(ca) : '—', label: 'CA réalisé', color: '#059669' },
-              { value: projetsCount, label: 'Projets', color: '#0F172A' },
+              { value: devisCount, label: 'Devis', color: '#2563EB', size: 22 },
+              { value: facturesCount, label: 'Factures', color: '#3A6B84', size: 22 },
+              { value: ca > 0 ? formatMontant(ca) : '—', label: 'CA réalisé', color: '#059669', size: 18 },
+              { value: projetsCount, label: 'Projets', color: '#0F172A', size: 22 },
             ].map(k => (
               <div key={k.label} style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 12, padding: 14, textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: k.color, letterSpacing: '-0.4px' }}>{k.value}</div>
+                <div style={{ fontSize: k.size, fontWeight: 800, color: k.color, letterSpacing: k.size === 18 ? '-0.3px' : '-0.4px' }}>{k.value}</div>
                 <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 3, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{k.label}</div>
               </div>
             ))}

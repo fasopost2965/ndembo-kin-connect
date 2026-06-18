@@ -39,6 +39,8 @@ interface Facture {
   acomptePercu: number;
   statutPaiement: 'IMPAYEE' | 'ACOMPTE_PERCU' | 'PARTIELLE' | 'PAYEE';
   reglements?: Reglement[];
+  createdAt?: string;
+  echeanceDate?: string;
 }
 
 export default function FacturesPage() {
@@ -90,32 +92,34 @@ function FacturesView() {
   return (
     <div className="flex flex-col min-h-screen" style={{ background: '#F0F2F5' }}>
 
-      {/* ── Topbar with tab toggle ── */}
+      {/* ── Topbar ── */}
       <div
-        className="flex items-center gap-4 px-6 shrink-0"
-        style={{ background: '#fff', borderBottom: '1px solid #E8ECF1', height: 60 }}
+        className="flex items-center gap-3 shrink-0"
+        style={{ background: '#fff', borderBottom: '1px solid #E8ECF1', height: 60, padding: '0 28px' }}
       >
-        <div className="text-[18px] font-extrabold tracking-[-0.3px]" style={{ color: '#0F172A' }}>
-          Pipeline Commercial
+        <div style={{ background: '#07101A', borderRadius: 8, padding: '4px 5px', lineHeight: 0, flexShrink: 0 }}>
+          <img src="/logo.png" alt="NKC" style={{ height: 22, width: 'auto', display: 'block' }} />
         </div>
-        <div
-          className="flex gap-0.5 rounded-lg p-0.5 ml-2"
-          style={{ background: '#F1F5F9', border: '1px solid #E2E8F0' }}
-        >
-          <Link
-            href="/devis"
-            className="px-4 py-1.5 rounded-md text-[13px] font-medium"
-            style={{ color: '#64748B' }}
-          >
+        {/* Tab toggle */}
+        <div style={{ display: 'flex', gap: 2, background: '#F1F5F9', borderRadius: 10, padding: 3 }}>
+          <Link href="/devis" style={{ padding: '6px 16px', borderRadius: 8, fontSize: 13, fontWeight: 500, color: '#64748B', textDecoration: 'none' }}>
             Devis
           </Link>
-          <div
-            className="px-4 py-1.5 rounded-md text-[13px] font-bold"
-            style={{ background: '#07101A', color: '#FCD116' }}
-          >
+          <div style={{ padding: '6px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, background: '#07101A', color: '#FCD116' }}>
             Factures
           </div>
         </div>
+        <div className="flex-1" />
+        {/* Search */}
+        <div style={{ position: 'relative' }}>
+          <MI name="search" size={16} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', pointerEvents: 'none' }} />
+          <input type="text" placeholder="Rechercher…"
+            style={{ padding: '8px 14px 8px 36px', border: '1.5px solid #E2E8F0', borderRadius: 9, fontSize: 13, fontFamily: 'inherit', color: '#0F172A', outline: 'none', background: '#F8FAFC', width: 200 }} />
+        </div>
+        <button style={{ padding: '8px 18px', background: '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 9, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 7 }}>
+          <MI name="add" size={15} style={{ color: '#FCD116' }} />
+          Nouvelle facture
+        </button>
       </div>
 
       <div className="flex-1 p-6">
@@ -137,7 +141,7 @@ function FacturesView() {
                 <MI name={k.icon} size={18} style={{ color: k.iconColor }} />
               </div>
               <div>
-                <div className="text-[20px] font-extrabold leading-none tracking-[-0.3px]" style={{ color: '#0F172A' }}>{k.value}</div>
+                <div className="text-[22px] font-extrabold leading-none tracking-[-0.4px]" style={{ color: '#0F172A' }}>{k.value}</div>
                 <div className="text-[11px] mt-0.5" style={{ color: '#94A3B8' }}>{k.label}</div>
               </div>
             </div>
@@ -148,10 +152,11 @@ function FacturesView() {
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent" style={{ borderBottom: '1px solid #E8ECF1' }}>
-              <TableHead>Numéro</TableHead>
+              <TableHead>Référence</TableHead>
               <TableHead>Client</TableHead>
-              <TableHead className="text-right">Montant TTC</TableHead>
-              <TableHead className="text-right">Encaissé</TableHead>
+              <TableHead>Émission</TableHead>
+              <TableHead>Échéance</TableHead>
+              <TableHead className="text-right">Montant</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -159,19 +164,21 @@ function FacturesView() {
           <TableBody>
             {loading ? (
               [...Array(4)].map((_, i) => (
-                <TableRow key={i}><TableCell colSpan={5}><div className="h-9 animate-pulse rounded-md bg-[#F1F5F9]" /></TableCell></TableRow>
+                <TableRow key={i}><TableCell colSpan={7}><div className="h-9 animate-pulse rounded-md bg-[#F1F5F9]" /></TableCell></TableRow>
               ))
             ) : rows.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="py-12 text-center text-sm text-[#94A3B8]">Aucune facture. Convertissez un devis validé.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} className="py-12 text-center text-sm text-[#94A3B8]">Aucune facture. Convertissez un devis validé.</TableCell></TableRow>
             ) : (
               rows.map((f) => {
                 const sb = factureStatutBadge(f.statutPaiement);
+                const fmt = (d?: string) => d ? new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
                 return (
                   <TableRow key={f.id} className="cursor-pointer" data-state={selectedId === f.id ? 'selected' : undefined} onClick={() => setSelectedId(f.id)}>
                     <TableCell className="font-mono text-xs font-semibold" style={{ color: '#3A6B84' }}>{f.numero}</TableCell>
                     <TableCell className="text-sm" style={{ color: '#334155' }}>{f.client?.nom ?? '—'}</TableCell>
+                    <TableCell className="text-[12px]" style={{ color: '#64748B' }}>{fmt(f.createdAt)}</TableCell>
+                    <TableCell className="text-[12px]" style={{ color: '#64748B' }}>{fmt(f.echeanceDate)}</TableCell>
                     <TableCell className="text-right text-[13px] font-bold" style={{ color: '#0F172A' }}>{formatMontant(f.montantTTC)}</TableCell>
-                    <TableCell className="text-right text-xs" style={{ color: '#0D9668' }}>{formatMontant(f.acomptePercu)}</TableCell>
                     <TableCell><Badge variant={sb.variant}>{sb.label}</Badge></TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-1">

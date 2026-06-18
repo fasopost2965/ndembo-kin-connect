@@ -222,10 +222,10 @@ export default function AthleteDetailPage() {
             className="flex-1 rounded-2xl p-6"
             style={{ background: '#fff', border: '1px solid #E2E8F0' }}
           >
-            {tab === 'carriere' && <CarriereTab athlete={athlete} />}
-            {tab === 'contrats' && <EmptyTab label="Contrats" icon="gavel" />}
-            {tab === 'activites' && <EmptyTab label="Activités" icon="history" />}
-            {tab === 'notes' && <EmptyTab label="Notes" icon="sticky_note_2" />}
+            {tab === 'carriere'  && <CarriereTab  athlete={athlete} />}
+            {tab === 'contrats'  && <ContratsTab />}
+            {tab === 'activites' && <ActivitesTab />}
+            {tab === 'notes'     && <NotesTab athlete={athlete} />}
           </div>
         </div>
       </div>
@@ -233,68 +233,94 @@ export default function AthleteDetailPage() {
   );
 }
 
+// Carrière : timeline verticale (design Fiche Athlète.dc.html)
+const CARRIERE_STATIC = [
+  { periode: '2024 — Présent', club: 'Club actuel', role: 'Voir profil sportif' },
+];
+
 function CarriereTab({ athlete }: { athlete: Athlete }) {
-  const sections = [
-    {
-      title: 'Informations sportives',
-      rows: [
-        { label: 'Sport', value: athlete.sport, capitalize: true },
-        { label: 'Poste', value: athlete.poste },
-        { label: 'Niveau', value: athlete.niveau },
-        { label: 'Club actuel', value: athlete.clubActuel ?? '—' },
-        { label: 'Priorité scouting', value: athlete.priorityScouting ?? '—' },
-      ],
-    },
-    {
-      title: 'Informations personnelles',
-      rows: [
-        { label: 'Nationalité', value: athlete.nationalite ?? '—' },
-        { label: 'Date de naissance', value: athlete.dateNaissance ?? '—' },
-        { label: 'Téléphone', value: athlete.telephone ?? '—' },
-        { label: 'Email', value: athlete.email ?? '—' },
-      ],
-    },
-  ];
+  const entries = athlete.clubActuel
+    ? [{ periode: '2024 — Présent', club: athlete.clubActuel, role: `${athlete.sport} · ${athlete.poste}` }]
+    : CARRIERE_STATIC;
 
   return (
-    <div className="grid grid-cols-2 gap-6">
-      {sections.map(section => (
-        <div key={section.title}>
-          <div className="text-[11px] font-bold uppercase tracking-[1.5px] mb-3.5" style={{ color: '#94A3B8' }}>
-            {section.title}
+    <div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', marginBottom: 18 }}>Historique de carrière</div>
+      <div style={{ position: 'relative', paddingLeft: 24 }}>
+        <div style={{ position: 'absolute', left: 7, top: 0, bottom: 0, width: 2, background: '#E8ECF1' }} />
+        {entries.map((c, i) => (
+          <div key={i} style={{ position: 'relative', marginBottom: 24 }}>
+            <div style={{ position: 'absolute', left: -21, top: 4, width: 10, height: 10, borderRadius: '50%', background: '#FCD116', border: '2px solid #fff', boxShadow: '0 0 0 2px #FCD116' }} />
+            <div style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, marginBottom: 3 }}>{c.periode}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>{c.club}</div>
+            <div style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>{c.role}</div>
           </div>
-          <div className="space-y-3">
-            {section.rows.map(row => (
-              <div
-                key={row.label}
-                className="flex justify-between items-center py-2.5"
-                style={{ borderBottom: '1px solid #F1F5F9' }}
-              >
-                <span className="text-[12px]" style={{ color: '#94A3B8' }}>{row.label}</span>
-                <span
-                  className="text-[13px] font-semibold"
-                  style={{
-                    color: '#0F172A',
-                    textTransform: row.capitalize ? 'capitalize' : undefined,
-                  }}
-                >
-                  {row.value}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
 
-function EmptyTab({ label, icon }: { label: string; icon: string }) {
+// Contrats tab : liste avec icône document
+function ContratsTab() {
   return (
-    <div className="flex flex-col items-center justify-center py-16" style={{ color: '#94A3B8' }}>
-      <MI name={icon} size={40} style={{ color: '#E2E8F0', marginBottom: 12 }} />
-      <div className="text-[14px] font-semibold" style={{ color: '#CBD5E1' }}>Aucun(e) {label.toLowerCase()}</div>
-      <div className="text-[12px] mt-1">Les données apparaîtront ici</div>
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>Contrats</div>
+        <button style={{ padding: '6px 14px', background: '#07101A', color: '#FCD116', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 7, cursor: 'pointer', fontFamily: 'inherit' }}>
+          + Nouveau contrat
+        </button>
+      </div>
+      <div style={{ textAlign: 'center', padding: '32px 0', color: '#94A3B8', fontSize: 13 }}>
+        <MI name="gavel" size={36} style={{ color: '#E2E8F0', display: 'block', margin: '0 auto 10px' }} />
+        Aucun contrat — connectez l'API pour afficher les données
+      </div>
+    </div>
+  );
+}
+
+// Activités tab : journal avec icônes colorées
+const ACTIVITES_STATIC = [
+  { icon: 'event', iColor: '#3A6B84', iBg: '#EFF6FF', desc: 'Réunion de suivi — évaluation tactique', time: "Aujourd'hui" },
+  { icon: 'add_circle', iColor: '#64748B', iBg: '#F1F5F9', desc: 'Fiche créée dans le CRM', time: 'À la création' },
+];
+
+function ActivitesTab() {
+  return (
+    <div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', marginBottom: 18 }}>Journal d'activités</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {ACTIVITES_STATIC.map((a, i) => (
+          <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: a.iBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <MI name={a.icon} size={15} style={{ color: a.iColor }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, color: '#334155', fontWeight: 500 }}>{a.desc}</div>
+              <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 2 }}>{a.time}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Notes tab : fond #FFFBEB
+function NotesTab({ athlete }: { athlete: Athlete }) {
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>Notes du coach</div>
+        <button style={{ padding: '6px 14px', background: '#F1F5F9', color: '#475569', fontSize: 12, fontWeight: 600, border: '1px solid #E2E8F0', borderRadius: 7, cursor: 'pointer', fontFamily: 'inherit' }}>
+          + Ajouter
+        </button>
+      </div>
+      <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '14px 16px', fontSize: 13, color: '#78350F', lineHeight: 1.6 }}>
+        {athlete.sport && athlete.poste
+          ? `${athlete.prenom} ${athlete.nom} — ${athlete.sport}, ${athlete.poste}. Aucune note saisie pour le moment.`
+          : 'Aucune note saisie pour le moment.'}
+      </div>
     </div>
   );
 }
