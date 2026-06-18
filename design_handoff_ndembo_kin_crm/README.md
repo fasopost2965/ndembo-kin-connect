@@ -129,9 +129,30 @@ Les fichiers de `designs/` sont des prototypes écrits en HTML. **La tâche n'es
 
 ---
 
+## 3bis. Cible d'affichage : desktop d'abord, mobile futur
+
+**Priorité absolue : le rendu desktop doit être impeccable.** L'app est destinée à un usage de **bureau** (largeur de conception 1280–1440px). Les maquettes `designs/*.dc.html` sont les références desktop définitives — à reproduire pixel par pixel.
+
+Un usage **téléphone occasionnel** est à prévoir, sans le concevoir maintenant. Le dev doit donc coder en desktop-first **mais** garder une structure qui se convertit proprement plus tard. Règles de conversion mobile (à appliquer le jour de la bascule, breakpoint `≤ 768px`) :
+
+| Pattern desktop | Comportement mobile (futur) |
+|---|---|
+| Topbar 60px (logo + titre + recherche + filtres + bouton) | Logo + titre + icône menu ; recherche/filtres dans un tiroir déroulant ; bouton d'action en FAB ou pleine largeur |
+| Tables (Athlètes, Clients, Contrats, Factures) | Une **carte par ligne** empilée (nom+avatar en haut, méta en paires label/valeur) — jamais de scroll horizontal de table |
+| Grilles stats `repeat(4,1fr)` | `repeat(2,1fr)` ≤768px, `1fr` ≤420px |
+| Layout fiche `300px + 1fr` (Fiche Athlète/Client) | Colonnes empilées : carte profil en haut, onglets en dessous |
+| Drawer latéral 400–440px | **Bottom sheet** pleine largeur (ou plein écran) qui remonte du bas |
+| Dashboard (KPIs + CA + pipeline + kanban) | Sections empilées 1 colonne, ordre : KPIs → CA → pipeline → activités ; aperçu kanban en scroll horizontal de colonnes |
+| Formulaires `grid 2–3 col` | 1 colonne, champs pleine largeur |
+| Onglets pill horizontaux | Rester horizontaux mais **scrollables** si débordement |
+
+**À respecter dès maintenant pour faciliter la bascule :** cibles tactiles ≥ 44px, unités relatives (rem/%) plutôt que px figés sur les conteneurs, conteneurs en `max-width` + `flex/grid` (jamais de largeur fixe en dur sur une colonne de contenu), et `meta viewport` présent. Ne pas concevoir d'écrans mobiles dédiés tant que le besoin n'est pas confirmé.
+
+---
+
 ## 4. Écrans (références dans `designs/`)
 
-10 écrans haute-fidélité + le Design System. Pour chacun, ouvre le `.dc.html` pour voir la cible exacte.
+20 écrans haute-fidélité + le Design System. Pour chacun, ouvre le `.dc.html` pour voir la cible exacte.
 
 | # | Écran (fichier) | Module | Rôle |
 |---|---|---|---|
@@ -150,6 +171,11 @@ Les fichiers de `designs/` sont des prototypes écrits en HTML. **La tâche n'es
 | 13 | `Liste Contrats` | Contrats | Table + filtres statut + stats + drawer avec suivi de signature |
 | 14 | `Parametres` | Paramètres | Agence (RCCM/NIF/IBAN), Utilisateurs, **matrice RBAC**, Facturation, Mobile Money |
 | 15 | `Modeles Facture & Devis` | Documents | Modèles A4 prêts pour PDF — facture + devis (2 colonnes, lignes, totaux, signature) |
+| 16 | `Catalogue Prestations` | Prestations | Grille de services + filtres catégorie + prix (source des lignes de devis) |
+| 17 | `Liste Reglements` | Règlements | Journal des encaissements + filtres méthode (Mobile Money) + totaux |
+| 18 | `Rapports KPIs` | Rapports | CA mensuel, taux conversion, top athlètes, répartition CA (graphes CSS) |
+| 19 | `Liste Taches` | Tâches | Vue table des tâches (alt. au Kanban) + filtres priorité/statut |
+| 20 | `Jalons Projets` | Jalons | Milestones par projet avec progression + statut atteint/en cours/à venir |
 | — | `Design System` | Réf. | Palette, typo, composants, rayons & ombres |
 
 ### Comportements clés par écran
@@ -409,6 +435,8 @@ N'invente pas de contenu ni d'écrans non présents dans les designs.
 ```
 design_handoff_ndembo_kin_crm/
 ├── README.md                      ← ce document
+├── ROUTES.md                      ← carte des routes (frontend + API + RBAC + sidebar)
+├── CLAUDE.md                      ← instructions projet (à copier à la racine du repo)
 └── designs/                       ← références visuelles (ouvrir dans un navigateur)
     ├── support.js                 ← moteur de rendu (requis par les .dc.html)
     ├── assets/logo.png
@@ -427,6 +455,11 @@ design_handoff_ndembo_kin_crm/
     ├── Fiche Client.dc.html
     ├── Liste Contrats.dc.html
     ├── Parametres.dc.html
+    ├── Catalogue Prestations.dc.html
+    ├── Liste Reglements.dc.html
+    ├── Rapports KPIs.dc.html
+    ├── Liste Taches.dc.html
+    ├── Jalons Projets.dc.html
     └── Modeles Facture & Devis.dc.html
 ```
 

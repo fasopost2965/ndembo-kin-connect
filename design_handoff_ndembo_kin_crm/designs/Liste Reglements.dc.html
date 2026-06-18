@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F0F2F5; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; min-height: 100vh; background: #F0F2F5; display: flex; flex-direction: column;">
+
+  <!-- TOPBAR -->
+  <div style="background: #fff; border-bottom: 1px solid #E8ECF1; padding: 0 28px; display: flex; align-items: center; height: 60px; gap: 16px; flex-shrink: 0;">
+    <div style="background: #07101A; border-radius: 8px; padding: 4px 5px;">
+      <img src="assets/logo.png" style="height: 22px; width: auto; display: block;" />
+    </div>
+    <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 16px; font-weight: 800; color: #0F172A; letter-spacing: -0.3px;">Règlements</span>
+      <span style="font-size: 12px; font-weight: 700; background: #07101A; color: #FCD116; padding: 2px 9px; border-radius: 20px;">{{ totalCount }}</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <div style="position: relative;">
+        <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 17px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">search</span>
+        <input type="text" placeholder="Rechercher un règlement…" value="{{ search }}" onInput="{{ onSearch }}"
+          style="padding: 9px 14px 9px 38px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #F8FAFC; width: 240px;"
+          style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+      </div>
+      <div style="position: relative;">
+        <select value="{{ filterMethode }}" onChange="{{ onFilterMethode }}"
+          style="padding: 9px 32px 9px 12px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #F8FAFC; appearance: none; cursor: pointer;"
+          style-focus="border-color: #3A6B84; background: #fff;">
+          <option value="">Toutes méthodes</option>
+          <option value="M-Pesa">M-Pesa</option>
+          <option value="Airtel Money">Airtel Money</option>
+          <option value="Orange Money">Orange Money</option>
+          <option value="Virement">Virement bancaire</option>
+          <option value="Espèces">Espèces</option>
+        </select>
+        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 15px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+      </div>
+      <button onClick="{{ onAdd }}" style="padding: 9px 18px; background: #07101A; color: #FCD116; font-size: 13px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 7px; white-space: nowrap;" style-hover="background: #132730;">
+        <span style="font-family: Material Icons Outlined; font-size: 16px; display: inline-flex; line-height: 1;">add</span>
+        Enregistrer un paiement
+      </button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px 28px 0;">
+    <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+      <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 14px;">
+        <div style="{{ s.iBox }}">
+          <span style="font-family: Material Icons Outlined; font-size: 20px; display: inline-flex; line-height: 1; color: {{ s.iColor }};">{{ s.icon }}</span>
+        </div>
+        <div>
+          <div style="font-size: 21px; font-weight: 800; color: #0F172A; letter-spacing: -0.4px;">{{ s.value }}</div>
+          <div style="font-size: 11px; color: #94A3B8; font-weight: 500; margin-top: 1px;">{{ s.label }}</div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- TABLE -->
+  <div style="padding: 16px 28px 32px; flex: 1;">
+    <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+      <div style="display: grid; grid-template-columns: 1.1fr 1.1fr 1.8fr 1.4fr 1fr 1fr; gap: 8px; padding: 11px 22px; background: #F8FAFC; border-bottom: 1px solid #E8ECF1;">
+        <sc-for list="{{ headers }}" as="h" hint-placeholder-count="6">
+          <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">{{ h.label }}</div>
+        </sc-for>
+      </div>
+      <sc-for list="{{ reglements }}" as="r" hint-placeholder-count="8">
+        <div style="display: grid; grid-template-columns: 1.1fr 1.1fr 1.8fr 1.4fr 1fr 1fr; gap: 8px; padding: 13px 22px; border-bottom: 1px solid #F8FAFC; align-items: center;" style-hover="background: #F8FAFC;">
+          <div style="font-size: 13px; font-weight: 700; color: #0F172A; font-family: monospace;">{{ r.ref }}</div>
+          <div style="font-size: 12px; color: #3A6B84; font-weight: 600; font-family: monospace;">{{ r.facture }}</div>
+          <div style="font-size: 13px; color: #334155;">{{ r.client }}</div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="{{ r.mBadge }}">{{ r.mShort }}</div>
+            <span style="font-size: 12px; color: #475569; font-weight: 500;">{{ r.methode }}</span>
+          </div>
+          <div style="font-size: 14px; font-weight: 700; color: #059669; font-family: monospace;">{{ r.montant }}</div>
+          <div style="font-size: 12px; color: #64748B;">{{ r.date }}</div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 56px 20px; text-align: center;">
+          <span style="font-family: Material Icons Outlined; font-size: 42px; color: #CBD5E1; display: block; margin-bottom: 10px;">search_off</span>
+          <div style="font-size: 14px; font-weight: 700; color: #334155;">Aucun règlement trouvé</div>
+          <div style="font-size: 13px; color: #94A3B8; margin-top: 4px;">Essayez d'ajuster la recherche ou le filtre de méthode.</div>
+        </div>
+      </sc-if>
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; border-top: 1px solid #E8ECF1; background: #FAFBFC;">
+        <div style="font-size: 12px; color: #94A3B8;">{{ countInfo }}</div>
+        <div style="font-size: 13px; color: #334155;">Total affiché : <span style="font-weight: 800; color: #059669; font-family: monospace;">{{ sumShown }}</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1440, &quot;height&quot;: 860}}">
+class Component extends DCLogic {
+  state = { search:'', filterMethode:'' };
+
+  _methodes = {
+    'M-Pesa': { short:'MP', bg:'#E30613' },
+    'Airtel Money': { short:'AM', bg:'#ED1C24' },
+    'Orange Money': { short:'OM', bg:'#FF7900' },
+    'Virement': { short:'VB', bg:'#3A6B84' },
+    'Espèces': { short:'ES', bg:'#64748B' },
+  };
+
+  data = [
+    { id:1, ref:'REG-2026-051', facture:'FAC-2026-0042', client:'AS Vita Club', methode:'M-Pesa', montant:8500, date:'17 juin 2026' },
+    { id:2, ref:'REG-2026-050', facture:'FAC-2026-0041', client:'MTN RDC', methode:'Virement', montant:24000, date:'15 juin 2026' },
+    { id:3, ref:'REG-2026-049', facture:'FAC-2026-0039', client:'TP Mazembe', methode:'Airtel Money', montant:6200, date:'12 juin 2026' },
+    { id:4, ref:'REG-2026-048', facture:'FAC-2026-0038', client:'Académie Élan', methode:'M-Pesa', montant:3800, date:'9 juin 2026' },
+    { id:5, ref:'REG-2026-047', facture:'FAC-2026-0036', client:'DC Motema Pembe', methode:'Espèces', montant:2500, date:'5 juin 2026' },
+    { id:6, ref:'REG-2026-046', facture:'FAC-2026-0035', client:'AS Vita Club', methode:'Airtel Money', montant:5600, date:'2 juin 2026' },
+    { id:7, ref:'REG-2026-045', facture:'FAC-2026-0033', client:'Airtel Congo', methode:'Virement', montant:18000, date:'28 mai 2026' },
+    { id:8, ref:'REG-2026-044', facture:'FAC-2026-0031', client:'BC Kinshasa', methode:'Orange Money', montant:4500, date:'24 mai 2026' },
+  ];
+
+  _fmt(n) { return '$'+n.toLocaleString('fr-FR'); }
+
+  renderVals() {
+    const s = this.state;
+    const filtered = this.data.filter(r => {
+      const q = s.search.toLowerCase();
+      return (!q || r.ref.toLowerCase().includes(q) || r.facture.toLowerCase().includes(q) || r.client.toLowerCase().includes(q))
+        && (!s.filterMethode || r.methode===s.filterMethode);
+    });
+
+    const total = this.data.reduce((a,r)=>a+r.montant,0);
+    const mobileMoney = this.data.filter(r=>['M-Pesa','Airtel Money','Orange Money'].includes(r.methode)).reduce((a,r)=>a+r.montant,0);
+    const moisCount = this.data.filter(r=>r.date.includes('juin')).length;
+    const stats = [
+      { icon:'account_balance_wallet', iColor:'#059669', iBox:{width:44,height:44,borderRadius:12,background:'#F0FDF4',border:'1px solid #BBF7D0',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}, value:'$'+(total/1000).toFixed(1)+'k', label:'Total encaissé' },
+      { icon:'calendar_month', iColor:'#3A6B84', iBox:{width:44,height:44,borderRadius:12,background:'#EFF6FF',border:'1px solid #BFDBFE',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}, value:moisCount, label:'Règlements ce mois' },
+      { icon:'smartphone', iColor:'#B45309', iBox:{width:44,height:44,borderRadius:12,background:'#FEF9EE',border:'1px solid #FDE68A',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}, value:'$'+(mobileMoney/1000).toFixed(1)+'k', label:'Via Mobile Money' },
+      { icon:'receipt_long', iColor:'#2563EB', iBox:{width:44,height:44,borderRadius:12,background:'#EFF6FF',border:'1px solid #BFDBFE',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}, value:this.data.length, label:'Total règlements' },
+    ];
+
+    const reglements = filtered.map(r => {
+      const m = this._methodes[r.methode] || this._methodes['Espèces'];
+      return {
+        ...r,
+        montant:this._fmt(r.montant),
+        methode:r.methode,
+        mShort:m.short,
+        mBadge:{ width:26, height:26, borderRadius:7, background:m.bg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, color:'#fff', flexShrink:0 },
+      };
+    });
+
+    const sumShown = filtered.reduce((a,r)=>a+r.montant,0);
+
+    return {
+      search:s.search, filterMethode:s.filterMethode,
+      totalCount:this.data.length, stats, reglements,
+      headers:[{label:'Référence'},{label:'Facture'},{label:'Client'},{label:'Méthode'},{label:'Montant'},{label:'Date'}],
+      noResults: reglements.length===0,
+      countInfo: filtered.length+' règlement'+(filtered.length>1?'s':''),
+      sumShown:this._fmt(sumShown),
+      onSearch:(e)=>this.setState({search:e.target.value}),
+      onFilterMethode:(e)=>this.setState({filterMethode:e.target.value}),
+      onAdd:()=>alert('→ Enregistrer un paiement'),
+    };
+  }
+}
+</script>
+</body>
+</html>

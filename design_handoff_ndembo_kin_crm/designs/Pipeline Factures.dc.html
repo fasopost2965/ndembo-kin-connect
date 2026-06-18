@@ -113,6 +113,13 @@
           </div>
         </div>
       </sc-for>
+      <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 56px 20px; text-align: center;">
+          <span style="font-family: Material Icons Outlined; font-size: 42px; color: #CBD5E1; display: block; margin-bottom: 10px;">{{ emptyIcon }}</span>
+          <div style="font-size: 14px; font-weight: 700; color: #334155;">{{ emptyTitle }}</div>
+          <div style="font-size: 13px; color: #94A3B8; margin-top: 4px;">{{ emptyDesc }}</div>
+        </div>
+      </sc-if>
     </div>
   </div>
 </div>
@@ -215,6 +222,10 @@ class Component extends DCLogic {
       tabFacturesStyle: !isDevis ? tabAct : tabInact,
       addLabel: isDevis ? 'Nouveau devis' : 'Nouvelle facture',
       statutOptions, rows, kpis,
+      noResults: rows.length === 0,
+      emptyIcon: (s.search || s.filterStatut) ? 'search_off' : (isDevis ? 'request_quote' : 'receipt_long'),
+      emptyTitle: (s.search || s.filterStatut) ? (isDevis ? 'Aucun devis trouvé' : 'Aucune facture trouvée') : (isDevis ? 'Aucun devis pour l\u0027instant' : 'Aucune facture pour l\u0027instant'),
+      emptyDesc: (s.search || s.filterStatut) ? 'Essayez d\u0027ajuster la recherche ou le filtre.' : (isDevis ? 'Créez votre premier devis pour démarrer le pipeline.' : 'Les factures converties depuis un devis apparaîtront ici.'),
       tableHeaders: ['Référence','Client','Émission','Échéance','Montant','Statut',''],
       showDevis: () => this.setState({ view:'devis', filterStatut:'' }),
       showFactures: () => this.setState({ view:'factures', filterStatut:'' }),

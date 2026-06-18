@@ -92,6 +92,13 @@
           <div><span style="{{ c.statutStyle }}">{{ c.statutLabel }}</span></div>
         </div>
       </sc-for>
+      <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 52px 20px; text-align: center;">
+          <span style="font-family: Material Icons Outlined; font-size: 40px; color: #CBD5E1; display: block; margin-bottom: 10px;">search_off</span>
+          <div style="font-size: 14px; font-weight: 700; color: #334155;">Aucun contrat trouvé</div>
+          <div style="font-size: 13px; color: #94A3B8; margin-top: 4px;">Essayez d'ajuster la recherche ou le filtre de statut.</div>
+        </div>
+      </sc-if>
     </div>
   </div>
 
@@ -243,7 +250,7 @@ class Component extends DCLogic {
 
     return {
       search:s.search, filterStatut:s.filterStatut,
-      totalCount:this.data.length, stats, contrats,
+      totalCount:this.data.length, stats, contrats, noResults: contrats.length===0,
       headers:[{label:'Référence'},{label:'Athlète / Client'},{label:'Type'},{label:'Période'},{label:'Montant'},{label:'Statut'}],
       drawerOpen:s.drawerOpen, selected,
       onSearch:(e)=>this.setState({search:e.target.value}),

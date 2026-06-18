@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F0F2F5; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; min-height: 100vh; background: #F0F2F5; display: flex; flex-direction: column;">
+
+  <!-- TOPBAR -->
+  <div style="background: #fff; border-bottom: 1px solid #E8ECF1; padding: 0 28px; display: flex; align-items: center; height: 60px; gap: 16px; flex-shrink: 0;">
+    <div style="background: #07101A; border-radius: 8px; padding: 4px 5px;">
+      <img src="assets/logo.png" style="height: 22px; width: auto; display: block;" />
+    </div>
+    <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 16px; font-weight: 800; color: #0F172A; letter-spacing: -0.3px;">Tâches</span>
+      <span style="font-size: 12px; font-weight: 700; background: #07101A; color: #FCD116; padding: 2px 9px; border-radius: 20px;">{{ totalCount }}</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <div style="position: relative;">
+        <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 17px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">search</span>
+        <input type="text" placeholder="Rechercher une tâche…" value="{{ search }}" onInput="{{ onSearch }}"
+          style="padding: 9px 14px 9px 38px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #F8FAFC; width: 220px;"
+          style-focus="border-color: #3A6B84; background: #fff; box-shadow: 0 0 0 3px rgba(58,107,132,0.08);" />
+      </div>
+      <div style="position: relative;">
+        <select value="{{ filterPrio }}" onChange="{{ onFilterPrio }}"
+          style="padding: 9px 32px 9px 12px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #F8FAFC; appearance: none; cursor: pointer;"
+          style-focus="border-color: #3A6B84; background: #fff;">
+          <option value="">Toutes priorités</option>
+          <option value="Haute">Haute</option>
+          <option value="Moyenne">Moyenne</option>
+          <option value="Basse">Basse</option>
+        </select>
+        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 15px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+      </div>
+      <button onClick="{{ onAdd }}" style="padding: 9px 18px; background: #07101A; color: #FCD116; font-size: 13px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 7px; white-space: nowrap;" style-hover="background: #132730;">
+        <span style="font-family: Material Icons Outlined; font-size: 16px; display: inline-flex; line-height: 1;">add</span>
+        Nouvelle tâche
+      </button>
+    </div>
+  </div>
+
+  <!-- STATS PAR STATUT -->
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px 28px 0;">
+    <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+      <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 14px;">
+        <div style="{{ s.dot }}"></div>
+        <div>
+          <div style="font-size: 22px; font-weight: 800; color: #0F172A; letter-spacing: -0.4px;">{{ s.value }}</div>
+          <div style="font-size: 11px; color: #94A3B8; font-weight: 500; margin-top: 1px;">{{ s.label }}</div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- TABLE -->
+  <div style="padding: 16px 28px 32px; flex: 1;">
+    <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+      <div style="display: grid; grid-template-columns: 2.6fr 1.4fr 1fr 1.2fr 1.1fr; gap: 8px; padding: 11px 22px; background: #F8FAFC; border-bottom: 1px solid #E8ECF1;">
+        <sc-for list="{{ headers }}" as="h" hint-placeholder-count="5">
+          <div style="font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">{{ h.label }}</div>
+        </sc-for>
+      </div>
+      <sc-for list="{{ taches }}" as="t" hint-placeholder-count="8">
+        <div style="display: grid; grid-template-columns: 2.6fr 1.4fr 1fr 1.2fr 1.1fr; gap: 8px; padding: 13px 22px; border-bottom: 1px solid #F8FAFC; align-items: center;" style-hover="background: #F8FAFC;">
+          <div style="display: flex; align-items: center; gap: 11px;">
+            <div style="{{ t.checkStyle }}"><span style="font-family: Material Icons Outlined; font-size: 14px; display: inline-flex; line-height: 1; color: #fff;">{{ t.checkIcon }}</span></div>
+            <div>
+              <div style="{{ t.titleStyle }}">{{ t.titre }}</div>
+              <div style="font-size: 11px; color: #94A3B8; margin-top: 1px;">{{ t.projet }}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="{{ t.avatarStyle }}">{{ t.assigneeInit }}</div>
+            <span style="font-size: 12px; color: #475569;">{{ t.assignee }}</span>
+          </div>
+          <div><span style="{{ t.prioStyle }}">{{ t.priorite }}</span></div>
+          <div style="font-size: 12px; color: {{ t.dueColor }}; font-weight: 600;">{{ t.echeance }}</div>
+          <div><span style="{{ t.statutStyle }}">{{ t.statutLabel }}</span></div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 56px 20px; text-align: center;">
+          <span style="font-family: Material Icons Outlined; font-size: 42px; color: #CBD5E1; display: block; margin-bottom: 10px;">search_off</span>
+          <div style="font-size: 14px; font-weight: 700; color: #334155;">Aucune tâche trouvée</div>
+          <div style="font-size: 13px; color: #94A3B8; margin-top: 4px;">Essayez d'ajuster la recherche ou le filtre de priorité.</div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1280, &quot;height&quot;: 820}}">
+class Component extends DCLogic {
+  state = { search:'', filterPrio:'' };
+
+  data = [
+    { id:1, titre:'Préparer le dossier de transfert J. Mbala', projet:'Transfert TP Mazembe', assignee:'Jean-Pierre K.', priorite:'Haute', echeance:'Demain', statut:'EN_COURS' },
+    { id:2, titre:'Signer le contrat de sponsoring MTN', projet:'Partenariat MTN RDC', assignee:'Amadou S.', priorite:'Haute', echeance:'18 juin', statut:'EN_ATTENTE' },
+    { id:3, titre:'Organiser la séance photo officielle', projet:'Image AS Vita', assignee:'Marie-Claire N.', priorite:'Moyenne', echeance:'22 juin', statut:'TODO' },
+    { id:4, titre:'Valider le budget tournoi présaison', projet:'Tournoi présaison', assignee:'Esther B.', priorite:'Moyenne', echeance:'25 juin', statut:'EN_COURS' },
+    { id:5, titre:'Relancer facture FAC-2026-0038', projet:'Recouvrement', assignee:'Esther B.', priorite:'Haute', echeance:'Aujourd\u0027hui', statut:'EN_COURS' },
+    { id:6, titre:'Mettre à jour les fiches de 5 athlètes', projet:'Base de données', assignee:'Didier M.', priorite:'Basse', echeance:'30 juin', statut:'TODO' },
+    { id:7, titre:'Planifier la session de coaching tactique', projet:'Coaching AS Vita', assignee:'Didier M.', priorite:'Moyenne', echeance:'12 juin', statut:'TERMINE' },
+    { id:8, titre:'Envoyer le devis DEV-2026-014', projet:'Pipeline AS Vita', assignee:'Marie-Claire N.', priorite:'Basse', echeance:'10 juin', statut:'TERMINE' },
+  ];
+
+  _statut = {
+    TODO:{label:'À faire', bg:'#F1F5F9', c:'#64748B', dot:'#94A3B8'},
+    EN_ATTENTE:{label:'En attente', bg:'#FEF9EE', c:'#C9960C', dot:'#F59E0B'},
+    EN_COURS:{label:'En cours', bg:'#EFF6FF', c:'#2563EB', dot:'#2563EB'},
+    TERMINE:{label:'Terminé', bg:'#F0FDF4', c:'#059669', dot:'#059669'},
+  };
+  _prio(p) {
+    const m = { Haute:{bg:'#FFF1F2',c:'#BE123C'}, Moyenne:{bg:'#FEF9EE',c:'#B45309'}, Basse:{bg:'#F1F5F9',c:'#64748B'} };
+    const x = m[p]||m.Basse;
+    return { fontSize:10, fontWeight:700, background:x.bg, color:x.c, padding:'3px 9px', borderRadius:20, display:'inline-block', whiteSpace:'nowrap' };
+  }
+  _avatarColors = ['#3A6B84','#1D4ED8','#059669','#B45309','#6D28D9'];
+
+  renderVals() {
+    const s = this.state;
+    const filtered = this.data.filter(t => {
+      const q = s.search.toLowerCase();
+      return (!q || t.titre.toLowerCase().includes(q) || t.projet.toLowerCase().includes(q)) && (!s.filterPrio || t.priorite===s.filterPrio);
+    });
+
+    const cnt = (st) => this.data.filter(t=>t.statut===st).length;
+    const stats = [
+      { label:'À faire', value:cnt('TODO'), dot:{width:12,height:12,borderRadius:4,background:'#94A3B8',flexShrink:0} },
+      { label:'En cours', value:cnt('EN_COURS'), dot:{width:12,height:12,borderRadius:4,background:'#2563EB',flexShrink:0} },
+      { label:'En attente', value:cnt('EN_ATTENTE'), dot:{width:12,height:12,borderRadius:4,background:'#F59E0B',flexShrink:0} },
+      { label:'Terminées', value:cnt('TERMINE'), dot:{width:12,height:12,borderRadius:4,background:'#059669',flexShrink:0} },
+    ];
+
+    const taches = filtered.map((t,i) => {
+      const st = this._statut[t.statut];
+      const done = t.statut==='TERMINE';
+      const urgent = t.echeance==='Aujourd\u0027hui' || t.echeance==='Demain';
+      return {
+        ...t,
+        statutLabel:st.label,
+        statutStyle:{ fontSize:10, fontWeight:700, background:st.bg, color:st.c, padding:'3px 9px', borderRadius:20, display:'inline-block', whiteSpace:'nowrap' },
+        prioStyle:this._prio(t.priorite),
+        assigneeInit:t.assignee.split(' ').map(w=>w[0]).slice(0,2).join(''),
+        avatarStyle:{ width:26, height:26, borderRadius:'50%', background:this._avatarColors[i%this._avatarColors.length], display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, color:'#fff', flexShrink:0 },
+        checkStyle:{ width:22, height:22, borderRadius:7, background: done?'#059669':'#fff', border: done?'none':'1.5px solid #E2E8F0', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 },
+        checkIcon: done?'check':'',
+        titleStyle:{ fontSize:13.5, fontWeight:600, color: done?'#94A3B8':'#0F172A', textDecoration: done?'line-through':'none' },
+        dueColor: urgent && !done ? '#BE123C' : '#64748B',
+      };
+    });
+
+    return {
+      search:s.search, filterPrio:s.filterPrio,
+      totalCount:this.data.length, stats, taches,
+      headers:[{label:'Tâche'},{label:'Assigné à'},{label:'Priorité'},{label:'Échéance'},{label:'Statut'}],
+      noResults: taches.length===0,
+      onSearch:(e)=>this.setState({search:e.target.value}),
+      onFilterPrio:(e)=>this.setState({filterPrio:e.target.value}),
+      onAdd:()=>alert('→ Nouvelle tâche'),
+    };
+  }
+}
+</script>
+</body>
+</html>

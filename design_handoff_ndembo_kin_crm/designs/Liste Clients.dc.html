@@ -109,6 +109,13 @@
           </div>
         </div>
       </sc-for>
+      <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 52px 20px; text-align: center;">
+          <span style="font-family: Material Icons Outlined; font-size: 40px; color: #CBD5E1; display: block; margin-bottom: 10px;">search_off</span>
+          <div style="font-size: 14px; font-weight: 700; color: #334155;">Aucun client trouvé</div>
+          <div style="font-size: 13px; color: #94A3B8; margin-top: 4px;">Essayez d'ajuster la recherche ou les filtres.</div>
+        </div>
+      </sc-if>
       <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid #E8ECF1; background: #FAFBFC;">
         <div style="font-size: 12px; color: #94A3B8;">{{ paginationInfo }}</div>
         <div style="display: flex; gap: 4px;">
@@ -283,7 +290,7 @@ class Component extends DCLogic {
 
     return {
       search:s.search, filterType:s.filterType, filterVille:s.filterVille,
-      totalCount:this.data.length, stats, clients, pages,
+      totalCount:this.data.length, stats, clients, pages, noResults: clients.length===0,
       paginationInfo: filtered.length+' client'+(filtered.length>1?'s':'')+' · page '+page+'/'+totalPages,
       headers:[{label:'Client'},{label:'Type'},{label:'Ville'},{label:'Devis'},{label:'Factures'},{label:'CA réalisé'},{label:'Statut'},{label:''}],
       drawerOpen:s.drawerOpen, selected,

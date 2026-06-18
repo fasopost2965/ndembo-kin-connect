@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F0F2F5; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; min-height: 100vh; background: #F0F2F5; display: flex; flex-direction: column;">
+
+  <!-- TOPBAR -->
+  <div style="background: #fff; border-bottom: 1px solid #E8ECF1; padding: 0 28px; display: flex; align-items: center; height: 60px; gap: 14px; flex-shrink: 0;">
+    <div style="background: #07101A; border-radius: 8px; padding: 4px 5px;">
+      <img src="assets/logo.png" style="height: 22px; width: auto; display: block;" />
+    </div>
+    <span style="font-size: 16px; font-weight: 800; color: #0F172A; letter-spacing: -0.3px;">Rapports &amp; KPIs</span>
+    <div style="flex: 1;"></div>
+    <div style="position: relative;">
+      <select style="padding: 9px 32px 9px 12px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #F8FAFC; appearance: none; cursor: pointer;">
+        <option>Année 2026</option>
+        <option>Année 2025</option>
+      </select>
+      <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 15px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+    </div>
+    <button style="padding: 9px 18px; background: #07101A; color: #FCD116; font-size: 13px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 7px; white-space: nowrap;" style-hover="background: #132730;">
+      <span style="font-family: Material Icons Outlined; font-size: 16px; display: inline-flex; line-height: 1;">download</span>
+      Exporter (CSV)
+    </button>
+  </div>
+
+  <!-- KPI ROW -->
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px 28px 0;">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+      <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+          <div style="font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px;">{{ k.label }}</div>
+          <span style="{{ k.trendStyle }}">{{ k.trend }}</span>
+        </div>
+        <div style="font-size: 26px; font-weight: 800; color: {{ k.color }}; letter-spacing: -0.5px;">{{ k.value }}</div>
+        <div style="font-size: 11px; color: #94A3B8; margin-top: 4px;">{{ k.sub }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1.7fr 1fr; gap: 16px; padding: 16px 28px 0;">
+
+    <!-- CA MENSUEL -->
+    <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 22px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px;">
+        <div>
+          <div style="font-size: 15px; font-weight: 800; color: #0F172A;">Chiffre d'affaires mensuel</div>
+          <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">En milliers de USD · 2026</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 20px; font-weight: 800; color: #059669; letter-spacing: -0.4px; font-family: monospace;">{{ caTotal }}</div>
+          <div style="font-size: 11px; color: #94A3B8;">total YTD</div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: flex-end; gap: 10px; height: 200px; padding-top: 10px;">
+        <sc-for list="{{ caBars }}" as="b" hint-placeholder-count="12">
+          <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end;">
+            <div style="font-size: 10px; font-weight: 700; color: #475569;">{{ b.val }}</div>
+            <div style="{{ b.barStyle }}"></div>
+            <div style="font-size: 10px; color: #94A3B8; font-weight: 600;">{{ b.mois }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- CONVERSION -->
+    <div style="background: #07101A; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column;">
+      <div style="font-size: 15px; font-weight: 800; color: #fff;">Taux de conversion</div>
+      <div style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px;">Devis → Facture</div>
+      <div style="display: flex; align-items: center; justify-content: center; flex: 1; padding: 18px 0;">
+        <div style="text-align: center;">
+          <div style="font-size: 56px; font-weight: 800; color: #FCD116; letter-spacing: -2px; line-height: 1;">{{ conversion }}</div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 8px;">{{ conversionSub }}</div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <sc-for list="{{ funnel }}" as="f" hint-placeholder-count="3">
+          <div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+              <span style="font-size: 12px; color: rgba(255,255,255,0.6);">{{ f.label }}</span>
+              <span style="font-size: 12px; font-weight: 700; color: #fff;">{{ f.value }}</span>
+            </div>
+            <div style="height: 7px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;">
+              <div style="{{ f.barStyle }}"></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px 28px 32px;">
+
+    <!-- TOP ATHLÈTES -->
+    <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 22px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+      <div style="font-size: 15px; font-weight: 800; color: #0F172A; margin-bottom: 18px;">Top athlètes par valeur marchande</div>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <sc-for list="{{ topAthletes }}" as="a" hint-placeholder-count="5">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="{{ a.avatarStyle }}">{{ a.initials }}</div>
+            <div style="flex: 1;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span style="font-size: 13px; font-weight: 600; color: #334155;">{{ a.nom }}</span>
+                <span style="font-size: 13px; font-weight: 800; color: #059669; font-family: monospace;">{{ a.valFmt }}</span>
+              </div>
+              <div style="height: 7px; background: #F1F5F9; border-radius: 4px; overflow: hidden;">
+                <div style="{{ a.barStyle }}"></div>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- RÉPARTITION CLIENTS -->
+    <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 22px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+      <div style="font-size: 15px; font-weight: 800; color: #0F172A; margin-bottom: 18px;">Répartition du CA par type de client</div>
+      <div style="display: flex; height: 18px; border-radius: 6px; overflow: hidden; margin-bottom: 20px;">
+        <sc-for list="{{ repartition }}" as="r" hint-placeholder-count="4">
+          <div style="{{ r.segStyle }}"></div>
+        </sc-for>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <sc-for list="{{ repartition }}" as="r" hint-placeholder-count="4">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="{{ r.dotStyle }}"></div>
+            <span style="font-size: 13px; color: #334155; font-weight: 500; flex: 1;">{{ r.label }}</span>
+            <span style="font-size: 13px; font-weight: 700; color: #0F172A;">{{ r.pct }}</span>
+            <span style="font-size: 12px; color: #94A3B8; font-family: monospace; width: 64px; text-align: right;">{{ r.val }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1280, &quot;height&quot;: 940}}">
+class Component extends DCLogic {
+  _fmt(n) { return '$'+n.toLocaleString('fr-FR'); }
+
+  renderVals() {
+    const trendUp = (t) => ({ fontSize:11, fontWeight:700, color:'#059669', background:'#F0FDF4', padding:'2px 7px', borderRadius:6, display:'inline-block' });
+    const trendDown = (t) => ({ fontSize:11, fontWeight:700, color:'#BE123C', background:'#FFF1F2', padding:'2px 7px', borderRadius:6, display:'inline-block' });
+
+    const kpis = [
+      { label:'CA réalisé', value:'$214k', color:'#0F172A', sub:'année 2026', trend:'+18%', trendStyle:trendUp() },
+      { label:'Devis émis', value:'47', color:'#3A6B84', sub:'12 ce mois', trend:'+6', trendStyle:trendUp() },
+      { label:'Athlètes actifs', value:'32', color:'#059669', sub:'sur 38 au total', trend:'+3', trendStyle:trendUp() },
+      { label:'Délai paiement moy.', value:'24j', color:'#B45309', sub:'objectif : 30j', trend:'-4j', trendStyle:trendUp() },
+    ];
+
+    const caRaw = [
+      { mois:'Jan', val:12 }, { mois:'Fév', val:15 }, { mois:'Mar', val:19 }, { mois:'Avr', val:14 },
+      { mois:'Mai', val:22 }, { mois:'Juin', val:26 }, { mois:'Juil', val:18 }, { mois:'Aoû', val:16 },
+      { mois:'Sep', val:21 }, { mois:'Oct', val:24 }, { mois:'Nov', val:0 }, { mois:'Déc', val:0 },
+    ];
+    const caMax = Math.max(...caRaw.map(c=>c.val));
+    const caBars = caRaw.map(c => ({
+      mois:c.mois, val:c.val>0 ? c.val : '',
+      barStyle: {
+        width:'100%', maxWidth:'26px', height:(c.val/caMax*150)+'px', minHeight: c.val>0?'4px':'2px',
+        borderRadius:'5px 5px 2px 2px',
+        background: c.val>0 ? (c.mois==='Juin' ? 'linear-gradient(180deg,#FCD116,#DAA520)' : 'linear-gradient(180deg,#3A6B84,#2A5468)') : '#EEF1F4',
+      },
+    }));
+
+    const funnel = [
+      { label:'Devis émis', value:'47', pct:100 },
+      { label:'Devis validés', value:'34', pct:72 },
+      { label:'Factures payées', value:'30', pct:64 },
+    ].map((f,i) => ({
+      ...f,
+      barStyle:{ width:f.pct+'%', height:'100%', background: i===2 ? '#FCD116' : '#7CC8E8', borderRadius:'4px' },
+    }));
+
+    const athColors = ['#07101A','#3A6B84','#1D4ED8','#059669','#B45309'];
+    const topRaw = [
+      { nom:'Théo Lukaku Mbemba', val:130000 },
+      { nom:'Joël Mbuyi Kabongo', val:85000 },
+      { nom:'Armel Diallo Nzinga', val:67000 },
+      { nom:'Patricia Kabongo Ilunga', val:45000 },
+      { nom:'Christian Pasi Makiadi', val:29000 },
+    ];
+    const topMax = topRaw[0].val;
+    const topAthletes = topRaw.map((a,i) => ({
+      nom:a.nom,
+      initials:a.nom.split(' ').slice(0,2).map(w=>w[0]).join(''),
+      valFmt:this._fmt(a.val),
+      avatarStyle:{ width:36, height:36, borderRadius:'50%', background:athColors[i%athColors.length], display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:800, color:'#FCD116', flexShrink:0 },
+      barStyle:{ width:(a.val/topMax*100)+'%', height:'100%', background:'linear-gradient(90deg,#3A6B84,#7CC8E8)', borderRadius:'4px' },
+    }));
+
+    const repRaw = [
+      { label:'Clubs', val:118000, color:'#2563EB' },
+      { label:'Sponsors', val:62000, color:'#B45309' },
+      { label:'Académies', val:22000, color:'#6D28D9' },
+      { label:'Partenaires', val:12000, color:'#0E7490' },
+    ];
+    const repTotal = repRaw.reduce((a,r)=>a+r.val,0);
+    const repartition = repRaw.map(r => ({
+      label:r.label,
+      pct: Math.round(r.val/repTotal*100)+'%',
+      val:this._fmt(r.val),
+      segStyle:{ width:(r.val/repTotal*100)+'%', background:r.color, height:'100%' },
+      dotStyle:{ width:12, height:12, borderRadius:4, background:r.color, flexShrink:0 },
+    }));
+
+    return {
+      kpis, caBars, caTotal:'$214k', conversion:'64%', conversionSub:'30 payées sur 47 devis',
+      funnel, topAthletes, repartition,
+    };
+  }
+}
+</script>
+</body>
+</html>

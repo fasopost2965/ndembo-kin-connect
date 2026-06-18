@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F0F2F5; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="font-family: Plus Jakarta Sans, sans-serif; min-height: 100vh; background: #F0F2F5; display: flex; flex-direction: column;">
+
+  <!-- TOPBAR -->
+  <div style="background: #fff; border-bottom: 1px solid #E8ECF1; padding: 0 28px; display: flex; align-items: center; height: 60px; gap: 16px; flex-shrink: 0;">
+    <div style="background: #07101A; border-radius: 8px; padding: 4px 5px;">
+      <img src="assets/logo.png" style="height: 22px; width: auto; display: block;" />
+    </div>
+    <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 16px; font-weight: 800; color: #0F172A; letter-spacing: -0.3px;">Jalons</span>
+      <span style="font-size: 12px; font-weight: 700; background: #07101A; color: #FCD116; padding: 2px 9px; border-radius: 20px;">{{ totalCount }}</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <div style="position: relative;">
+        <select value="{{ filterProjet }}" onChange="{{ onFilterProjet }}"
+          style="padding: 9px 32px 9px 12px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-size: 13px; font-family: Plus Jakarta Sans, sans-serif; color: #0F172A; outline: none; background: #F8FAFC; appearance: none; cursor: pointer; min-width: 200px;"
+          style-focus="border-color: #3A6B84; background: #fff;">
+          <option value="">Tous les projets</option>
+          <sc-for list="{{ projetOptions }}" as="o" hint-placeholder-count="3">
+            <option value="{{ o }}">{{ o }}</option>
+          </sc-for>
+        </select>
+        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: Material Icons Outlined; font-size: 15px; color: #94A3B8; pointer-events: none; display: inline-flex; line-height: 1;">expand_more</span>
+      </div>
+      <button onClick="{{ onAdd }}" style="padding: 9px 18px; background: #07101A; color: #FCD116; font-size: 13px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; font-family: Plus Jakarta Sans, sans-serif; display: flex; align-items: center; gap: 7px; white-space: nowrap;" style-hover="background: #132730;">
+        <span style="font-family: Material Icons Outlined; font-size: 16px; display: inline-flex; line-height: 1;">add</span>
+        Nouveau jalon
+      </button>
+    </div>
+  </div>
+
+  <!-- PROJETS -->
+  <div style="padding: 22px 28px 32px; display: flex; flex-direction: column; gap: 16px; max-width: 1100px; margin: 0 auto; width: 100%;">
+    <sc-for list="{{ projets }}" as="p" hint-placeholder-count="3">
+      <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); overflow: hidden;">
+        <!-- En-tête projet -->
+        <div style="padding: 18px 24px; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; gap: 16px;">
+          <div style="{{ p.iconBox }}">
+            <span style="font-family: Material Icons Outlined; font-size: 20px; display: inline-flex; line-height: 1; color: {{ p.iconColor }};">{{ p.icon }}</span>
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 15px; font-weight: 800; color: #0F172A;">{{ p.nom }}</div>
+            <div style="font-size: 12px; color: #94A3B8; margin-top: 1px;">{{ p.client }} · {{ p.doneCount }}/{{ p.total }} jalons atteints</div>
+          </div>
+          <div style="width: 140px;">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 5px;">
+              <span style="font-size: 13px; font-weight: 800; color: {{ p.iconColor }};">{{ p.pct }}%</span>
+            </div>
+            <div style="height: 7px; background: #F1F5F9; border-radius: 4px; overflow: hidden;">
+              <div style="{{ p.progStyle }}"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Jalons -->
+        <div style="padding: 18px 24px;">
+          <div style="position: relative; padding-left: 26px;">
+            <div style="position: absolute; left: 9px; top: 6px; bottom: 6px; width: 2px; background: #E8ECF1;"></div>
+            <sc-for list="{{ p.jalons }}" as="j" hint-placeholder-count="4">
+              <div style="position: relative; display: flex; align-items: center; justify-content: space-between; padding: 8px 0;">
+                <div style="{{ j.dot }}"><span style="font-family: Material Icons Outlined; font-size: 12px; display: inline-flex; line-height: 1; color: {{ j.dotIconColor }};">{{ j.dotIcon }}</span></div>
+                <div style="flex: 1;">
+                  <div style="{{ j.titleStyle }}">{{ j.titre }}</div>
+                  <div style="font-size: 11px; color: #94A3B8; margin-top: 1px;">{{ j.date }}</div>
+                </div>
+                <span style="{{ j.statutStyle }}">{{ j.statutLabel }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1100, &quot;height&quot;: 880}}">
+class Component extends DCLogic {
+  state = { filterProjet:'' };
+
+  _meta = {
+    'Transfert J. Mbala': { icon:'swap_horiz', color:'#2563EB', bg:'#EFF6FF' },
+    'Tournoi présaison AS Vita': { icon:'emoji_events', color:'#B45309', bg:'#FEF9EE' },
+    'Partenariat MTN RDC': { icon:'handshake', color:'#059669', bg:'#F0FDF4' },
+  };
+
+  data = [
+    { nom:'Transfert J. Mbala', client:'TP Mazembe', jalons:[
+      { titre:'Accord de principe signé', date:'2 mai 2026', statut:'ATTEINT' },
+      { titre:'Visite médicale validée', date:'18 mai 2026', statut:'ATTEINT' },
+      { titre:'Négociation des termes financiers', date:'En cours · échéance 20 juin', statut:'EN_COURS' },
+      { titre:'Signature du contrat définitif', date:'Prévu 30 juin', statut:'A_VENIR' },
+    ]},
+    { nom:'Tournoi présaison AS Vita', client:'AS Vita Club', jalons:[
+      { titre:'Budget validé', date:'10 mai 2026', statut:'ATTEINT' },
+      { titre:'Réservation du stade', date:'En cours · échéance 22 juin', statut:'EN_COURS' },
+      { titre:'Confirmation des équipes invitées', date:'Prévu 28 juin', statut:'A_VENIR' },
+      { titre:'Couverture média & sponsors', date:'Prévu 5 juil.', statut:'A_VENIR' },
+    ]},
+    { nom:'Partenariat MTN RDC', client:'MTN RDC', jalons:[
+      { titre:'Proposition commerciale envoyée', date:'1 juin 2026', statut:'ATTEINT' },
+      { titre:'Devis validé par le sponsor', date:'10 juin 2026', statut:'ATTEINT' },
+      { titre:'Signature du contrat de sponsoring', date:'Prévu 18 juin', statut:'A_VENIR' },
+    ]},
+  ];
+
+  _jalonMeta(s) {
+    const m = {
+      ATTEINT:{label:'Atteint', bg:'#F0FDF4', c:'#059669', dotBg:'#059669', dotIcon:'check', dotIconColor:'#fff'},
+      EN_COURS:{label:'En cours', bg:'#EFF6FF', c:'#2563EB', dotBg:'#2563EB', dotIcon:'pending', dotIconColor:'#fff'},
+      A_VENIR:{label:'À venir', bg:'#F1F5F9', c:'#94A3B8', dotBg:'#E2E8F0', dotIcon:'', dotIconColor:'#fff'},
+    };
+    return m[s]||m.A_VENIR;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const filtered = s.filterProjet ? this.data.filter(p=>p.nom===s.filterProjet) : this.data;
+    const totalCount = this.data.reduce((a,p)=>a+p.jalons.length,0);
+
+    const projets = filtered.map(p => {
+      const meta = this._meta[p.nom] || { icon:'flag', color:'#3A6B84', bg:'#EFF6FF' };
+      const done = p.jalons.filter(j=>j.statut==='ATTEINT').length;
+      const pct = Math.round(done/p.jalons.length*100);
+      return {
+        nom:p.nom, client:p.client,
+        icon:meta.icon, iconColor:meta.color,
+        iconBox:{ width:42, height:42, borderRadius:12, background:meta.bg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 },
+        doneCount:done, total:p.jalons.length, pct,
+        progStyle:{ width:pct+'%', height:'100%', background:meta.color, borderRadius:'4px' },
+        jalons:p.jalons.map(j => {
+          const jm = this._jalonMeta(j.statut);
+          return {
+            titre:j.titre, date:j.date,
+            statutLabel:jm.label,
+            statutStyle:{ fontSize:10, fontWeight:700, background:jm.bg, color:jm.c, padding:'3px 10px', borderRadius:20, display:'inline-block', whiteSpace:'nowrap' },
+            dot:{ position:'absolute', left:'-26px', width:20, height:20, borderRadius:'50%', background:jm.dotBg, border:'2px solid #fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, boxShadow:'0 0 0 2px '+jm.dotBg },
+            dotIcon:jm.dotIcon, dotIconColor:jm.dotIconColor,
+            titleStyle:{ fontSize:13.5, fontWeight:600, color: j.statut==='A_VENIR' ? '#94A3B8' : '#334155' },
+          };
+        }),
+      };
+    });
+
+    return {
+      totalCount,
+      projetOptions:this.data.map(p=>p.nom),
+      filterProjet:s.filterProjet,
+      projets,
+      onFilterProjet:(e)=>this.setState({filterProjet:e.target.value}),
+      onAdd:()=>alert('→ Nouveau jalon'),
+    };
+  }
+}
+</script>
+</body>
+</html>
