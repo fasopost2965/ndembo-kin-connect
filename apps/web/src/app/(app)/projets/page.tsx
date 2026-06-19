@@ -33,9 +33,12 @@ export default function ProjetsPage() {
   // Modal state
   const [showModal, setShowModal] = useState(false);
   const [clients, setClients] = useState<ClientLite[]>([]);
-  const [form, setForm] = useState({ clientId: '', objet: '', dateDebut: '', dateFin: '' });
+  const [form, setForm] = useState({ clientId: '', objet: '', dateDebut: '', dateFin: '', typeProjet: 'gestion_carriere', budgetTotal: '' });
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+  const [showNewClient, setShowNewClient] = useState(false);
+  const [newClientForm, setNewClientForm] = useState({ nom: '', email: '', telephone: '' });
+  const [savingClient, setSavingClient] = useState(false);
 
   useEffect(() => {
     projetsApi.list({ limit: 100 }).then((r) => {
@@ -80,18 +83,21 @@ export default function ProjetsPage() {
       await projetsApi.create({
         clientId: form.clientId,
         objet: form.objet,
+        typeProjet: form.typeProjet,
+        budgetTotal: form.budgetTotal ? Number(form.budgetTotal) : 0,
         ...(form.dateDebut && { dateDebut: form.dateDebut }),
         ...(form.dateFin && { dateFin: form.dateFin }),
       });
       setShowModal(false);
-      setForm({ clientId: '', objet: '', dateDebut: '', dateFin: '' });
+      setForm({ clientId: '', objet: '', dateDebut: '', dateFin: '', typeProjet: 'gestion_carriere', budgetTotal: '' });
       // Reload list
       const r = await projetsApi.list({ limit: 100 });
       const list: ProjetLite[] = r.data.data;
       setProjets(list);
       if (list.length) setSelectedId(list[0].id);
     } catch (e: any) {
-      setFormError(e?.response?.data?.message || 'Erreur lors de la création du projet.');
+      const msg = e?.response?.data?.message || e?.response?.data?.error || 'Erreur lors de la création du projet.';
+      setFormError(typeof msg === 'string' ? msg : JSON.stringify(msg));
     } finally {
       setSubmitting(false);
     }
@@ -229,6 +235,35 @@ export default function ProjetsPage() {
                   </select>
                   <MI name="expand_more" size={16} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', pointerEvents: 'none' }} />
                 </div>
+                {!showNewClient ? (
+                  <button type="button" onClick={() => setShowNewClient(true)} style={{ marginTop: 6, fontSize: 12, color: '#3A6B84', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <MI name="add" size={14} style={{ color: '#3A6B84' }} /> Nouveau client
+                  </button>
+                ) : (
+                  <div style={{ marginTop: 8, padding: 12, background: '#F8FAFC', borderRadius: 10, border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: '#334155' }}>Créer un client</div>
+                    <input placeholder="Nom / Société *" value={newClientForm.nom} onChange={e => setNewClientForm(f => ({ ...f, nom: e.target.value }))} style={{ ...INPUT_STYLE, padding: '7px 10px', fontSize: 12 }} />
+                    <input placeholder="Email" value={newClientForm.email} onChange={e => setNewClientForm(f => ({ ...f, email: e.target.value }))} style={{ ...INPUT_STYLE, padding: '7px 10px', fontSize: 12 }} />
+                    <input placeholder="Téléphone" value={newClientForm.telephone} onChange={e => setNewClientForm(f => ({ ...f, telephone: e.target.value }))} style={{ ...INPUT_STYLE, padding: '7px 10px', fontSize: 12 }} />
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button type="button" disabled={savingClient || !newClientForm.nom.trim()} onClick={async () => {
+                        setSavingClient(true);
+                        try {
+                          const { data: c } = await clientsApi.create({ nom: newClientForm.nom, email: newClientForm.email || undefined, telephone: newClientForm.telephone || undefined, type: 'ENTREPRISE' });
+                          const r = await clientsApi.list({ limit: 200 });
+                          setClients(r.data.data || r.data || []);
+                          setForm(f => ({ ...f, clientId: c.id }));
+                          setShowNewClient(false);
+                          setNewClientForm({ nom: '', email: '', telephone: '' });
+                        } catch { setFormError('Erreur création client.'); }
+                        finally { setSavingClient(false); }
+                      }} style={{ padding: '6px 14px', background: '#07101A', color: '#FCD116', fontSize: 11, fontWeight: 700, border: 'none', borderRadius: 7, cursor: 'pointer' }}>
+                        {savingClient ? 'Création…' : 'Créer'}
+                      </button>
+                      <button type="button" onClick={() => setShowNewClient(false)} style={{ padding: '6px 14px', background: '#F1F5F9', color: '#64748B', fontSize: 11, fontWeight: 600, border: '1px solid #E2E8F0', borderRadius: 7, cursor: 'pointer' }}>Annuler</button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Objet */}
@@ -267,8 +302,28 @@ export default function ProjetsPage() {
                 </div>
               </div>
 
+              {/* Type projet */}
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Type de projet</label>
+                <div style={{ position: 'relative' }}>
+                  <select value={form.typeProjet} onChange={e => setForm(f => ({ ...f, typeProjet: e.target.value }))} style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 36, cursor: 'pointer' }}>
+                    <option value="gestion_carriere">Gestion de carrière</option>
+                    <option value="camp">Camp / Formation</option>
+                    <option value="stage">Stage</option>
+                  </select>
+                  <MI name="expand_more" size={16} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', pointerEvents: 'none' }} />
+                </div>
+              </div>
+
+              {/* Budget */}
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Budget (USD)</label>
+                <input type="number" min="0" placeholder="Ex : 5000" value={form.budgetTotal} onChange={e => setForm(f => ({ ...f, budgetTotal: e.target.value }))} style={INPUT_STYLE} />
+              </div>
+
               {/* Error */}
-              {formError && (
+              {formError && (<parameter>
+</invoke>
                 <div style={{ fontSize: 13, color: '#EF4444', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8, padding: '9px 13px' }}>
                   {formError}
                 </div>

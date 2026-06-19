@@ -127,7 +127,8 @@ export default function TachesPage() {
       setForm({ titre: '', projetId: '', priorite: 'NORMALE', dateEcheance: '' });
       loadTaches();
     } catch (e: any) {
-      setFormError(e?.response?.data?.message || 'Erreur lors de la création.');
+      const msg = e?.response?.data?.message || e?.response?.data?.error || (typeof e?.response?.data === 'string' ? e.response.data : JSON.stringify(e?.response?.data)) || 'Erreur lors de la création.';
+      setFormError(msg);
     } finally {
       setSubmitting(false);
     }

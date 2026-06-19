@@ -65,7 +65,7 @@ function FacturesView() {
     setLoading(true);
     try {
       const { data } = await facturesApi.list();
-      setRows(data.data);
+      setRows(Array.isArray(data) ? data : (data.data || []));
     } finally {
       setLoading(false);
     }

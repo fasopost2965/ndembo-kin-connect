@@ -63,7 +63,7 @@ export default function JalonsPage() {
   // Modal
   const [showModal, setShowModal] = useState(false);
   const [projets, setProjets] = useState<Projet[]>([]);
-  const [form, setForm] = useState({ projetId: '', nom: '', datePrevis: '', statut: 'EN_ATTENTE' });
+  const [form, setForm] = useState({ projetId: '', nom: '', datePrevis: '', statut: 'planifie' });
   const [saving, setSaving] = useState(false);
 
   // Raw jalon ids for status update
@@ -102,7 +102,7 @@ export default function JalonsPage() {
         setProjets((data || []).map((p: any) => ({ id: p.id, objet: p.objet ?? p.titre ?? p.id })));
       })
       .catch(() => setProjets([]));
-    setForm({ projetId: '', nom: '', datePrevis: '', statut: 'EN_ATTENTE' });
+    setForm({ projetId: '', nom: '', datePrevis: '', statut: 'planifie' });
     setShowModal(true);
   }
 
@@ -211,10 +211,10 @@ export default function JalonsPage() {
                       onChange={e => setForm(f => ({ ...f, statut: e.target.value }))}
                       style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 32, cursor: 'pointer' }}
                     >
-                      <option value="EN_ATTENTE">En attente</option>
+                      <option value="planifie">Planifié</option>
                       <option value="en_cours">En cours</option>
-                      <option value="termine">Atteint</option>
-                      <option value="retard">Retard</option>
+                      <option value="termine">Terminé</option>
+                      <option value="retard">En retard</option>
                     </select>
                     <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'inline-flex' }}>
                       <MI name="expand_more" size={15} color="#94A3B8" />

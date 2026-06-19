@@ -70,7 +70,8 @@ export default function ReglementsPage() {
     setLoading(true);
     reglementsApi.list()
       .then(({ data }) => {
-        const rows: Reglement[] = (data || []).map((r: any) => ({
+        const list = Array.isArray(data) ? data : (data?.data || []);
+        const rows: Reglement[] = list.map((r: any) => ({
           id: r.id,
           ref: r.reference || r.orderNumber || r.id.slice(0, 10).toUpperCase(),
           facture: r.facture?.numero ?? '—',
@@ -88,8 +89,11 @@ export default function ReglementsPage() {
   useEffect(() => { loadData(); }, []);
 
   function openModal() {
-    facturesApi.list({ statut: 'ENVOYEE' })
-      .then(({ data }) => setFactures(data || []))
+    facturesApi.list()
+      .then(({ data }) => {
+        const list = Array.isArray(data) ? data : (data?.data || []);
+        setFactures(list.filter((f: any) => f.statutPaiement !== 'PAYEE'));
+      })
       .catch(() => setFactures([]));
     setForm({ factureId: '', montant: '', moyenPaiement: 'BANK', reference: '' });
     setShowModal(true);

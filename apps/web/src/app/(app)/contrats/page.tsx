@@ -164,7 +164,10 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
 
 function Checkbox({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', padding: '10px 14px', border: `1.5px solid ${checked ? '#07101A' : '#E2E8F0'}`, borderRadius: 10, background: checked ? '#F8FAFC' : '#fff', userSelect: 'none' }}>
+    <div
+      onClick={() => onChange(!checked)}
+      style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', padding: '10px 14px', border: `1.5px solid ${checked ? '#07101A' : '#E2E8F0'}`, borderRadius: 10, background: checked ? '#F8FAFC' : '#fff', userSelect: 'none' }}
+    >
       <div style={{
         width: 18, height: 18, borderRadius: 5, border: `2px solid ${checked ? '#07101A' : '#CBD5E1'}`,
         background: checked ? '#07101A' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
@@ -172,7 +175,7 @@ function Checkbox({ label, checked, onChange }: { label: string; checked: boolea
         {checked && <MI name="check" size={12} style={{ color: '#FCD116' }} />}
       </div>
       <span style={{ fontSize: 13.5, fontWeight: 500, color: '#334155' }}>{label}</span>
-    </label>
+    </div>
   );
 }
 
@@ -183,9 +186,14 @@ function GenerateModal({ onClose, onDone }: { onClose: () => void; onDone: (nume
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [showNewClient, setShowNewClient] = useState(false);
+  const [newClientForm, setNewClientForm] = useState({ nom: '', email: '', telephone: '' });
+  const [savingClient, setSavingClient] = useState(false);
+
+  const reloadClients = () => clientsApi.list({ limit: 200 }).then(r => setClients(r.data.data || r.data || [])).catch(() => {});
 
   useEffect(() => {
-    clientsApi.list({ limit: 200 }).then(r => setClients(r.data.data || r.data || [])).catch(() => {});
+    reloadClients();
     athletesApi.list({ limit: 200 }).then(r => setAthletes(r.data.data || r.data || [])).catch(() => {});
   }, []);
 
@@ -284,6 +292,34 @@ function GenerateModal({ onClose, onDone }: { onClose: () => void; onDone: (nume
                   <MI name="expand_more" size={16} style={{ color: '#94A3B8' }} />
                 </span>
               </div>
+              {!showNewClient ? (
+                <button type="button" onClick={() => setShowNewClient(true)} style={{ marginTop: 6, fontSize: 12, color: '#3A6B84', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <MI name="add" size={14} style={{ color: '#3A6B84' }} /> Nouveau client
+                </button>
+              ) : (
+                <div style={{ marginTop: 8, padding: 12, background: '#F8FAFC', borderRadius: 10, border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#334155' }}>Créer un client</div>
+                  <input placeholder="Nom / Société *" value={newClientForm.nom} onChange={e => setNewClientForm(f => ({ ...f, nom: e.target.value }))} style={{ ...INPUT_STYLE, padding: '7px 10px', fontSize: 12 }} />
+                  <input placeholder="Email" value={newClientForm.email} onChange={e => setNewClientForm(f => ({ ...f, email: e.target.value }))} style={{ ...INPUT_STYLE, padding: '7px 10px', fontSize: 12 }} />
+                  <input placeholder="Téléphone" value={newClientForm.telephone} onChange={e => setNewClientForm(f => ({ ...f, telephone: e.target.value }))} style={{ ...INPUT_STYLE, padding: '7px 10px', fontSize: 12 }} />
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button type="button" disabled={savingClient || !newClientForm.nom.trim()} onClick={async () => {
+                      setSavingClient(true);
+                      try {
+                        const { data: c } = await clientsApi.create({ nom: newClientForm.nom, email: newClientForm.email || undefined, telephone: newClientForm.telephone || undefined, type: 'ENTREPRISE' });
+                        await reloadClients();
+                        set('clientId')(c.id);
+                        setShowNewClient(false);
+                        setNewClientForm({ nom: '', email: '', telephone: '' });
+                      } catch { setError('Erreur lors de la création du client.'); }
+                      finally { setSavingClient(false); }
+                    }} style={{ padding: '6px 14px', background: '#07101A', color: '#FCD116', fontSize: 11, fontWeight: 700, border: 'none', borderRadius: 7, cursor: 'pointer' }}>
+                      {savingClient ? 'Création…' : 'Créer'}
+                    </button>
+                    <button type="button" onClick={() => setShowNewClient(false)} style={{ padding: '6px 14px', background: '#F1F5F9', color: '#64748B', fontSize: 11, fontWeight: 600, border: '1px solid #E2E8F0', borderRadius: 7, cursor: 'pointer' }}>Annuler</button>
+                  </div>
+                </div>
+              )}
             </div>
             <div>
               <label style={LABEL_STYLE}>Athlète (optionnel)</label>

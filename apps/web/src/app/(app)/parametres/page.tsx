@@ -235,7 +235,7 @@ function ChangeRoleModal({ user, onClose }: { user: User; onClose: () => void })
             <MI name="close" size={16} style={{ color: '#64748B' }} />
           </button>
         </div>
-        <div style={{ fontSize: 13, color: '#64748B', marginBottom: 16 }}>{user.nom} · {user.email}</div>
+        <div style={{ fontSize: 13, color: '#64748B', marginBottom: 16 }}>{user.name || user.email}</div>
 
         {done ? (
           <div style={{ padding: '16px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -563,7 +563,8 @@ export default function ParametresPage() {
               ) : users.map((u) => {
                 const rm = ROLE_META[u.role] || { label: u.role, bg: '#F1F5F9', color: '#64748B' };
                 const ac = avatarColor(u.id);
-                const initials2 = u.nom.split(' ').map(w => w[0]).slice(0, 2).join('');
+                const uName = u.name || u.nom || u.email || '?';
+                const initials2 = uName.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase();
                 return (
                   <div key={u.id} style={{ display: 'grid', gridTemplateColumns: '2.4fr 1.4fr 1fr 0.8fr 60px', gap: 8, padding: '13px 26px', borderBottom: '1px solid #F8FAFC', alignItems: 'center' }}>
                     <div className="flex items-center gap-3">
@@ -572,7 +573,7 @@ export default function ParametresPage() {
                         {initials2}
                       </div>
                       <div>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>{u.nom}</div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>{u.name || u.nom || u.email}</div>
                         <div style={{ fontSize: 11, color: '#94A3B8' }}>{u.email}</div>
                       </div>
                     </div>
@@ -593,7 +594,7 @@ export default function ParametresPage() {
                       <UserActionMenu
                         user={u}
                         onChangeRole={() => setChangeRoleUser(u)}
-                        onDisable={() => alert(`Désactivation de ${u.nom} — fonctionnalité bientôt disponible`)}
+                        onDisable={() => alert(`Désactivation de ${u.name || u.nom || u.email} — fonctionnalité bientôt disponible`)}
                       />
                     </div>
                   </div>
