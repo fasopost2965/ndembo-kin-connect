@@ -2,6 +2,8 @@ import { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../lib/rbac';
 import { prisma } from '../../lib/prisma';
 
+const MOIS_FR = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+
 export async function dashboardRoutes(server: FastifyInstance) {
   // GET /dashboard/kpis
   server.get('/kpis', { preHandler: [requireAuth] }, async () => {
@@ -48,16 +50,33 @@ export async function dashboardRoutes(server: FastifyInstance) {
 
   // GET /dashboard/ca — CA par mois (12 derniers mois)
   server.get('/ca', { preHandler: [requireAuth] }, async () => {
-    const rows = await prisma.$queryRaw<{ mois: string; total: number }[]>`
-      SELECT TO_CHAR(DATE_TRUNC('month', "createdAt"), 'Mon') as mois,
-             COALESCE(SUM("montantTTC"), 0) as total
-      FROM factures
-      WHERE "createdAt" >= NOW() - INTERVAL '12 months'
-        AND "statutPaiement" = 'PAYEE'
-      GROUP BY DATE_TRUNC('month', "createdAt")
-      ORDER BY DATE_TRUNC('month', "createdAt") ASC
-    `;
-    return rows;
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+
+    const factures = await prisma.facture.findMany({
+      where: {
+        createdAt: { gte: twelveMonthsAgo },
+        statutPaiement: 'PAYEE',
+      },
+      select: { createdAt: true, montantTTC: true },
+    });
+
+    // Group by month in JS
+    const byMonth = new Map<string, number>();
+    for (const f of factures) {
+      const key = MOIS_FR[new Date(f.createdAt).getMonth()];
+      byMonth.set(key, (byMonth.get(key) ?? 0) + f.montantTTC);
+    }
+
+    // Return last 12 months in order
+    const result = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const mois = MOIS_FR[d.getMonth()];
+      result.push({ mois, total: Math.round(byMonth.get(mois) ?? 0) });
+    }
+    return result;
   });
 
   // GET /dashboard/pipeline — projets en cours

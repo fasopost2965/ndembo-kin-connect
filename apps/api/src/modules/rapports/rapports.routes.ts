@@ -12,7 +12,6 @@ export async function rapportRoutes(server: FastifyInstance) {
     const startOfYear = new Date(year, 0, 1);
 
     const [
-      caYear,
       devisEmis,
       devisValides,
       devisConvertis,
@@ -21,14 +20,9 @@ export async function rapportRoutes(server: FastifyInstance) {
       athletesTotal,
       topAthletes,
       facturesEncaissees,
-      caParMoisRaw,
-      delaiRaw,
+      facturesAnneePourCA,
+      reglements,
     ] = await Promise.all([
-      // CA réalisé = total encaissé (acompte perçu) sur l'année
-      prisma.facture.aggregate({
-        where: { createdAt: { gte: startOfYear } },
-        _sum: { acomptePercu: true },
-      }),
       prisma.devis.count({ where: { statut: { not: 'REFUSE' } } }),
       prisma.devis.count({ where: { statut: { in: ['VALIDE', 'CONVERTI'] } } }),
       prisma.devis.count({ where: { statut: 'CONVERTI' } }),
@@ -41,35 +35,35 @@ export async function rapportRoutes(server: FastifyInstance) {
         take: 5,
         select: { id: true, nom: true, prenom: true, valeurMarchande: true },
       }),
-      // Factures avec encaissement > 0 et type de client (répartition du CA)
       prisma.facture.findMany({
         where: { acomptePercu: { gt: 0 } },
         select: { acomptePercu: true, client: { select: { type: true } } },
       }),
-      // CA mensuel = encaissements attribués au mois d'émission de la facture
-      prisma.$queryRaw<{ m: number; total: number }[]>`
-        SELECT EXTRACT(MONTH FROM "createdAt")::int as m,
-               COALESCE(SUM("acomptePercu"), 0)::float as total
-        FROM factures
-        WHERE EXTRACT(YEAR FROM "createdAt") = ${year}
-        GROUP BY EXTRACT(MONTH FROM "createdAt")
-      `,
-      // Délai moyen de paiement : jours entre émission facture et règlement confirmé
-      prisma.$queryRaw<{ avg_days: number | null }[]>`
-        SELECT AVG(EXTRACT(EPOCH FROM (r."dateReglement" - f."createdAt")) / 86400)::float as avg_days
-        FROM reglements r
-        JOIN factures f ON f.id = r."factureId"
-        WHERE r.statut = 'CONFIRME'
-      `,
+      prisma.facture.findMany({
+        where: { createdAt: { gte: startOfYear } },
+        select: { createdAt: true, acomptePercu: true },
+      }),
+      prisma.reglement.findMany({
+        where: { statut: 'CONFIRME' },
+        select: { dateReglement: true, facture: { select: { createdAt: true } } },
+      }),
     ]);
 
-    // CA mensuel sur 12 mois (rempli à 0 pour les mois sans encaissement)
-    const caParMois = MOIS_FR.map((mois, i) => {
-      const row = caParMoisRaw.find((r) => r.m === i + 1);
-      return { mois, val: row ? Math.round(row.total) : 0 };
-    });
+    // CA total année
+    const ca = Math.round(facturesAnneePourCA.reduce((s, f) => s + f.acomptePercu, 0));
 
-    // Répartition du CA encaissé par type de client
+    // CA par mois (12 mois de l'année)
+    const byMonth = new Map<number, number>();
+    for (const f of facturesAnneePourCA) {
+      const m = new Date(f.createdAt).getMonth();
+      byMonth.set(m, (byMonth.get(m) ?? 0) + f.acomptePercu);
+    }
+    const caParMois = MOIS_FR.map((mois, i) => ({
+      mois,
+      val: Math.round(byMonth.get(i) ?? 0),
+    }));
+
+    // Répartition du CA par type de client
     const repMap = new Map<string, number>();
     for (const f of facturesEncaissees) {
       const t = f.client?.type ?? 'Autre';
@@ -79,8 +73,19 @@ export async function rapportRoutes(server: FastifyInstance) {
       .map(([label, val]) => ({ label, val: Math.round(val) }))
       .sort((a, b) => b.val - a.val);
 
-    const ca = Math.round(caYear._sum.acomptePercu || 0);
-    const delaiMoyen = delaiRaw[0]?.avg_days != null ? Math.round(delaiRaw[0].avg_days) : null;
+    // Délai moyen de paiement (jours) calculé en JS
+    let delaiMoyen: number | null = null;
+    if (reglements.length > 0) {
+      const delais = reglements
+        .filter((r) => r.facture?.createdAt)
+        .map((r) => {
+          const ms = new Date(r.dateReglement).getTime() - new Date(r.facture!.createdAt).getTime();
+          return ms / (1000 * 60 * 60 * 24);
+        });
+      if (delais.length > 0) {
+        delaiMoyen = Math.round(delais.reduce((s, d) => s + d, 0) / delais.length);
+      }
+    }
 
     return {
       annee: year,

@@ -1,11 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 
-// ── Navigation groups (source: ROUTES.md §4 — Sidebar order) ──
+// ── Design tokens ──
+const T = {
+  bg: '#FFFFFF',
+  border: '#E8ECF1',
+  groupLabel: '#94A3B8',
+  linkInactive: '#4A5568',
+  linkHover: '#07101A',
+  linkActiveBg: 'rgba(19,39,48,0.06)',
+  linkActiveText: '#07101A',
+  linkActiveBorder: '#3A6B84',
+  iconInactive: '#94A3B8',
+  iconActive: '#3A6B84',
+  badgeBg: 'rgba(58,107,132,0.1)',
+  badgeText: '#3A6B84',
+  divider: '#F1F5F9',
+  userNameText: '#0F172A',
+  userEmailText: '#94A3B8',
+};
+
 const NAV_GROUPS = [
   {
     label: 'PILOTAGE',
@@ -17,8 +35,8 @@ const NAV_GROUPS = [
   {
     label: 'CRM',
     items: [
-      { label: 'Athlètes', href: '/athletes', icon: 'directions_run', badge: '45' },
-      { label: 'Clients',  href: '/clients',  icon: 'business',       badge: '28' },
+      { label: 'Athlètes', href: '/athletes', icon: 'directions_run' },
+      { label: 'Clients',  href: '/clients',  icon: 'business' },
       { label: 'Contrats', href: '/contrats', icon: 'gavel' },
     ],
   },
@@ -26,7 +44,7 @@ const NAV_GROUPS = [
     label: 'COMMERCIAL',
     items: [
       { label: 'Prestations', href: '/prestations', icon: 'category' },
-      { label: 'Devis',       href: '/devis',       icon: 'request_quote', badge: '12' },
+      { label: 'Devis',       href: '/devis',       icon: 'request_quote' },
       { label: 'Factures',    href: '/factures',    icon: 'receipt_long' },
       { label: 'Règlements',  href: '/reglements',  icon: 'payments' },
     ],
@@ -34,7 +52,7 @@ const NAV_GROUPS = [
   {
     label: 'PROJETS',
     items: [
-      { label: 'Projets', href: '/projets', icon: 'work',     badge: '8' },
+      { label: 'Projets', href: '/projets', icon: 'work' },
       { label: 'Tâches',  href: '/taches',  icon: 'task_alt' },
       { label: 'Jalons',  href: '/jalons',  icon: 'flag' },
     ],
@@ -47,30 +65,34 @@ const NAV_GROUPS = [
   },
 ];
 
-// Icône Material Icons Outlined inline
-function MI({ name, size = 18, className = '' }: { name: string; size?: number; className?: string }) {
+function MI({ name, size = 18, style }: { name: string; size?: number; style?: React.CSSProperties }) {
   return (
     <span
-      className={`material-icons-outlined select-none leading-none ${className}`}
-      style={{ fontSize: size, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+      className="material-icons-outlined select-none leading-none"
+      style={{ fontSize: size, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, ...style }}
     >
       {name}
     </span>
   );
 }
 
-function getUserFromStorage(): { name: string; email: string; initials: string } {
+function getUserFromStorage(): { name: string; email: string; initials: string; role: string } {
   try {
     const raw = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
     if (raw) {
       const u = JSON.parse(raw);
       const name = u.name || u.email?.split('@')[0] || 'Administrateur';
       const initials = name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
-      return { name, email: u.email || 'admin@ndembokin.cd', initials };
+      return { name, email: u.email || 'admin@ndembokin.cd', initials, role: u.role || 'ADMIN' };
     }
   } catch {}
-  return { name: 'Administrateur', email: 'admin@ndembokin.cd', initials: 'AD' };
+  return { name: 'Administrateur', email: 'admin@ndembokin.cd', initials: 'AD', role: 'ADMIN' };
 }
+
+const ROLE_LABELS: Record<string, string> = {
+  ADMIN: 'Administrateur', MANAGER: 'Manager', COMMERCIAL: 'Commercial',
+  COACH: 'Coach', COMPTABLE: 'Comptable',
+};
 
 function handleLogout() {
   localStorage.removeItem('access_token');
@@ -78,49 +100,74 @@ function handleLogout() {
   window.location.href = '/login';
 }
 
-/** Lien de navigation — actif ou inactif */
 function NavLink({
-  href, icon, label, badge, active, onClick,
+  href, icon, label, active, onClick,
 }: {
-  href: string; icon: string; label: string; badge?: string;
+  href: string; icon: string; label: string;
   active: boolean; onClick?: () => void;
 }) {
-  const base = 'flex items-center gap-2.5 px-2.5 py-2 rounded-[9px] mb-0.5 cursor-pointer transition-colors text-[13px] font-medium';
-  const activeStyle = 'bg-[rgba(252,209,22,0.08)] text-[#FCD116] font-semibold border-l-2 border-[#DAA520] pl-[9px]';
-  const inactiveStyle = 'text-[rgba(255,255,255,0.45)] hover:bg-[rgba(255,255,255,0.04)] hover:text-[rgba(255,255,255,0.7)]';
-
   return (
-    <Link href={href} onClick={onClick} className={`${base} ${active ? activeStyle : inactiveStyle}`}>
+    <Link
+      href={href}
+      onClick={onClick}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        padding: '8px 10px',
+        borderRadius: 8,
+        marginBottom: 1,
+        fontSize: 13.5,
+        fontWeight: active ? 600 : 500,
+        color: active ? T.linkActiveText : T.linkInactive,
+        background: active ? T.linkActiveBg : 'transparent',
+        borderLeft: active ? `3px solid ${T.linkActiveBorder}` : '3px solid transparent',
+        textDecoration: 'none',
+        transition: 'all 0.15s',
+        cursor: 'pointer',
+      }}
+      onMouseEnter={e => {
+        if (!active) {
+          (e.currentTarget as HTMLAnchorElement).style.background = '#F8FAFC';
+          (e.currentTarget as HTMLAnchorElement).style.color = T.linkHover;
+        }
+      }}
+      onMouseLeave={e => {
+        if (!active) {
+          (e.currentTarget as HTMLAnchorElement).style.background = 'transparent';
+          (e.currentTarget as HTMLAnchorElement).style.color = T.linkInactive;
+        }
+      }}
+    >
       <MI
         name={icon}
-        size={18}
-        className={active ? 'text-[#FCD116]' : 'text-[rgba(255,255,255,0.3)]'}
+        size={17}
+        style={{ color: active ? T.iconActive : T.iconInactive }}
       />
-      <span className="flex-1">{label}</span>
-      {badge && (
-        <span className="text-[10px] font-bold bg-[rgba(252,209,22,0.12)] text-[rgba(252,209,22,0.7)] px-1.5 py-0.5 rounded-lg">
-          {badge}
-        </span>
-      )}
+      <span style={{ flex: 1 }}>{label}</span>
     </Link>
   );
 }
 
-/** Corps de la navigation (partagé sidebar desktop + drawer mobile) */
 function NavBody({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
-  const user = getUserFromStorage();
+  const [user, setUser] = useState({ name: 'Administrateur', email: 'admin@ndembokin.cd', initials: 'AD', role: 'ADMIN' });
+  useEffect(() => { setUser(getUserFromStorage()); }, []);
 
   const isActive = (href: string) =>
     pathname === href || (href !== '/dashboard' && pathname.startsWith(href + '/'));
 
   return (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
       {/* Nav groups */}
-      <nav className="flex-1 px-2.5 py-3.5 overflow-y-auto dark-scroll space-y-5">
+      <nav style={{ flex: 1, padding: '12px 10px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 20 }}>
         {NAV_GROUPS.map((group) => (
           <div key={group.label}>
-            <div className="text-[9px] font-bold text-[rgba(255,255,255,0.2)] tracking-[2px] uppercase px-2.5 mb-1">
+            <div style={{
+              fontSize: 9, fontWeight: 700, color: T.groupLabel,
+              letterSpacing: '1.8px', textTransform: 'uppercase',
+              padding: '0 10px', marginBottom: 4,
+            }}>
               {group.label}
             </div>
             {group.items.map((item) => (
@@ -129,7 +176,6 @@ function NavBody({ onNavigate }: { onNavigate?: () => void }) {
                 href={item.href}
                 icon={item.icon}
                 label={item.label}
-                badge={item.badge}
                 active={isActive(item.href)}
                 onClick={onNavigate}
               />
@@ -139,8 +185,8 @@ function NavBody({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
 
       {/* Paramètres */}
-      <div className="px-2.5 pb-1.5">
-        <div className="h-px bg-[rgba(252,209,22,0.07)] mx-2 mb-2" />
+      <div style={{ padding: '6px 10px' }}>
+        <div style={{ height: 1, background: T.divider, marginBottom: 6 }} />
         <NavLink
           href="/parametres"
           icon="settings"
@@ -151,43 +197,62 @@ function NavBody({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       {/* Profil utilisateur */}
-      <div className="px-4 py-3 border-t border-[rgba(252,209,22,0.07)]">
-        <div className="flex items-center gap-2.5">
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black text-[#07101A] shrink-0"
-            style={{ background: 'linear-gradient(135deg,#DAA520,#FCD116)' }}
-          >
+      <div style={{
+        padding: '10px 14px 14px',
+        borderTop: `1px solid ${T.divider}`,
+        background: '#FAFBFC',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{
+            width: 34, height: 34, borderRadius: '50%',
+            background: 'linear-gradient(135deg,#132730,#3A6B84)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 11, fontWeight: 800, color: '#FCD116', flexShrink: 0,
+          }}>
             {user.initials}
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-[12px] font-semibold text-[rgba(255,255,255,0.7)] truncate">{user.name}</div>
-            <div className="text-[10px] text-[rgba(255,255,255,0.25)] truncate">{user.email}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 12.5, fontWeight: 700, color: T.userNameText, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {user.name}
+            </div>
+            <div style={{ fontSize: 10.5, color: T.userEmailText, marginTop: 1 }}>
+              {ROLE_LABELS[user.role] || user.role}
+            </div>
           </div>
           <button
             onClick={handleLogout}
             title="Déconnexion"
-            className="flex items-center justify-center w-6 h-6 rounded-md hover:bg-[rgba(255,255,255,0.08)] transition-colors"
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 28, height: 28, borderRadius: 7,
+              border: 'none', background: 'transparent', cursor: 'pointer',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = '#F1F5F9')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
-            <MI name="logout" size={14} className="text-[rgba(255,255,255,0.2)] hover:text-[rgba(255,255,255,0.5)]" />
+            <MI name="logout" size={15} style={{ color: '#94A3B8' }} />
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
 function Brand() {
   return (
-    <div className="flex items-center gap-3">
-      <div className="bg-white rounded-[10px] px-1.5 py-1 flex items-center justify-center shrink-0">
-        <img src="/logo.png" alt="NKC" className="h-7 w-auto" />
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{
+        background: '#07101A', borderRadius: 10,
+        padding: '5px 7px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      }}>
+        <img src="/logo.png" alt="NKC" style={{ height: 26, width: 'auto', display: 'block' }} />
       </div>
       <div>
-        <div className="text-white font-extrabold text-[14px] leading-tight tracking-[-0.2px]">Ndembo Kin</div>
-        <div
-          className="text-[9px] font-bold tracking-[1.5px] uppercase mt-0.5"
-          style={{ color: 'rgba(252,209,22,0.5)' }}
-        >
+        <div style={{ fontWeight: 800, fontSize: 14, color: '#07101A', letterSpacing: '-0.3px', lineHeight: 1.2 }}>
+          Ndembo Kin
+        </div>
+        <div style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: '#3A6B84', marginTop: 1 }}>
           CONNECT SARL
         </div>
       </div>
@@ -195,19 +260,18 @@ function Brand() {
   );
 }
 
-/** Sidebar desktop — masquée en dessous de md */
 export function Sidebar() {
   return (
-    <aside
-      className="hidden md:flex flex-col shrink-0"
-      style={{
-        width: 252,
-        minHeight: '100vh',
-        background: '#07101A',
-        borderRight: '1px solid rgba(252,209,22,0.08)',
-      }}
-    >
-      <div className="px-4 py-5" style={{ borderBottom: '1px solid rgba(252,209,22,0.07)' }}>
+    <aside style={{
+      width: 240,
+      minHeight: '100vh',
+      background: T.bg,
+      borderRight: `1px solid ${T.border}`,
+      display: 'flex',
+      flexDirection: 'column',
+      flexShrink: 0,
+    }} className="hidden md:flex">
+      <div style={{ padding: '16px 14px', borderBottom: `1px solid ${T.border}` }}>
         <Brand />
       </div>
       <NavBody />
@@ -215,19 +279,18 @@ export function Sidebar() {
   );
 }
 
-/** Mobile — barre du haut + drawer slide-over */
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <header
-        className="md:hidden sticky top-0 z-30 flex h-14 items-center gap-3 px-3"
-        style={{ background: '#07101A', borderBottom: '1px solid rgba(252,209,22,0.08)' }}
-      >
+      <header style={{
+        background: '#07101A', borderBottom: '1px solid rgba(252,209,22,0.1)',
+        padding: '0 12px', display: 'flex', alignItems: 'center', height: 56, gap: 12, flexShrink: 0,
+      }} className="md:hidden sticky top-0 z-30">
         <button
           onClick={() => setOpen(true)}
           aria-label="Ouvrir le menu"
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-300 hover:bg-white/10"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 10, border: 'none', background: 'transparent', cursor: 'pointer', color: '#fff' }}
         >
           <Menu size={22} />
         </button>
@@ -235,22 +298,20 @@ export function MobileNav() {
       </header>
 
       {open && (
-        <div className="md:hidden fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
-          <div
-            className="absolute inset-y-0 left-0 flex flex-col shadow-xl"
-            style={{ width: 252, background: '#07101A' }}
-          >
-            <div
-              className="flex items-center justify-between px-4 py-5"
-              style={{ borderBottom: '1px solid rgba(252,209,22,0.07)' }}
-            >
+        <div className="md:hidden" style={{ position: 'fixed', inset: 0, zIndex: 50 }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} onClick={() => setOpen(false)} />
+          <div style={{
+            position: 'absolute', top: 0, bottom: 0, left: 0, width: 240,
+            background: T.bg, boxShadow: '4px 0 24px rgba(0,0,0,0.12)',
+            display: 'flex', flexDirection: 'column',
+          }}>
+            <div style={{ padding: '14px', borderBottom: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Brand />
               <button
                 onClick={() => setOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: 8, border: 'none', background: '#F1F5F9', cursor: 'pointer' }}
               >
-                <X size={18} />
+                <X size={17} color="#64748B" />
               </button>
             </div>
             <NavBody onNavigate={() => setOpen(false)} />

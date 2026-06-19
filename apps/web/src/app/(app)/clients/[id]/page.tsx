@@ -94,7 +94,15 @@ export default function FicheClientPage() {
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
-    clientsApi.timeline(id).then(({ data }) => setTimeline(data || [])).catch(() => {});
+    clientsApi.timeline(id).then(({ data }) => {
+      if (Array.isArray(data)) { setTimeline(data); return; }
+      const items: TimelineItem[] = [];
+      if (data?.devis) data.devis.forEach((d: any) => items.push({ id: d.id, type: 'devis', titre: `Devis ${d.numero}`, date: d.createdAt }));
+      if (data?.factures) data.factures.forEach((f: any) => items.push({ id: f.id, type: 'facture', titre: `Facture ${f.numero}`, date: f.createdAt }));
+      if (data?.activites) data.activites.forEach((a: any) => items.push({ id: a.id, type: a.type || 'default', titre: a.titre || a.type, date: a.dateActivite || a.createdAt }));
+      items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setTimeline(items);
+    }).catch(() => {});
   }, [id]);
 
   if (loading || !client) {

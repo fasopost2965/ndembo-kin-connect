@@ -29,12 +29,15 @@ export function DevisForm({ onSaved, onCancel }: { onSaved: () => void; onCancel
   const [lignes, setLignes] = useState<LigneRow[]>(draft?.lignes ?? [{ prestationId: '', quantite: 1, prixUnit: 0 }]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [showNewClient, setShowNewClient] = useState(false);
+  const [newClientName, setNewClientName] = useState('');
+  const [savingClient, setSavingClient] = useState(false);
 
   // Persist the draft (power-cut resilience).
   useAutosave<DevisDraft>(DRAFT_KEY, { clientId, tva, notes, lignes });
 
   useEffect(() => {
-    clientsApi.list({ limit: 100 }).then((r) => setClients(r.data.data)).catch(() => {});
+    clientsApi.list({ limit: 100 }).then((r) => setClients(r.data.data || r.data || [])).catch(() => {});
     prestationsApi.list().then((r) => setPrestations(r.data)).catch(() => {});
   }, []);
 
@@ -92,6 +95,28 @@ export function DevisForm({ onSaved, onCancel }: { onSaved: () => void; onCancel
             {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.nom}</SelectItem>)}
           </SelectContent>
         </Select>
+        {!showNewClient ? (
+          <button type="button" onClick={() => setShowNewClient(true)} className="mt-1 text-xs font-semibold text-[#3A6B84] flex items-center gap-1" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+            <Plus size={13} /> Nouveau client
+          </button>
+        ) : (
+          <div className="mt-2 flex items-center gap-2">
+            <Input placeholder="Nom / Société" value={newClientName} onChange={e => setNewClientName(e.target.value)} className="h-8 text-xs flex-1" />
+            <Button type="button" size="sm" variant="gold" disabled={savingClient || !newClientName.trim()} onClick={async () => {
+              setSavingClient(true);
+              try {
+                const { data: c } = await clientsApi.create({ nom: newClientName, type: 'ENTREPRISE' });
+                const r = await clientsApi.list({ limit: 100 });
+                setClients(r.data.data || r.data || []);
+                setClientId(c.id);
+                setShowNewClient(false);
+                setNewClientName('');
+              } catch { setError('Erreur création client.'); }
+              finally { setSavingClient(false); }
+            }} className="h-8 text-xs">{savingClient ? '…' : 'Créer'}</Button>
+            <Button type="button" size="sm" variant="outline" onClick={() => setShowNewClient(false)} className="h-8 text-xs">✕</Button>
+          </div>
+        )}
       </div>
 
       {/* Line items */}

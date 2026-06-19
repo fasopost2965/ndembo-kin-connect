@@ -74,7 +74,7 @@ export async function factureRoutes(server: FastifyInstance) {
         numero: facture.numero,
         createdAt: facture.createdAt,
         client: facture.client,
-        lignes: facture.lignes as unknown as PdfLigne[],
+        lignes: JSON.parse(facture.lignes as string) as PdfLigne[],
         montantHT: facture.montantHT,
         tva: facture.tva,
         montantTTC: facture.montantTTC,

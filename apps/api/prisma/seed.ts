@@ -199,10 +199,10 @@ async function main() {
     update: {},
     create: {
       numero: 'DEV-2026-001', clientId: clients[0].id,
-      lignes: [
+      lignes: JSON.stringify([
         { designation: 'Gestion de carrière annuelle', quantite: 1, prixUnit: 12000, total: 12000 },
         { designation: 'Camp de scouting', quantite: 2, prixUnit: 3500, total: 7000 },
-      ],
+      ]),
       montantHT: 19000, tva: 16, montantTTC: 22040, statut: 'VALIDE',
     },
   });
@@ -212,7 +212,7 @@ async function main() {
     update: {},
     create: {
       numero: 'DEV-2026-002', clientId: clients[1].id,
-      lignes: [{ designation: 'Conseil en recrutement', quantite: 3, prixUnit: 2000, total: 6000 }],
+      lignes: JSON.stringify([{ designation: 'Conseil en recrutement', quantite: 3, prixUnit: 2000, total: 6000 }]),
       montantHT: 6000, tva: 16, montantTTC: 6960, statut: 'EN_ATTENTE',
     },
   });
@@ -222,7 +222,7 @@ async function main() {
     update: {},
     create: {
       numero: 'DEV-2026-003', clientId: clients[2].id,
-      lignes: [{ designation: 'Stage d\'intégration club', quantite: 1, prixUnit: 5000, total: 5000 }],
+      lignes: JSON.stringify([{ designation: "Stage d'intégration club", quantite: 1, prixUnit: 5000, total: 5000 }]),
       montantHT: 5000, tva: 16, montantTTC: 5800, statut: 'EN_ATTENTE',
     },
   });
@@ -232,7 +232,7 @@ async function main() {
     update: {},
     create: {
       numero: 'DEV-2026-004', clientId: clients[3].id,
-      lignes: [{ designation: 'Gestion de carrière (6 mois)', quantite: 1, prixUnit: 7000, total: 7000 }],
+      lignes: JSON.stringify([{ designation: 'Gestion de carrière (6 mois)', quantite: 1, prixUnit: 7000, total: 7000 }]),
       montantHT: 7000, tva: 16, montantTTC: 8120, statut: 'REFUSE',
     },
   });
@@ -245,10 +245,10 @@ async function main() {
     update: {},
     create: {
       numero: 'FACT-2026-001', clientId: clients[0].id, devisId: devis1.id,
-      lignes: [
+      lignes: JSON.stringify([
         { designation: 'Gestion de carrière annuelle', quantite: 1, prixUnit: 12000, total: 12000 },
         { designation: 'Camp de scouting', quantite: 2, prixUnit: 3500, total: 7000 },
-      ],
+      ]),
       montantHT: 19000, tva: 16, montantTTC: 22040,
       acomptePercu: 11020, statutPaiement: 'PARTIELLE',
     },

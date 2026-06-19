@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { reglementsApi } from '@/lib/api';
+import { reglementsApi, facturesApi, ReglementInput } from '@/lib/api';
 
 function MI({ name, size = 16, color }: { name: string; size?: number; color?: string }) {
   return (
@@ -14,7 +14,6 @@ function MI({ name, size = 16, color }: { name: string; size?: number; color?: s
   );
 }
 
-// Clés = enum MoyenPaiement Prisma
 const METHODES: Record<string, { label: string; short: string; bg: string; mobile: boolean }> = {
   MTN_MONEY:    { label: 'MTN Money',    short: 'MTN', bg: '#FFC107', mobile: true },
   AIRTEL_MONEY: { label: 'Airtel Money', short: 'AM',  bg: '#ED1C24', mobile: true },
@@ -28,10 +27,12 @@ interface Reglement {
   ref: string;
   facture: string;
   client: string;
-  methode: string;   // enum key
+  methode: string;
   montant: number;
   date: Date | null;
 }
+
+interface Facture { id: string; numero: string; client?: { nom?: string }; montantTTC?: number }
 
 function fmtMontant(n: number) {
   return '$' + n.toLocaleString('fr-FR');
@@ -42,16 +43,35 @@ function fmtDate(d: Date | null) {
 
 const HEADERS = ['Référence', 'Facture', 'Client', 'Méthode', 'Montant', 'Date'];
 
-export default function ReglementsPage() {
-  const [search, setSearch]           = useState('');
-  const [filterMethode, setFilterMethode] = useState('');
-  const [data, setData] = useState<Reglement[]>([]);
-  const [loading, setLoading] = useState(true);
+const INPUT_STYLE: React.CSSProperties = {
+  width: '100%', padding: '11px 14px', border: '1.5px solid #E2E8F0', borderRadius: 10,
+  fontSize: 13, fontFamily: 'Plus Jakarta Sans, sans-serif', color: '#0F172A',
+  outline: 'none', background: '#fff', boxSizing: 'border-box',
+};
+const LABEL_STYLE: React.CSSProperties = {
+  display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 5,
+};
 
-  useEffect(() => {
+export default function ReglementsPage() {
+  const [search, setSearch]               = useState('');
+  const [filterMethode, setFilterMethode] = useState('');
+  const [data, setData]                   = useState<Reglement[]>([]);
+  const [loading, setLoading]             = useState(true);
+
+  // Modal
+  const [showModal, setShowModal] = useState(false);
+  const [factures, setFactures]   = useState<Facture[]>([]);
+  const [form, setForm] = useState<{ factureId: string; montant: string; moyenPaiement: ReglementInput['moyenPaiement']; reference: string }>({
+    factureId: '', montant: '', moyenPaiement: 'BANK', reference: '',
+  });
+  const [saving, setSaving] = useState(false);
+
+  function loadData() {
+    setLoading(true);
     reglementsApi.list()
       .then(({ data }) => {
-        const rows: Reglement[] = (data || []).map((r: any) => ({
+        const list = Array.isArray(data) ? data : (data?.data || []);
+        const rows: Reglement[] = list.map((r: any) => ({
           id: r.id,
           ref: r.reference || r.orderNumber || r.id.slice(0, 10).toUpperCase(),
           facture: r.facture?.numero ?? '—',
@@ -64,7 +84,40 @@ export default function ReglementsPage() {
       })
       .catch(() => setData([]))
       .finally(() => setLoading(false));
-  }, []);
+  }
+
+  useEffect(() => { loadData(); }, []);
+
+  function openModal() {
+    facturesApi.list()
+      .then(({ data }) => {
+        const list = Array.isArray(data) ? data : (data?.data || []);
+        setFactures(list.filter((f: any) => f.statutPaiement !== 'PAYEE'));
+      })
+      .catch(() => setFactures([]));
+    setForm({ factureId: '', montant: '', moyenPaiement: 'BANK', reference: '' });
+    setShowModal(true);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.factureId || !form.montant) return;
+    setSaving(true);
+    try {
+      await reglementsApi.create({
+        factureId: form.factureId,
+        montant: parseFloat(form.montant),
+        moyenPaiement: form.moyenPaiement,
+        reference: form.reference || undefined,
+      });
+      setShowModal(false);
+      loadData();
+    } catch {
+      alert('Erreur lors de l\'enregistrement du paiement.');
+    } finally {
+      setSaving(false);
+    }
+  }
 
   const filtered = data.filter(r => {
     const q = search.toLowerCase();
@@ -87,6 +140,110 @@ export default function ReglementsPage() {
 
   return (
     <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', minHeight: '100vh', background: '#F0F2F5', display: 'flex', flexDirection: 'column' }}>
+
+      {/* MODAL */}
+      {showModal && (
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          onClick={e => { if (e.target === e.currentTarget) setShowModal(false); }}
+        >
+          <div style={{ background: '#fff', borderRadius: 20, padding: 28, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', width: '100%', maxWidth: 520 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
+              <span style={{ fontSize: 16, fontWeight: 800, color: '#0F172A' }}>Enregistrer un paiement</span>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex' }}>
+                <MI name="close" size={20} color="#94A3B8" />
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <label style={LABEL_STYLE}>Facture *</label>
+                <div style={{ position: 'relative' }}>
+                  <select
+                    required
+                    value={form.factureId}
+                    onChange={e => setForm(f => ({ ...f, factureId: e.target.value }))}
+                    style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 32, cursor: 'pointer' }}
+                  >
+                    <option value="">Sélectionner une facture…</option>
+                    {factures.map(f => (
+                      <option key={f.id} value={f.id}>
+                        {f.numero}{f.client?.nom ? ` — ${f.client.nom}` : ''}{f.montantTTC ? ` ($${f.montantTTC})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'inline-flex' }}>
+                    <MI name="expand_more" size={15} color="#94A3B8" />
+                  </span>
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={LABEL_STYLE}>Montant ($) *</label>
+                  <input
+                    required
+                    type="number"
+                    min={0.01}
+                    step={0.01}
+                    value={form.montant}
+                    onChange={e => setForm(f => ({ ...f, montant: e.target.value }))}
+                    placeholder="0.00"
+                    style={INPUT_STYLE}
+                    onFocus={e => { e.currentTarget.style.borderColor = '#3A6B84'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(58,107,132,0.08)'; }}
+                    onBlur={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
+                  />
+                </div>
+                <div>
+                  <label style={LABEL_STYLE}>Moyen de paiement *</label>
+                  <div style={{ position: 'relative' }}>
+                    <select
+                      required
+                      value={form.moyenPaiement}
+                      onChange={e => setForm(f => ({ ...f, moyenPaiement: e.target.value as ReglementInput['moyenPaiement'] }))}
+                      style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 32, cursor: 'pointer' }}
+                    >
+                      <option value="BANK">Virement bancaire</option>
+                      <option value="CARTE">Carte</option>
+                      <option value="MTN_MONEY">MTN Money</option>
+                      <option value="AIRTEL_MONEY">Airtel Money</option>
+                      <option value="ORANGE_MONEY">Orange Money</option>
+                    </select>
+                    <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'inline-flex' }}>
+                      <MI name="expand_more" size={15} color="#94A3B8" />
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label style={LABEL_STYLE}>Référence (optionnel)</label>
+                <input
+                  value={form.reference}
+                  onChange={e => setForm(f => ({ ...f, reference: e.target.value }))}
+                  placeholder="N° de virement, code transaction…"
+                  style={INPUT_STYLE}
+                  onFocus={e => { e.currentTarget.style.borderColor = '#3A6B84'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(58,107,132,0.08)'; }}
+                  onBlur={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 6, borderTop: '1px solid #F1F5F9', marginTop: 4 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  style={{ padding: '10px 20px', background: '#F1F5F9', color: '#475569', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  style={{ padding: '10px 24px', background: '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 10, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: saving ? 0.7 : 1 }}
+                >
+                  {saving ? 'Enregistrement…' : 'Enregistrer le paiement'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* TOPBAR */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E8ECF1', padding: '0 28px', display: 'flex', alignItems: 'center', height: 60, gap: 16, flexShrink: 0 }}>
@@ -127,6 +284,7 @@ export default function ReglementsPage() {
             </span>
           </div>
           <button
+            onClick={openModal}
             style={{ padding: '9px 18px', background: '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap' }}
             onMouseEnter={e => (e.currentTarget.style.background = '#132730')}
             onMouseLeave={e => (e.currentTarget.style.background = '#07101A')}

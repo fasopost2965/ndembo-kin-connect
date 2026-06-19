@@ -28,8 +28,8 @@ export async function athleteRoutes(server: FastifyInstance) {
     const where = {
       ...(query.search && {
         OR: [
-          { nom: { contains: query.search, mode: 'insensitive' as const } },
-          { prenom: { contains: query.search, mode: 'insensitive' as const } },
+          { nom: { contains: query.search } },
+          { prenom: { contains: query.search } },
         ],
       }),
       ...(query.sport && { sport: query.sport }),
