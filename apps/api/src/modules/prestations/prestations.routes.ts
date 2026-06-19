@@ -34,4 +34,11 @@ export async function prestationRoutes(server: FastifyInstance) {
     const data = prestationSchema.partial().extend({ isActive: z.boolean().optional() }).parse(req.body);
     return prisma.prestation.update({ where: { id }, data });
   });
+
+  // DELETE /prestations/:id — remove
+  server.delete('/:id', { preHandler: [can('devisFactures', 'write')] }, async (req, reply) => {
+    const { id } = req.params as { id: string };
+    await prisma.prestation.delete({ where: { id } });
+    return reply.status(204).send();
+  });
 }

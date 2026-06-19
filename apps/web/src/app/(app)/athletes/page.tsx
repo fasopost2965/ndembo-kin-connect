@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { athletesApi } from '@/lib/api';
 import { cn, formatValeur, initials } from '@/lib/utils';
 import { Badge, niveauBadge } from '@/components/ui/badge';
@@ -394,6 +395,7 @@ export default function AthletesPage() {
 function AthleteDetail({ athlete, onEdit, onDelete }: {
   athlete: Athlete; onEdit: () => void; onDelete: () => void;
 }) {
+  const router = useRouter();
   const nb = niveauBadge(athlete.niveau);
 
   return (
@@ -468,6 +470,7 @@ function AthleteDetail({ athlete, onEdit, onDelete }: {
           Voir la fiche complète
         </Link>
         <button
+          onClick={() => router.push('/contrats')}
           style={{ width: '100%', padding: 11, background: '#F1F5F9', color: '#475569', fontSize: 13, fontWeight: 600, border: '1px solid #E2E8F0', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit' }}
         >
           Créer un contrat

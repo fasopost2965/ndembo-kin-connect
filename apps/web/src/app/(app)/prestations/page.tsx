@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { prestationsApi } from '@/lib/api';
+import { prestationsApi, PrestationInput } from '@/lib/api';
 
 function MI({ name, size = 16, color }: { name: string; size?: number; color?: string }) {
   return (
@@ -14,7 +14,6 @@ function MI({ name, size = 16, color }: { name: string; size?: number; color?: s
   );
 }
 
-// Mapping des types Prisma → libellé/couleur/icône d'affichage
 const CATS: Record<string, { color: string; bg: string; icon: string }> = {
   Gestion_carriere: { color: '#2563EB', bg: '#EFF6FF', icon: 'badge' },
   Conseil:          { color: '#6D28D9', bg: '#F5F3FF', icon: 'sports' },
@@ -28,13 +27,25 @@ const CAT_LABEL: Record<string, string> = {
   Stage: 'Stage',
 };
 
+const TYPE_OPTIONS: { value: PrestationInput['type']; label: string }[] = [
+  { value: 'Conseil', label: 'Conseil' },
+  { value: 'Gestion_carriere', label: 'Gestion de carrière' },
+  { value: 'Camp', label: 'Camp' },
+  { value: 'Stage', label: 'Stage' },
+];
+
 interface Prestation {
   id: string;
   nom: string;
-  categorie: string;       // <- type API
-  prix: number;            // <- prixBase
-  unite: string;           // <- dureeEstimee
+  categorie: string;
+  prix: number;
+  unite: string;
   description: string;
+  isActive: boolean;
+  // raw fields for edit
+  type: string;
+  prixBase: number;
+  dureeEstimee: string;
 }
 
 function fmtPrix(n: number) {
@@ -52,13 +63,31 @@ const CAT_FILTER_IDLE: React.CSSProperties = {
   background: '#fff', color: '#475569',
 };
 
+const INPUT_STYLE: React.CSSProperties = {
+  width: '100%', padding: '11px 14px', border: '1.5px solid #E2E8F0', borderRadius: 10,
+  fontSize: 13, fontFamily: 'Plus Jakarta Sans, sans-serif', color: '#0F172A',
+  outline: 'none', background: '#fff', boxSizing: 'border-box',
+};
+const LABEL_STYLE: React.CSSProperties = {
+  display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 5,
+};
+
+const EMPTY_FORM = { nom: '', description: '', type: 'Conseil' as PrestationInput['type'], prixBase: 0, dureeEstimee: '', isActive: true };
+
 export default function PrestationsPage() {
   const [search, setSearch] = useState('');
   const [cat, setCat] = useState('');
   const [data, setData] = useState<Prestation[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  // Modal state
+  const [showModal, setShowModal] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+
+  function loadData() {
+    setLoading(true);
     prestationsApi.list(false)
       .then(({ data }) => {
         const rows: Prestation[] = (data || []).map((p: any) => ({
@@ -68,12 +97,73 @@ export default function PrestationsPage() {
           prix: p.prixBase ?? 0,
           unite: p.dureeEstimee ? `/ ${p.dureeEstimee}` : '',
           description: p.description ?? '',
+          isActive: p.isActive ?? true,
+          type: p.type,
+          prixBase: p.prixBase ?? 0,
+          dureeEstimee: p.dureeEstimee ?? '',
         }));
         setData(rows);
       })
       .catch(() => setData([]))
       .finally(() => setLoading(false));
-  }, []);
+  }
+
+  useEffect(() => { loadData(); }, []);
+
+  function openCreate() {
+    setEditId(null);
+    setForm(EMPTY_FORM);
+    setShowModal(true);
+  }
+
+  function openEdit(p: Prestation) {
+    setEditId(p.id);
+    setForm({
+      nom: p.nom,
+      description: p.description,
+      type: p.type as PrestationInput['type'],
+      prixBase: p.prixBase,
+      dureeEstimee: p.dureeEstimee,
+      isActive: p.isActive,
+    });
+    setShowModal(true);
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('Supprimer cette prestation ?')) return;
+    try {
+      await prestationsApi.delete(id);
+      loadData();
+    } catch {
+      alert('Erreur lors de la suppression.');
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const payload: PrestationInput = {
+        nom: form.nom,
+        type: form.type,
+        prixBase: Number(form.prixBase),
+        dureeEstimee: form.dureeEstimee || undefined,
+        description: form.description || undefined,
+        isActive: form.isActive,
+      };
+      if (editId) {
+        await prestationsApi.update(editId, payload);
+      } else {
+        await prestationsApi.create(payload);
+      }
+      setShowModal(false);
+      loadData();
+    } catch {
+      alert('Erreur lors de la sauvegarde.');
+    } finally {
+      setSaving(false);
+    }
+  }
 
   const filtered = data.filter(p => {
     const q = search.toLowerCase();
@@ -90,6 +180,119 @@ export default function PrestationsPage() {
 
   return (
     <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', minHeight: '100vh', background: '#F0F2F5', display: 'flex', flexDirection: 'column' }}>
+
+      {/* MODAL */}
+      {showModal && (
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          onClick={e => { if (e.target === e.currentTarget) setShowModal(false); }}
+        >
+          <div style={{ background: '#fff', borderRadius: 20, padding: 28, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', width: '100%', maxWidth: 520 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
+              <span style={{ fontSize: 16, fontWeight: 800, color: '#0F172A' }}>{editId ? 'Modifier la prestation' : 'Nouvelle prestation'}</span>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex' }}>
+                <MI name="close" size={20} color="#94A3B8" />
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <label style={LABEL_STYLE}>Nom *</label>
+                <input
+                  required
+                  value={form.nom}
+                  onChange={e => setForm(f => ({ ...f, nom: e.target.value }))}
+                  placeholder="Ex: Gestion de carrière football"
+                  style={INPUT_STYLE}
+                  onFocus={e => { e.currentTarget.style.borderColor = '#3A6B84'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(58,107,132,0.08)'; }}
+                  onBlur={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
+                />
+              </div>
+              <div>
+                <label style={LABEL_STYLE}>Description</label>
+                <textarea
+                  value={form.description}
+                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                  placeholder="Description de la prestation…"
+                  rows={3}
+                  style={{ ...INPUT_STYLE, resize: 'vertical' }}
+                  onFocus={e => { e.currentTarget.style.borderColor = '#3A6B84'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(58,107,132,0.08)'; }}
+                  onBlur={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
+                />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={LABEL_STYLE}>Type *</label>
+                  <div style={{ position: 'relative' }}>
+                    <select
+                      required
+                      value={form.type}
+                      onChange={e => setForm(f => ({ ...f, type: e.target.value as PrestationInput['type'] }))}
+                      style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 32, cursor: 'pointer' }}
+                    >
+                      {TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                    <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'inline-flex' }}>
+                      <MI name="expand_more" size={15} color="#94A3B8" />
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <label style={LABEL_STYLE}>Prix de base ($) *</label>
+                  <input
+                    required
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    value={form.prixBase}
+                    onChange={e => setForm(f => ({ ...f, prixBase: parseFloat(e.target.value) || 0 }))}
+                    placeholder="0.00"
+                    style={INPUT_STYLE}
+                    onFocus={e => { e.currentTarget.style.borderColor = '#3A6B84'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(58,107,132,0.08)'; }}
+                    onBlur={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
+                  />
+                </div>
+              </div>
+              <div>
+                <label style={LABEL_STYLE}>Unité</label>
+                <input
+                  value={form.dureeEstimee}
+                  onChange={e => setForm(f => ({ ...f, dureeEstimee: e.target.value }))}
+                  placeholder="heure, jour, forfait…"
+                  style={INPUT_STYLE}
+                  onFocus={e => { e.currentTarget.style.borderColor = '#3A6B84'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(58,107,132,0.08)'; }}
+                  onBlur={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
+                />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <input
+                  type="checkbox"
+                  id="actif"
+                  checked={form.isActive}
+                  onChange={e => setForm(f => ({ ...f, isActive: e.target.checked }))}
+                  style={{ width: 16, height: 16, cursor: 'pointer', accentColor: '#07101A' }}
+                />
+                <label htmlFor="actif" style={{ fontSize: 13, fontWeight: 600, color: '#475569', cursor: 'pointer' }}>Actif (visible dans le catalogue)</label>
+              </div>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 6, borderTop: '1px solid #F1F5F9', marginTop: 4 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  style={{ padding: '10px 20px', background: '#F1F5F9', color: '#475569', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  style={{ padding: '10px 24px', background: '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 10, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: saving ? 0.7 : 1 }}
+                >
+                  {saving ? 'Enregistrement…' : (editId ? 'Mettre à jour' : 'Créer la prestation')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* TOPBAR */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E8ECF1', padding: '0 28px', display: 'flex', alignItems: 'center', height: 60, gap: 16, flexShrink: 0 }}>
@@ -113,6 +316,7 @@ export default function PrestationsPage() {
             />
           </div>
           <button
+            onClick={openCreate}
             style={{ padding: '9px 18px', background: '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap' }}
             onMouseEnter={e => (e.currentTarget.style.background = '#132730')}
             onMouseLeave={e => (e.currentTarget.style.background = '#07101A')}
@@ -155,7 +359,7 @@ export default function PrestationsPage() {
             {filtered.map(p => {
               const c = CATS[p.categorie] ?? { color: '#64748B', bg: '#F1F5F9', icon: 'category' };
               return (
-                <PrestationCard key={p.id} p={p} c={c} />
+                <PrestationCard key={p.id} p={p} c={c} onEdit={() => openEdit(p)} onDelete={() => handleDelete(p.id)} />
               );
             })}
           </div>
@@ -165,7 +369,7 @@ export default function PrestationsPage() {
   );
 }
 
-function PrestationCard({ p, c }: { p: Prestation; c: { color: string; bg: string; icon: string } }) {
+function PrestationCard({ p, c, onEdit, onDelete }: { p: Prestation; c: { color: string; bg: string; icon: string }; onEdit: () => void; onDelete: () => void }) {
   return (
     <div
       style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 16, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: 12, transition: 'border-color 0.15s, box-shadow 0.15s' }}
@@ -189,20 +393,24 @@ function PrestationCard({ p, c }: { p: Prestation; c: { color: string; bg: strin
           <div style={{ fontSize: 20, fontWeight: 800, color: '#059669', letterSpacing: '-0.4px', fontFamily: 'monospace' }}>{fmtPrix(p.prix)}</div>
           <div style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: 1 }}>{p.unite}</div>
         </div>
-        <EditBtn />
+        <div style={{ display: 'flex', gap: 6 }}>
+          <ActionBtn icon="edit" onClick={onEdit} hoverBg="#EFF6FF" hoverBorder="#BFDBFE" />
+          <ActionBtn icon="delete_outline" onClick={onDelete} hoverBg="#FEF2F2" hoverBorder="#FECACA" iconColor="#EF4444" />
+        </div>
       </div>
     </div>
   );
 }
 
-function EditBtn() {
+function ActionBtn({ icon, onClick, hoverBg, hoverBorder, iconColor = '#64748B' }: { icon: string; onClick: () => void; hoverBg: string; hoverBorder: string; iconColor?: string }) {
   return (
     <div
+      onClick={onClick}
       style={{ width: 30, height: 30, borderRadius: 8, background: '#F1F5F9', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 0.15s, border-color 0.15s' }}
-      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#EFF6FF'; (e.currentTarget as HTMLElement).style.borderColor = '#BFDBFE'; }}
+      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = hoverBg; (e.currentTarget as HTMLElement).style.borderColor = hoverBorder; }}
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#F1F5F9'; (e.currentTarget as HTMLElement).style.borderColor = '#E2E8F0'; }}
     >
-      <MI name="edit" size={15} color="#64748B" />
+      <MI name={icon} size={15} color={iconColor} />
     </div>
   );
 }

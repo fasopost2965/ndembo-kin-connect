@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, User, Zap } from 'lucide-react';
+import { Check, Loader2, User, Zap } from 'lucide-react';
 import { athletesApi } from '@/lib/api';
 import { useAutosave, loadDraft, clearDraft } from '@/lib/useAutosave';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,14 @@ export interface Athlete {
   telephone?: string | null;
   email?: string | null;
   statut: string;
+  notes?: string | null;
   priorityScouting?: string | null;
+}
+
+/** Normalise an ISO date or datetime string to YYYY-MM-DD for <input type="date"> */
+function toDateInput(raw?: string | null): string {
+  if (!raw) return '';
+  return raw.slice(0, 10);
 }
 
 const SPORTS = ['football', 'basketball', 'athletisme'];
@@ -50,10 +57,11 @@ export function AthleteForm({
       clubActuel: athlete?.clubActuel ?? '',
       valeurMarchande: athlete?.valeurMarchande?.toString() ?? '',
       nationalite: athlete?.nationalite ?? 'RDC',
-      dateNaissance: '',
+      dateNaissance: athlete?.dateNaissance ? athlete.dateNaissance.slice(0, 10) : '',
       telephone: athlete?.telephone ?? '',
       email: athlete?.email ?? '',
       priorityScouting: athlete?.priorityScouting ?? 'NORMALE',
+      notes: athlete?.notes ?? '',
     };
     // Restore a draft only in create mode (protects against power cuts).
     if (!athlete) return loadDraft<typeof base>(DRAFT_KEY) ?? base;
@@ -61,16 +69,29 @@ export function AthleteForm({
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ nom?: string; prenom?: string }>({});
 
   // Auto-save the draft every 800ms (create mode only).
   useAutosave(DRAFT_KEY, form, !isEdit);
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
+    if (key === 'nom' || key === 'prenom') {
+      setFieldErrors(prev => ({ ...prev, [key]: undefined }));
+    }
+  }
+
+  function validate(): boolean {
+    const errs: { nom?: string; prenom?: string } = {};
+    if (!form.prenom.trim()) errs.prenom = 'Le prénom est requis.';
+    if (!form.nom.trim()) errs.nom = 'Le nom est requis.';
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
   }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!validate()) return;
     setSaving(true);
     setError('');
     const payload = {
@@ -82,9 +103,11 @@ export function AthleteForm({
       clubActuel: form.clubActuel || undefined,
       valeurMarchande: form.valeurMarchande ? Number(form.valeurMarchande) : undefined,
       nationalite: form.nationalite,
+      dateNaissance: form.dateNaissance || undefined,
       telephone: form.telephone || undefined,
       email: form.email || undefined,
       priorityScouting: form.priorityScouting || undefined,
+      notes: form.notes || undefined,
     };
     try {
       if (isEdit) await athletesApi.update(athlete!.id, payload);
@@ -113,11 +136,21 @@ export function AthleteForm({
           <h3 className="text-lg font-semibold text-[#07101A]">Identité</h3>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Prénom" required>
-            <Input value={form.prenom} onChange={(e) => set('prenom', e.target.value)} required placeholder="ex: Lukaku" />
+          <Field label="Prénom" required error={fieldErrors.prenom}>
+            <Input
+              value={form.prenom}
+              onChange={(e) => set('prenom', e.target.value)}
+              placeholder="ex: Lukaku"
+              className={fieldErrors.prenom ? 'border-red-400 focus-visible:ring-red-200' : ''}
+            />
           </Field>
-          <Field label="Nom de famille" required>
-            <Input value={form.nom} onChange={(e) => set('nom', e.target.value)} required placeholder="ex: Mbuyi" />
+          <Field label="Nom de famille" required error={fieldErrors.nom}>
+            <Input
+              value={form.nom}
+              onChange={(e) => set('nom', e.target.value)}
+              placeholder="ex: Mbuyi"
+              className={fieldErrors.nom ? 'border-red-400 focus-visible:ring-red-200' : ''}
+            />
           </Field>
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -200,7 +233,7 @@ export function AthleteForm({
           </Field>
         </div>
         <Field label="Notes / Observations">
-          <textarea value="" onChange={() => {}} placeholder="Talents remarquables, historique, observations du coach..." className="min-h-24 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+          <textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} placeholder="Talents remarquables, historique, observations du coach..." className="min-h-24 rounded-lg border border-slate-300 px-3 py-2 text-sm" style={{ width: '100%', fontFamily: 'inherit', resize: 'vertical' }} />
         </Field>
       </div>
 
@@ -211,8 +244,15 @@ export function AthleteForm({
       )}
 
       <div className="mt-2 flex gap-2">
-        <Button type="submit" variant="gold" disabled={saving} className="flex-1">
-          {saving ? 'Enregistrement…' : isEdit ? 'Enregistrer' : "Créer l'athlète"}
+        <Button type="submit" variant="gold" disabled={saving} className="flex-1 flex items-center justify-center gap-2">
+          {saving ? (
+            <>
+              <Loader2 size={15} className="animate-spin" />
+              Enregistrement…
+            </>
+          ) : (
+            isEdit ? 'Enregistrer' : "Créer l'athlète"
+          )}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>Annuler</Button>
       </div>
@@ -220,7 +260,9 @@ export function AthleteForm({
   );
 }
 
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+function Field({
+  label, required, children, error,
+}: { label: string; required?: boolean; children: React.ReactNode; error?: string }) {
   return (
     <div className="flex flex-col gap-1.5">
       <Label>
@@ -228,6 +270,9 @@ function Field({ label, required, children }: { label: string; required?: boolea
         {required && <span className="ml-0.5 text-[#DC2626]">*</span>}
       </Label>
       {children}
+      {error && (
+        <span className="text-xs text-[#DC2626] font-medium mt-0.5">{error}</span>
+      )}
     </div>
   );
 }

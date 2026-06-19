@@ -75,8 +75,19 @@ export const clientsApi = {
 };
 
 // ── Prestations ───────────────────────────────────────────────────────────────
+export interface PrestationInput {
+  nom: string;
+  type: 'Conseil' | 'Gestion_carriere' | 'Camp' | 'Stage';
+  prixBase: number;
+  dureeEstimee?: string;
+  description?: string;
+  isActive?: boolean;
+}
 export const prestationsApi = {
   list: (activesOnly = true) => api.get('/prestations', { params: activesOnly ? { actives: 'true' } : {} }),
+  create: (data: PrestationInput) => api.post('/prestations', data),
+  update: (id: string, data: Partial<PrestationInput>) => api.patch(`/prestations/${id}`, data),
+  delete: (id: string) => api.delete(`/prestations/${id}`),
 };
 
 // ── Devis ─────────────────────────────────────────────────────────────────────
@@ -185,7 +196,7 @@ export const contratsApi = {
   get: (id: string) => api.get(`/contrats/${id}`),
   generate: (data: unknown) => api.post('/contrats/generate', data),
   sign: (id: string, partie: 'CLIENT' | 'PRESTATAIRE') => api.post(`/contrats/${id}/sign`, { partie }),
-  pdf: (id: string) => api.get(`/contrats/${id}/pdf`),
+  pdf: (id: string) => openPdf(`/contrats/${id}/pdf`),
 };
 
 // ── Settings ──────────────────────────────────────────────────────────────────

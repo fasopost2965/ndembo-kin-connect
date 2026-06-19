@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { dashboardApi } from '@/lib/api';
 
 // ── Icons ──
@@ -165,13 +166,24 @@ const CARD_STYLE: React.CSSProperties = {
 };
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [kpis, setKpis] = useState<{
     athletesActifs: number; chiffreAffaires: number; pipeline: number; tauxConversion: number;
   } | null>(null);
+  const [actionOpen, setActionOpen] = useState(false);
+  const [period, setPeriod] = useState<'mensuel' | 'trimestriel'>('mensuel');
 
   useEffect(() => {
     dashboardApi.kpis().then(r => setKpis(r.data)).catch(() => null);
   }, []);
+
+  // Close action dropdown when clicking outside
+  useEffect(() => {
+    if (!actionOpen) return;
+    const handler = () => setActionOpen(false);
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, [actionOpen]);
 
   const chartMax = Math.max(...CHART_DATA.map(d => d.value));
 
@@ -211,12 +223,45 @@ export default function DashboardPage() {
               <MI name="notifications" size={18} style={{ color: '#64748B' }} />
               <div className="absolute top-[7px] right-[7px] w-[7px] h-[7px] rounded-full" style={{ background: '#EF4444', border: '1.5px solid #F0F2F5' }} />
             </div>
-            <div
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] cursor-pointer text-[13px] font-bold"
-              style={{ background: '#07101A', color: '#FCD116' }}
-            >
-              <MI name="add" size={16} style={{ color: '#FCD116' }} />
-              Action rapide
+            <div style={{ position: 'relative' }}>
+              <div
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] cursor-pointer text-[13px] font-bold"
+                style={{ background: '#07101A', color: '#FCD116' }}
+                onClick={e => { e.stopPropagation(); setActionOpen(o => !o); }}
+              >
+                <MI name="add" size={16} style={{ color: '#FCD116' }} />
+                Action rapide
+                <MI name={actionOpen ? 'expand_less' : 'expand_more'} size={16} style={{ color: '#FCD116' }} />
+              </div>
+              {actionOpen && (
+                <div
+                  style={{
+                    position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 50,
+                    background: '#fff', borderRadius: 14, boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
+                    border: '1px solid #E2E8F0', padding: 6, minWidth: 210,
+                  }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  {[
+                    { icon: 'directions_run', label: 'Nouvel athlète',       path: '/athletes' },
+                    { icon: 'request_quote',  label: 'Nouveau devis',        path: '/devis' },
+                    { icon: 'description',    label: 'Générer un contrat',   path: '/contrats' },
+                    { icon: 'apartment',      label: 'Nouveau client',       path: '/clients' },
+                  ].map(item => (
+                    <button
+                      key={item.path}
+                      onClick={() => { setActionOpen(false); router.push(item.path); }}
+                      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-[10px] text-left text-[13px] font-semibold transition-colors"
+                      style={{ color: '#0F172A', background: 'none', border: 'none', cursor: 'pointer' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = '#F8FAFC')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                    >
+                      <MI name={item.icon} size={16} style={{ color: '#3A6B84' }} />
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -290,11 +335,13 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex gap-0.5 rounded-lg p-0.5" style={{ background: '#F1F5F9' }}>
                   <div className="px-3 py-1.5 rounded-md text-[11px] font-bold cursor-pointer"
-                    style={{ background: '#07101A', color: '#FCD116' }}>
+                    onClick={() => setPeriod('mensuel')}
+                    style={{ background: period === 'mensuel' ? '#07101A' : 'transparent', color: period === 'mensuel' ? '#FCD116' : '#94A3B8' }}>
                     Mensuel
                   </div>
                   <div className="px-3 py-1.5 rounded-md text-[11px] font-medium cursor-pointer"
-                    style={{ color: '#94A3B8' }}>
+                    onClick={() => setPeriod('trimestriel')}
+                    style={{ background: period === 'trimestriel' ? '#07101A' : 'transparent', color: period === 'trimestriel' ? '#FCD116' : '#94A3B8' }}>
                     Trimestriel
                   </div>
                 </div>
@@ -362,7 +409,7 @@ export default function DashboardPage() {
             <div style={{ ...CARD_STYLE, padding: 22, animation: 'fadeInUp 0.4s ease both', animationDelay: '280ms' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <div style={{ fontSize: 15, fontWeight: 800, color: '#0F172A' }}>Événements prochains</div>
-                <button style={{ fontSize: 12, fontWeight: 600, color: '#3A6B84', background: 'none', border: 'none', cursor: 'pointer' }}>+ Ajouter</button>
+                <button onClick={() => router.push('/jalons')} style={{ fontSize: 12, fontWeight: 600, color: '#3A6B84', background: 'none', border: 'none', cursor: 'pointer' }}>+ Ajouter</button>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {EVENTS.map((ev, i) => (

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { contratsApi, clientsApi, athletesApi } from '@/lib/api';
+import { contratsApi, clientsApi, athletesApi, openPdf } from '@/lib/api';
 import { formatMontant } from '@/lib/utils';
 
 function MI({ name, size = 16, style }: { name: string; size?: number; style?: React.CSSProperties }) {
@@ -65,6 +65,13 @@ const TYPE_LABELS: Record<string, string> = {
   REPRESENTATION: "Contrat de représentation d'athlète",
   PRESTATION:     'Contrat de prestation de services',
   PARTENARIAT:    'Contrat de partenariat commercial',
+};
+
+const TYPE_META: Record<string, { icon: string; desc: string }> = {
+  MANAGEMENT:     { icon: 'manage_accounts', desc: 'Gestion de carrière sportive complète' },
+  REPRESENTATION: { icon: 'person_pin',      desc: "Représentation officielle de l'athlète" },
+  PRESTATION:     { icon: 'handshake',       desc: 'Services ponctuels ou récurrents' },
+  PARTENARIAT:    { icon: 'groups',          desc: 'Accord de collaboration commerciale' },
 };
 
 const SERVICES = [
@@ -169,7 +176,7 @@ function Checkbox({ label, checked, onChange }: { label: string; checked: boolea
   );
 }
 
-function GenerateModal({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
+function GenerateModal({ onClose, onDone }: { onClose: () => void; onDone: (numero?: string) => void }) {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<GenForm>(INIT_FORM);
   const [clients, setClients] = useState<Client[]>([]);
@@ -214,7 +221,7 @@ function GenerateModal({ onClose, onDone }: { onClose: () => void; onDone: () =>
       if (form.confidentialite) clauses.push('confidentialite');
       if (form.droitImage) clauses.push('image');
 
-      await contratsApi.generate({
+      const res = await contratsApi.generate({
         clientId:    form.clientId,
         athleteId:   form.athleteId || undefined,
         typeContrat: form.typeContrat,
@@ -224,7 +231,8 @@ function GenerateModal({ onClose, onDone }: { onClose: () => void; onDone: () =>
         prestations: form.prestations,
         clauses,
       });
-      onDone();
+      const numero = res?.data?.numero || res?.data?.data?.numero;
+      onDone(numero);
     } catch (e: any) {
       setError(e?.response?.data?.message || 'Erreur lors de la génération du contrat.');
     } finally {
@@ -291,16 +299,29 @@ function GenerateModal({ onClose, onDone }: { onClose: () => void; onDone: () =>
             </div>
             <div>
               <label style={LABEL_STYLE}>Type de contrat <span style={{ color: '#EF4444' }}>*</span></label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {Object.entries(TYPE_LABELS).map(([val, label]) => (
-                  <label key={val} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', padding: '11px 14px', border: `1.5px solid ${form.typeContrat === val ? '#07101A' : '#E2E8F0'}`, borderRadius: 10, background: form.typeContrat === val ? '#F8FAFC' : '#fff' }}>
-                    <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${form.typeContrat === val ? '#07101A' : '#CBD5E1'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      {form.typeContrat === val && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#07101A' }} />}
-                    </div>
-                    <span style={{ fontSize: 13.5, fontWeight: form.typeContrat === val ? 700 : 500, color: form.typeContrat === val ? '#0F172A' : '#475569' }}>{label}</span>
-                    <input type="radio" value={val} checked={form.typeContrat === val} onChange={e => set('typeContrat')(e.target.value)} style={{ display: 'none' }} />
-                  </label>
-                ))}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                {Object.entries(TYPE_LABELS).map(([val, label]) => {
+                  const meta = TYPE_META[val];
+                  const active = form.typeContrat === val;
+                  return (
+                    <label key={val} onClick={() => set('typeContrat')(val)}
+                      style={{ display: 'flex', flexDirection: 'column', gap: 8, cursor: 'pointer', padding: '14px 16px', border: `2px solid ${active ? '#07101A' : '#E2E8F0'}`, borderRadius: 12, background: active ? '#F8FAFC' : '#fff', transition: 'border-color 0.15s, background 0.15s', position: 'relative' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ width: 36, height: 36, borderRadius: 9, background: active ? '#07101A' : '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.15s' }}>
+                          <MI name={meta.icon} size={18} style={{ color: active ? '#FCD116' : '#94A3B8' }} />
+                        </div>
+                        <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${active ? '#07101A' : '#CBD5E1'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          {active && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#07101A' }} />}
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: active ? 700 : 600, color: active ? '#0F172A' : '#334155', lineHeight: 1.3 }}>{label.replace('Contrat de ', '').replace("Contrat d'", '')}</div>
+                        <div style={{ fontSize: 11.5, color: '#94A3B8', marginTop: 3, lineHeight: 1.4 }}>{meta.desc}</div>
+                      </div>
+                      <input type="radio" value={val} checked={active} onChange={() => set('typeContrat')(val)} style={{ display: 'none' }} />
+                    </label>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -336,15 +357,30 @@ function GenerateModal({ onClose, onDone }: { onClose: () => void; onDone: () =>
 
         {/* ── Step 2: Prestations ── */}
         {step === 2 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ fontSize: 13, color: '#64748B', marginBottom: 6 }}>
-              Sélectionnez les prestations NKC incluses dans ce contrat :
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+              <div style={{ fontSize: 13, color: '#64748B' }}>
+                Sélectionnez les prestations NKC incluses dans ce contrat :
+              </div>
+              <button
+                type="button"
+                onClick={() => setForm(f => ({
+                  ...f,
+                  prestations: f.prestations.length === SERVICES.length ? [] : [...SERVICES],
+                }))}
+                style={{ fontSize: 12, fontWeight: 600, color: '#3A6B84', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 7, padding: '5px 12px', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5 }}
+              >
+                <MI name={form.prestations.length === SERVICES.length ? 'deselect' : 'select_all'} size={14} style={{ color: '#3A6B84' }} />
+                {form.prestations.length === SERVICES.length ? 'Tout désélectionner' : 'Tout sélectionner'}
+              </button>
             </div>
-            {SERVICES.map(s => (
-              <Checkbox key={s} label={s} checked={form.prestations.includes(s)} onChange={() => togglePrestation(s)} />
-            ))}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {SERVICES.map(s => (
+                <Checkbox key={s} label={s} checked={form.prestations.includes(s)} onChange={() => togglePrestation(s)} />
+              ))}
+            </div>
             {form.prestations.length === 0 && (
-              <div style={{ fontSize: 12, color: '#94A3B8', padding: '8px 0' }}>
+              <div style={{ fontSize: 12, color: '#94A3B8', padding: '4px 0' }}>
                 Aucune prestation sélectionnée — l'article 3 sera défini selon accord particulier.
               </div>
             )}
@@ -354,6 +390,61 @@ function GenerateModal({ onClose, onDone }: { onClose: () => void; onDone: () =>
         {/* ── Step 3: Aperçu ── */}
         {step === 3 && (
           <div>
+            {/* Document preview card */}
+            <div style={{ background: '#fff', border: '2px solid #E2E8F0', borderRadius: 16, overflow: 'hidden', marginBottom: 16, boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
+              {/* Doc header bar */}
+              <div style={{ background: '#07101A', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 9, background: '#FCD116', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <MI name="description" size={18} style={{ color: '#07101A' }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: '#fff', letterSpacing: '-0.2px' }}>
+                    {TYPE_LABELS[form.typeContrat]}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>Ndembo Kin Connect · Kinshasa, RDC</div>
+                </div>
+                <div style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, background: 'rgba(252,209,22,0.12)', color: '#FCD116', padding: '4px 11px', borderRadius: 20, border: '1px solid rgba(252,209,22,0.2)' }}>
+                  EN PRÉPARATION
+                </div>
+              </div>
+              {/* Parties */}
+              <div style={{ padding: '14px 20px', background: '#FAFBFC', borderBottom: '1px solid #E8ECF1', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Prestataire</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>Ndembo Kin Connect</div>
+                  <div style={{ fontSize: 11, color: '#64748B' }}>Agence de management sportif</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Client</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>{selectedClient?.nom || '—'}</div>
+                  {selectedAthlete && <div style={{ fontSize: 11, color: '#64748B' }}>Athlète : {selectedAthlete.prenom} {selectedAthlete.nom}</div>}
+                </div>
+              </div>
+              {/* Dates */}
+              {(form.dateDebut || form.dateFin) && (
+                <div style={{ padding: '10px 20px', background: '#fff', borderBottom: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <MI name="date_range" size={15} style={{ color: '#3A6B84', flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#334155' }}>
+                    {form.dateDebut && new Date(form.dateDebut).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                    {form.dateDebut && form.dateFin && ' → '}
+                    {form.dateFin && new Date(form.dateFin).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                  </span>
+                  {form.montant && (
+                    <span style={{ marginLeft: 'auto', fontSize: 14, fontWeight: 800, color: '#059669', fontFamily: 'monospace' }}>
+                      {Number(form.montant).toLocaleString('fr-FR')} USD
+                    </span>
+                  )}
+                </div>
+              )}
+              {/* Article count */}
+              <div style={{ padding: '10px 20px', background: '#fff', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <MI name="gavel" size={15} style={{ color: '#94A3B8' }} />
+                <span style={{ fontSize: 12, color: '#64748B' }}>
+                  {12 + (form.nonConcurrence ? 1 : 0) + (form.confidentialite ? 1 : 0) + (form.droitImage ? 1 : 0)} articles · droit congolais (RDC) · prêt pour signature électronique
+                </span>
+              </div>
+            </div>
+
             <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 14, padding: '20px 22px', marginBottom: 16 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 14 }}>Récapitulatif</div>
               {[
@@ -433,6 +524,8 @@ export default function ContratsPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [inputFocus, setInputFocus] = useState(false);
   const [showGenModal, setShowGenModal] = useState(false);
+  const [successBanner, setSuccessBanner] = useState('');
+  const [newContratId, setNewContratId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -679,12 +772,13 @@ export default function ContratsPage() {
             {/* Footer */}
             <div style={{ padding: '16px 24px', borderTop: '1px solid #E8ECF1', display: 'flex', flexDirection: 'column', gap: 8 }}>
               <button
+                onClick={() => contratsApi.sign(selected.id, 'CLIENT').then(() => load()).catch(() => null)}
                 style={{ width: '100%', padding: 12, background: '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                 <MI name="draw" size={16} style={{ color: '#FCD116' }} />
                 Envoyer pour signature
               </button>
               <button
-                onClick={() => contratsApi.pdf(selected.id)}
+                onClick={() => openPdf(`/contrats/${selected.id}/pdf`)}
                 style={{ width: '100%', padding: 11, background: '#F1F5F9', color: '#475569', fontSize: 13, fontWeight: 600, border: '1px solid #E2E8F0', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
                 <MI name="picture_as_pdf" size={15} />
                 Télécharger le PDF

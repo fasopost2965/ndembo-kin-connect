@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { FileText, Wallet, Smartphone } from 'lucide-react';
 import { facturesApi } from '@/lib/api';
 import { formatMontant } from '@/lib/utils';
@@ -52,9 +52,11 @@ export default function FacturesPage() {
 }
 
 function FacturesView() {
+  const router = useRouter();
   const focusId = useSearchParams().get('focus');
   const [rows, setRows] = useState<Facture[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<Facture | null>(null);
   const [payMode, setPayMode] = useState<PayMode>('none');
@@ -90,6 +92,13 @@ function FacturesView() {
   const impayees = rows.filter(f => f.statutPaiement === 'IMPAYEE').length;
   const payees = rows.filter(f => f.statutPaiement === 'PAYEE').length;
 
+  const filteredRows = search
+    ? rows.filter(f => {
+        const q = search.toLowerCase();
+        return f.numero.toLowerCase().includes(q) || (f.client?.nom ?? '').toLowerCase().includes(q);
+      })
+    : rows;
+
   return (
     <div className="flex flex-col min-h-screen" style={{ background: '#F0F2F5' }}>
 
@@ -114,12 +123,12 @@ function FacturesView() {
         {/* Search */}
         <div style={{ position: 'relative' }}>
           <MI name="search" size={16} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', pointerEvents: 'none' }} />
-          <input type="text" placeholder="Rechercher…"
+          <input type="text" placeholder="Rechercher…" value={search} onChange={e => setSearch(e.target.value)}
             style={{ padding: '8px 14px 8px 36px', border: '1.5px solid #E2E8F0', borderRadius: 9, fontSize: 13, fontFamily: 'inherit', color: '#0F172A', outline: 'none', background: '#F8FAFC', width: 200 }} />
         </div>
-        <button style={{ padding: '8px 18px', background: '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 9, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 7 }}>
+        <button onClick={() => router.push('/devis')} style={{ padding: '8px 18px', background: '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 9, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 7 }}>
           <MI name="add" size={15} style={{ color: '#FCD116' }} />
-          Nouvelle facture
+          Créer depuis un devis
         </button>
       </div>
 
@@ -167,10 +176,10 @@ function FacturesView() {
               [...Array(4)].map((_, i) => (
                 <TableRow key={i}><TableCell colSpan={7}><div className="h-9 animate-pulse rounded-md bg-[#F1F5F9]" /></TableCell></TableRow>
               ))
-            ) : rows.length === 0 ? (
+            ) : filteredRows.length === 0 ? (
               <TableRow><TableCell colSpan={7} className="py-12 text-center text-sm text-[#94A3B8]">Aucune facture. Convertissez un devis validé.</TableCell></TableRow>
             ) : (
-              rows.map((f) => {
+              filteredRows.map((f) => {
                 const sb = factureStatutBadge(f.statutPaiement);
                 const fmt = (d?: string) => d ? new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
                 return (
