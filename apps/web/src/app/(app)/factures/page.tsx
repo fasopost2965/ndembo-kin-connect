@@ -75,6 +75,7 @@ function FacturesView() {
 
   const loadDetail = useCallback(async (id: string) => {
     const { data } = await facturesApi.get(id);
+    if (typeof data.lignes === 'string') data.lignes = JSON.parse(data.lignes);
     setDetail(data);
   }, []);
 

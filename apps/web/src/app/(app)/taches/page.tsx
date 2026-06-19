@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { tachesApi } from '@/lib/api';
+import { tachesApi, projetsApi } from '@/lib/api';
 
 function MI({ name, size = 16, color }: { name: string; size?: number; color?: string }) {
   return (
@@ -32,13 +32,19 @@ const PRIO_META: Record<string, { bg: string; c: string }> = {
 const AVATAR_COLORS = ['#3A6B84', '#1D4ED8', '#059669', '#B45309', '#6D28D9'];
 
 interface Tache { id: string; titre: string; projet: string; assignee: string; priorite: string; echeance: string; statut: Statut }
+interface ProjetLite { id: string; numero: string; objet: string }
 
-// Mapping priorité enum API → libellé d'affichage (et filtre)
 const PRIO_LABEL: Record<string, string> = {
   URGENTE: 'Haute', HAUTE: 'Haute', NORMALE: 'Moyenne', BASSE: 'Basse',
 };
 
 const HEADERS = ['Tâche', 'Assigné à', 'Priorité', 'Échéance', 'Statut'];
+
+const INPUT_STYLE: React.CSSProperties = {
+  width: '100%', padding: '10px 13px', border: '1.5px solid #E2E8F0', borderRadius: 9,
+  fontSize: 14, fontFamily: 'inherit', color: '#0F172A', outline: 'none', background: '#F8FAFC',
+  boxSizing: 'border-box',
+};
 
 function initials(name: string) {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('');
@@ -54,7 +60,15 @@ export default function TachesPage() {
   const [data, setData] = useState<Tache[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  // Modal state
+  const [showModal, setShowModal] = useState(false);
+  const [projets, setProjets] = useState<ProjetLite[]>([]);
+  const [form, setForm] = useState({ titre: '', projetId: '', priorite: 'NORMALE', dateEcheance: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
+
+  const loadTaches = () => {
+    setLoading(true);
     tachesApi.list()
       .then(({ data }) => {
         const rows: Tache[] = (data || []).map((t: any) => ({
@@ -70,7 +84,17 @@ export default function TachesPage() {
       })
       .catch(() => setData([]))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { loadTaches(); }, []);
+
+  useEffect(() => {
+    if (showModal && projets.length === 0) {
+      projetsApi.list({ limit: 200 }).then(r => {
+        setProjets(r.data.data || r.data || []);
+      }).catch(() => {});
+    }
+  }, [showModal]);
 
   const filtered = data.filter(t => {
     const q = search.toLowerCase();
@@ -85,6 +109,29 @@ export default function TachesPage() {
     { label: 'En attente', value: cnt('EN_ATTENTE'), dot: '#F59E0B' },
     { label: 'Terminées',  value: cnt('TERMINE'),    dot: '#059669' },
   ];
+
+  const handleSubmit = async () => {
+    if (!form.titre.trim()) { setFormError('Le titre est requis.'); return; }
+    if (!form.projetId) { setFormError('Veuillez sélectionner un projet.'); return; }
+    setFormError('');
+    setSubmitting(true);
+    try {
+      await tachesApi.create({
+        projetId: form.projetId,
+        titre: form.titre,
+        priorite: form.priorite,
+        colonne: 'TODO',
+        ...(form.dateEcheance && { dateEcheance: form.dateEcheance }),
+      } as any);
+      setShowModal(false);
+      setForm({ titre: '', projetId: '', priorite: 'NORMALE', dateEcheance: '' });
+      loadTaches();
+    } catch (e: any) {
+      setFormError(e?.response?.data?.message || 'Erreur lors de la création.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', minHeight: '100vh', background: '#F0F2F5', display: 'flex', flexDirection: 'column' }}>
@@ -126,6 +173,7 @@ export default function TachesPage() {
             </span>
           </div>
           <button
+            onClick={() => setShowModal(true)}
             style={{ padding: '9px 18px', background: '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap' }}
             onMouseEnter={e => (e.currentTarget.style.background = '#132730')}
             onMouseLeave={e => (e.currentTarget.style.background = '#07101A')}
@@ -217,6 +265,131 @@ export default function TachesPage() {
           )}
         </div>
       </div>
+
+      {/* ── Modal Nouvelle tâche ── */}
+      {showModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: 'rgba(7,16,26,0.55)', backdropFilter: 'blur(3px)' }}
+          onClick={e => { if (e.target === e.currentTarget) setShowModal(false); }}
+        >
+          <div
+            style={{
+              background: '#fff', borderRadius: 20, boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
+              width: '100%', maxWidth: 460, padding: '28px 28px 24px',
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
+              <div>
+                <div style={{ fontSize: 17, fontWeight: 800, color: '#0F172A' }}>Nouvelle tâche</div>
+                <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 2 }}>Ajouter une tâche à un projet</div>
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid #E2E8F0', background: '#F8FAFC', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <MI name="close" size={16} color="#64748B" />
+              </button>
+            </div>
+
+            {/* Form */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Titre */}
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
+                  Titre <span style={{ color: '#EF4444' }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ex : Préparer contrat de transfert"
+                  value={form.titre}
+                  onChange={e => setForm(f => ({ ...f, titre: e.target.value }))}
+                  style={INPUT_STYLE}
+                />
+              </div>
+
+              {/* Projet */}
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
+                  Projet <span style={{ color: '#EF4444' }}>*</span>
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <select
+                    value={form.projetId}
+                    onChange={e => setForm(f => ({ ...f, projetId: e.target.value }))}
+                    style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 36, cursor: 'pointer' }}
+                  >
+                    <option value="">Sélectionner un projet…</option>
+                    {projets.map(p => (
+                      <option key={p.id} value={p.id}>{p.numero} — {p.objet}</option>
+                    ))}
+                  </select>
+                  <MI name="expand_more" size={16} color="#94A3B8" />
+                  <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'inline-flex' }}>
+                    <MI name="expand_more" size={16} color="#94A3B8" />
+                  </span>
+                </div>
+              </div>
+
+              {/* Priorité + Échéance */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Priorité</label>
+                  <div style={{ position: 'relative' }}>
+                    <select
+                      value={form.priorite}
+                      onChange={e => setForm(f => ({ ...f, priorite: e.target.value }))}
+                      style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 36, cursor: 'pointer' }}
+                    >
+                      <option value="URGENTE">Urgente</option>
+                      <option value="HAUTE">Haute</option>
+                      <option value="NORMALE">Normale</option>
+                      <option value="BASSE">Basse</option>
+                    </select>
+                    <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'inline-flex' }}>
+                      <MI name="expand_more" size={16} color="#94A3B8" />
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Date d'échéance</label>
+                  <input
+                    type="date"
+                    value={form.dateEcheance}
+                    onChange={e => setForm(f => ({ ...f, dateEcheance: e.target.value }))}
+                    style={INPUT_STYLE}
+                  />
+                </div>
+              </div>
+
+              {/* Error */}
+              {formError && (
+                <div style={{ fontSize: 13, color: '#EF4444', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8, padding: '9px 13px' }}>
+                  {formError}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
+              <button
+                onClick={() => setShowModal(false)}
+                style={{ padding: '10px 18px', background: '#F1F5F9', color: '#475569', fontSize: 13, fontWeight: 600, border: '1px solid #E2E8F0', borderRadius: 9, cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={submitting}
+                style={{ padding: '10px 22px', background: '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 9, cursor: submitting ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: submitting ? 0.7 : 1 }}
+              >
+                {submitting ? 'Création…' : 'Créer la tâche'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

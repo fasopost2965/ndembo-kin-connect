@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { contratsApi } from '@/lib/api';
+import { contratsApi, clientsApi, athletesApi } from '@/lib/api';
 import { formatMontant } from '@/lib/utils';
 
 function MI({ name, size = 16, style }: { name: string; size?: number; style?: React.CSSProperties }) {
@@ -60,6 +60,370 @@ function periode(c: Contrat): string {
 
 const COL = '1.2fr 2fr 1.4fr 1.4fr 1fr 1.2fr';
 
+const TYPE_LABELS: Record<string, string> = {
+  MANAGEMENT:     'Contrat de management sportif',
+  REPRESENTATION: "Contrat de représentation d'athlète",
+  PRESTATION:     'Contrat de prestation de services',
+  PARTENARIAT:    'Contrat de partenariat commercial',
+};
+
+const SERVICES = [
+  'Gestion de carrière sportive',
+  'Scouting et placement en club',
+  'Négociation de transferts',
+  'Communication & image publique',
+  'Organisation de stages/camps',
+  'Accompagnement médical',
+  'Gestion des sponsors',
+  'Formation et développement',
+];
+
+const INPUT_STYLE: React.CSSProperties = {
+  width: '100%', padding: '10px 13px', border: '1.5px solid #E2E8F0', borderRadius: 9,
+  fontSize: 14, fontFamily: 'inherit', color: '#0F172A', outline: 'none', background: '#F8FAFC',
+  boxSizing: 'border-box',
+};
+
+const LABEL_STYLE: React.CSSProperties = {
+  display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6,
+};
+
+// ── Multi-step modal ──────────────────────────────────────────────────────────
+interface GenForm {
+  clientId: string;
+  athleteId: string;
+  typeContrat: string;
+  montant: string;
+  dateDebut: string;
+  dateFin: string;
+  nonConcurrence: boolean;
+  confidentialite: boolean;
+  droitImage: boolean;
+  prestations: string[];
+}
+
+const INIT_FORM: GenForm = {
+  clientId: '', athleteId: '', typeContrat: 'MANAGEMENT',
+  montant: '', dateDebut: '', dateFin: '',
+  nonConcurrence: false, confidentialite: false, droitImage: false,
+  prestations: [],
+};
+
+const STEPS = ['Parties', 'Conditions', 'Prestations', 'Aperçu'];
+
+function StepIndicator({ current, total }: { current: number; total: number }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 28 }}>
+      {STEPS.map((label, i) => {
+        const done = i < current;
+        const active = i === current;
+        return (
+          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+            {/* connector left */}
+            {i > 0 && (
+              <div style={{
+                position: 'absolute', left: 0, top: 14, width: '50%', height: 2,
+                background: done || active ? '#07101A' : '#E2E8F0',
+              }} />
+            )}
+            {/* connector right */}
+            {i < total - 1 && (
+              <div style={{
+                position: 'absolute', right: 0, top: 14, width: '50%', height: 2,
+                background: done ? '#07101A' : '#E2E8F0',
+              }} />
+            )}
+            {/* dot */}
+            <div style={{
+              width: 28, height: 28, borderRadius: '50%', zIndex: 1,
+              background: active ? '#07101A' : done ? '#07101A' : '#E2E8F0',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: active ? '2px solid #FCD116' : 'none',
+            }}>
+              {done
+                ? <MI name="check" size={14} style={{ color: '#FCD116' }} />
+                : <span style={{ fontSize: 11, fontWeight: 800, color: active ? '#FCD116' : '#94A3B8' }}>{i + 1}</span>
+              }
+            </div>
+            <div style={{ fontSize: 10, fontWeight: active ? 700 : 500, color: active ? '#07101A' : '#94A3B8', marginTop: 5, textAlign: 'center', whiteSpace: 'nowrap' }}>
+              {label}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Checkbox({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', padding: '10px 14px', border: `1.5px solid ${checked ? '#07101A' : '#E2E8F0'}`, borderRadius: 10, background: checked ? '#F8FAFC' : '#fff', userSelect: 'none' }}>
+      <div style={{
+        width: 18, height: 18, borderRadius: 5, border: `2px solid ${checked ? '#07101A' : '#CBD5E1'}`,
+        background: checked ? '#07101A' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      }}>
+        {checked && <MI name="check" size={12} style={{ color: '#FCD116' }} />}
+      </div>
+      <span style={{ fontSize: 13.5, fontWeight: 500, color: '#334155' }}>{label}</span>
+    </label>
+  );
+}
+
+function GenerateModal({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
+  const [step, setStep] = useState(0);
+  const [form, setForm] = useState<GenForm>(INIT_FORM);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [athletes, setAthletes] = useState<Athlete[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    clientsApi.list({ limit: 200 }).then(r => setClients(r.data.data || r.data || [])).catch(() => {});
+    athletesApi.list({ limit: 200 }).then(r => setAthletes(r.data.data || r.data || [])).catch(() => {});
+  }, []);
+
+  const set = <K extends keyof GenForm>(key: K) => (val: GenForm[K]) =>
+    setForm(f => ({ ...f, [key]: val }));
+
+  const togglePrestation = (s: string) =>
+    setForm(f => ({
+      ...f,
+      prestations: f.prestations.includes(s) ? f.prestations.filter(x => x !== s) : [...f.prestations, s],
+    }));
+
+  const validate = () => {
+    if (step === 0) {
+      if (!form.clientId) { setError('Veuillez sélectionner un client.'); return false; }
+    }
+    if (step === 1) {
+      if (!form.dateDebut || !form.dateFin) { setError('Veuillez renseigner les dates de début et de fin.'); return false; }
+    }
+    setError('');
+    return true;
+  };
+
+  const next = () => { if (validate()) setStep(s => s + 1); };
+  const prev = () => { setError(''); setStep(s => s - 1); };
+
+  const handleGenerate = async () => {
+    setSubmitting(true);
+    setError('');
+    try {
+      const clauses: string[] = [];
+      if (form.nonConcurrence) clauses.push('non-concurrence');
+      if (form.confidentialite) clauses.push('confidentialite');
+      if (form.droitImage) clauses.push('image');
+
+      await contratsApi.generate({
+        clientId:    form.clientId,
+        athleteId:   form.athleteId || undefined,
+        typeContrat: form.typeContrat,
+        montant:     form.montant ? Number(form.montant) : undefined,
+        dateDebut:   form.dateDebut || undefined,
+        dateFin:     form.dateFin || undefined,
+        prestations: form.prestations,
+        clauses,
+      });
+      onDone();
+    } catch (e: any) {
+      setError(e?.response?.data?.message || 'Erreur lors de la génération du contrat.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const selectedClient = clients.find(c => c.id === form.clientId);
+  const selectedAthlete = athletes.find(a => a.id === form.athleteId);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: 'rgba(7,16,26,0.6)', backdropFilter: 'blur(4px)' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div style={{
+        background: '#fff', borderRadius: 22, boxShadow: '0 24px 80px rgba(0,0,0,0.22)',
+        width: '100%', maxWidth: 640, maxHeight: '90vh', overflowY: 'auto',
+        padding: '32px 32px 28px',
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 26 }}>
+          <div>
+            <div style={{ fontSize: 19, fontWeight: 800, color: '#0F172A' }}>Générer un contrat</div>
+            <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 2 }}>Ndembo Kin Connect — Contrat juridiquement conforme (droit congolais)</div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{ width: 32, height: 32, borderRadius: 9, border: '1px solid #E2E8F0', background: '#F8FAFC', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+          >
+            <MI name="close" size={16} style={{ color: '#64748B' }} />
+          </button>
+        </div>
+
+        <StepIndicator current={step} total={STEPS.length} />
+
+        {/* ── Step 0: Parties ── */}
+        {step === 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <label style={LABEL_STYLE}>Client <span style={{ color: '#EF4444' }}>*</span></label>
+              <div style={{ position: 'relative' }}>
+                <select value={form.clientId} onChange={e => set('clientId')(e.target.value)} style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 36, cursor: 'pointer' }}>
+                  <option value="">Sélectionner un client…</option>
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}
+                </select>
+                <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                  <MI name="expand_more" size={16} style={{ color: '#94A3B8' }} />
+                </span>
+              </div>
+            </div>
+            <div>
+              <label style={LABEL_STYLE}>Athlète (optionnel)</label>
+              <div style={{ position: 'relative' }}>
+                <select value={form.athleteId} onChange={e => set('athleteId')(e.target.value)} style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 36, cursor: 'pointer' }}>
+                  <option value="">Aucun athlète</option>
+                  {athletes.map(a => <option key={a.id} value={a.id}>{a.prenom} {a.nom}</option>)}
+                </select>
+                <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                  <MI name="expand_more" size={16} style={{ color: '#94A3B8' }} />
+                </span>
+              </div>
+            </div>
+            <div>
+              <label style={LABEL_STYLE}>Type de contrat <span style={{ color: '#EF4444' }}>*</span></label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {Object.entries(TYPE_LABELS).map(([val, label]) => (
+                  <label key={val} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', padding: '11px 14px', border: `1.5px solid ${form.typeContrat === val ? '#07101A' : '#E2E8F0'}`, borderRadius: 10, background: form.typeContrat === val ? '#F8FAFC' : '#fff' }}>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${form.typeContrat === val ? '#07101A' : '#CBD5E1'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {form.typeContrat === val && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#07101A' }} />}
+                    </div>
+                    <span style={{ fontSize: 13.5, fontWeight: form.typeContrat === val ? 700 : 500, color: form.typeContrat === val ? '#0F172A' : '#475569' }}>{label}</span>
+                    <input type="radio" value={val} checked={form.typeContrat === val} onChange={e => set('typeContrat')(e.target.value)} style={{ display: 'none' }} />
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Step 1: Conditions ── */}
+        {step === 1 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <label style={LABEL_STYLE}>Montant (USD)</label>
+              <input type="number" min="0" placeholder="Ex : 5000" value={form.montant} onChange={e => set('montant')(e.target.value)} style={INPUT_STYLE} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={LABEL_STYLE}>Date début <span style={{ color: '#EF4444' }}>*</span></label>
+                <input type="date" value={form.dateDebut} onChange={e => set('dateDebut')(e.target.value)} style={INPUT_STYLE} />
+              </div>
+              <div>
+                <label style={LABEL_STYLE}>Date fin <span style={{ color: '#EF4444' }}>*</span></label>
+                <input type="date" value={form.dateFin} onChange={e => set('dateFin')(e.target.value)} style={INPUT_STYLE} />
+              </div>
+            </div>
+            <div>
+              <label style={{ ...LABEL_STYLE, marginBottom: 10 }}>Clauses spéciales</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <Checkbox label="Clause de non-concurrence" checked={form.nonConcurrence} onChange={set('nonConcurrence')} />
+                <Checkbox label="Clause de confidentialité" checked={form.confidentialite} onChange={set('confidentialite')} />
+                <Checkbox label="Droit à l'image" checked={form.droitImage} onChange={set('droitImage')} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Step 2: Prestations ── */}
+        {step === 2 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ fontSize: 13, color: '#64748B', marginBottom: 6 }}>
+              Sélectionnez les prestations NKC incluses dans ce contrat :
+            </div>
+            {SERVICES.map(s => (
+              <Checkbox key={s} label={s} checked={form.prestations.includes(s)} onChange={() => togglePrestation(s)} />
+            ))}
+            {form.prestations.length === 0 && (
+              <div style={{ fontSize: 12, color: '#94A3B8', padding: '8px 0' }}>
+                Aucune prestation sélectionnée — l'article 3 sera défini selon accord particulier.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Step 3: Aperçu ── */}
+        {step === 3 && (
+          <div>
+            <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 14, padding: '20px 22px', marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 14 }}>Récapitulatif</div>
+              {[
+                { icon: 'apartment',  label: 'Client',          value: selectedClient?.nom || '—' },
+                { icon: 'sports',     label: 'Athlète',         value: selectedAthlete ? `${selectedAthlete.prenom} ${selectedAthlete.nom}` : 'Aucun' },
+                { icon: 'description', label: 'Type',           value: TYPE_LABELS[form.typeContrat] || form.typeContrat },
+                { icon: 'payments',   label: 'Montant',         value: form.montant ? `${Number(form.montant).toLocaleString('fr-FR')} USD` : '—' },
+                { icon: 'date_range', label: 'Période',         value: form.dateDebut && form.dateFin ? `${form.dateDebut} → ${form.dateFin}` : '—' },
+                { icon: 'checklist',  label: 'Prestations',     value: form.prestations.length > 0 ? `${form.prestations.length} service(s)` : 'Aucune' },
+                { icon: 'gavel',      label: 'Clauses spéciales', value: [form.nonConcurrence && 'Non-concurrence', form.confidentialite && 'Confidentialité', form.droitImage && 'Droit à l\'image'].filter(Boolean).join(', ') || 'Aucune' },
+              ].map(row => (
+                <div key={row.label} style={{ display: 'flex', alignItems: 'center', gap: 12, paddingBottom: 11, marginBottom: 11, borderBottom: '1px solid #F1F5F9' }}>
+                  <MI name={row.icon} size={16} style={{ color: '#94A3B8', flexShrink: 0 }} />
+                  <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 12, color: '#94A3B8' }}>{row.label}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: '#334155', textAlign: 'right', maxWidth: '60%' }}>{row.value}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ background: '#FEF9EE', border: '1px solid #FDE68A', borderRadius: 10, padding: '12px 16px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <MI name="info" size={16} style={{ color: '#B45309', flexShrink: 0, marginTop: 1 }} />
+              <div style={{ fontSize: 12.5, color: '#78350F', lineHeight: 1.5 }}>
+                Le contrat généré comprendra <strong>{12 + (form.nonConcurrence ? 1 : 0) + (form.confidentialite ? 1 : 0) + (form.droitImage ? 1 : 0)} articles</strong> conformes au droit congolais (RDC). Il sera immédiatement disponible pour signature électronique.
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div style={{ fontSize: 13, color: '#EF4444', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8, padding: '9px 13px', marginTop: 16 }}>
+            {error}
+          </div>
+        )}
+
+        {/* Navigation */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 28, paddingTop: 20, borderTop: '1px solid #F1F5F9' }}>
+          <button
+            onClick={step === 0 ? onClose : prev}
+            style={{ padding: '10px 18px', background: '#F1F5F9', color: '#475569', fontSize: 13, fontWeight: 600, border: '1px solid #E2E8F0', borderRadius: 9, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 7 }}
+          >
+            <MI name={step === 0 ? 'close' : 'arrow_back'} size={15} style={{ color: '#64748B' }} />
+            {step === 0 ? 'Annuler' : 'Précédent'}
+          </button>
+          {step < STEPS.length - 1 ? (
+            <button
+              onClick={next}
+              style={{ padding: '10px 22px', background: '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 9, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 7 }}
+            >
+              Suivant
+              <MI name="arrow_forward" size={15} style={{ color: '#FCD116' }} />
+            </button>
+          ) : (
+            <button
+              onClick={handleGenerate}
+              disabled={submitting}
+              style={{ padding: '11px 26px', background: submitting ? '#94A3B8' : '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 9, cursor: submitting ? 'not-allowed' : 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 8 }}
+            >
+              <MI name="auto_awesome" size={16} style={{ color: '#FCD116' }} />
+              {submitting ? 'Génération…' : 'Générer le contrat'}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main page ─────────────────────────────────────────────────────────────────
 export default function ContratsPage() {
   const [rows, setRows] = useState<Contrat[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,6 +432,7 @@ export default function ContratsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [inputFocus, setInputFocus] = useState(false);
+  const [showGenModal, setShowGenModal] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -158,7 +523,12 @@ export default function ContratsPage() {
             </select>
             <MI name="expand_more" size={15} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', pointerEvents: 'none' }} />
           </div>
-          <button style={{ padding: '9px 18px', background: '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 7 }}>
+          <button
+            onClick={() => setShowGenModal(true)}
+            style={{ padding: '9px 18px', background: '#07101A', color: '#FCD116', fontSize: 13, fontWeight: 700, border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 7 }}
+            onMouseEnter={e => (e.currentTarget.style.background = '#132730')}
+            onMouseLeave={e => (e.currentTarget.style.background = '#07101A')}
+          >
             <MI name="add" size={16} style={{ color: '#FCD116' }} />
             Générer un contrat
           </button>
@@ -228,7 +598,7 @@ export default function ContratsPage() {
                     <div style={{ fontSize: 11, color: '#94A3B8' }}>{c.client.nom}</div>
                   </div>
                 </div>
-                <div style={{ fontSize: 13, color: '#334155' }}>{c.typeContrat}</div>
+                <div style={{ fontSize: 13, color: '#334155' }}>{TYPE_LABELS[c.typeContrat] || c.typeContrat}</div>
                 <div style={{ fontSize: 12, color: '#64748B' }}>{periode(c)}</div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: '#059669', fontFamily: 'monospace' }}>
                   {c.montant ? formatMontant(c.montant) : '—'}
@@ -257,7 +627,7 @@ export default function ContratsPage() {
                 <MI name="close" size={16} style={{ color: '#fff' }} />
               </button>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', marginBottom: 6 }}>{selected.numero}</div>
-              <div style={{ fontSize: 19, fontWeight: 800, color: '#fff' }}>{selected.typeContrat}</div>
+              <div style={{ fontSize: 19, fontWeight: 800, color: '#fff' }}>{TYPE_LABELS[selected.typeContrat] || selected.typeContrat}</div>
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>
                 {selected.athlete ? `${selected.athlete.prenom} ${selected.athlete.nom}` : '—'} · {selected.client.nom}
               </div>
@@ -278,7 +648,7 @@ export default function ContratsPage() {
               {[
                 selected.athlete ? { icon: 'sports',     label: 'Athlète', value: `${selected.athlete.prenom} ${selected.athlete.nom}` } : null,
                 { icon: 'apartment', label: 'Client',    value: selected.client.nom },
-                { icon: 'category',  label: 'Type',      value: selected.typeContrat },
+                { icon: 'category',  label: 'Type',      value: TYPE_LABELS[selected.typeContrat] || selected.typeContrat },
                 { icon: 'date_range', label: 'Période', value: periode(selected) },
               ].filter(Boolean).map((info: any) => (
                 <div key={info.label} style={{ display: 'flex', alignItems: 'center', gap: 12, paddingBottom: 12, borderBottom: '1px solid #F1F5F9' }}>
@@ -322,6 +692,14 @@ export default function ContratsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Generate modal */}
+      {showGenModal && (
+        <GenerateModal
+          onClose={() => setShowGenModal(false)}
+          onDone={() => { setShowGenModal(false); load(); }}
+        />
       )}
     </div>
   );
