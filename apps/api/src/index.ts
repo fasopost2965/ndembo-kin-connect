@@ -34,7 +34,18 @@ const server = Fastify({ logger: true });
 
 async function main() {
   await server.register(cors, {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: (origin, cb) => {
+      // Allow localhost on any port (dev) and the configured FRONTEND_URL
+      const allowed = [
+        process.env.FRONTEND_URL || 'http://localhost:3000',
+        'http://localhost:3000',
+      ];
+      if (!origin || allowed.includes(origin) || /^http:\/\/localhost:\d+$/.test(origin)) {
+        cb(null, true);
+      } else {
+        cb(new Error('CORS not allowed'), false);
+      }
+    },
     credentials: true,
   });
 

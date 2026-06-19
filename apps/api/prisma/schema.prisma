@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -14,7 +14,7 @@ model User {
   email     String   @unique
   password  String
   name      String
-  role      Role     @default(COMMERCIAL)
+  role      String   @default("COMMERCIAL") // ADMIN | MANAGER | COMMERCIAL | COACH | COMPTABLE
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -29,23 +29,23 @@ model User {
 // ─── ATHLÈTES ─────────────────────────────────────────────────────────────────
 
 model Athlete {
-  id              String   @id @default(cuid())
-  nom             String
-  prenom          String
-  sport           String   // football | basketball | athletisme
-  poste           String
-  niveau          Niveau
-  clubActuel      String?
-  valeurMarchande Float?
-  nationalite     String   @default("RDC")
-  dateNaissance   DateTime?
-  telephone       String?
-  email           String?
-  photo           String?
-  statut          String   @default("Actif")
-  priorityScouting String? // HAUTE | NORMALE | BASSE
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id               String    @id @default(cuid())
+  nom              String
+  prenom           String
+  sport            String    // football | basketball | athletisme
+  poste            String
+  niveau           String    // AMATEUR | SEMI_PRO | PRO
+  clubActuel       String?
+  valeurMarchande  Float?
+  nationalite      String    @default("RDC")
+  dateNaissance    DateTime?
+  telephone        String?
+  email            String?
+  photo            String?
+  statut           String    @default("Actif")
+  priorityScouting String?   // HAUTE | NORMALE | BASSE
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   contrats Contrat[]
 
@@ -55,21 +55,21 @@ model Athlete {
 // ─── CLIENTS ──────────────────────────────────────────────────────────────────
 
 model Client {
-  id                  String   @id @default(cuid())
-  nom                 String
-  type                String   // Club | Academie | Sponsor | Partenaire
-  rccm                String?
-  nif                 String?
-  email               String
-  telephone           String
-  adresse             String?
-  ville               String
-  secteurActivite     String?
+  id                    String   @id @default(cuid())
+  nom                   String
+  type                  String   // Club | Academie | Sponsor | Partenaire
+  rccm                  String?
+  nif                   String?
+  email                 String
+  telephone             String
+  adresse               String?
+  ville                 String
+  secteurActivite       String?
   montantSponsorisation Float?
-  contactNom          String?
-  contactPoste        String?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  contactNom            String?
+  contactPoste          String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   devis     Devis[]
   factures  Facture[]
@@ -83,14 +83,14 @@ model Client {
 // ─── PRESTATIONS ──────────────────────────────────────────────────────────────
 
 model Prestation {
-  id             String   @id @default(cuid())
-  nom            String
-  type           String   // Conseil | Gestion_carriere | Camp | Stage
-  prixBase       Float
-  dureeEstimee   String?
-  description    String?
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
+  id           String   @id @default(cuid())
+  nom          String
+  type         String   // Conseil | Gestion_carriere | Camp | Stage
+  prixBase     Float
+  dureeEstimee String?
+  description  String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
 
   @@map("prestations")
 }
@@ -98,20 +98,20 @@ model Prestation {
 // ─── DEVIS ────────────────────────────────────────────────────────────────────
 
 model Devis {
-  id          String      @id @default(cuid())
-  numero      String      @unique // DEV-2026-001
-  clientId    String
-  client      Client      @relation(fields: [clientId], references: [id])
-  lignes      Json        // [{prestationId, designation, quantite, prixUnit, total}]
-  montantHT   Float
-  tva         Float       @default(16)
-  montantTTC  Float
-  statut      DevisStatut @default(EN_ATTENTE)
-  validiteJours Int       @default(30)
-  notes       String?
-  pdfUrl      String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id            String   @id @default(cuid())
+  numero        String   @unique // DEV-2026-001
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id])
+  lignes        String   // JSON: [{prestationId, designation, quantite, prixUnit, total}]
+  montantHT     Float
+  tva           Float    @default(16)
+  montantTTC    Float
+  statut        String   @default("EN_ATTENTE") // EN_ATTENTE | VALIDE | REFUSE | CONVERTI
+  validiteJours Int      @default(30)
+  notes         String?
+  pdfUrl        String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   facture Facture?
 
@@ -121,23 +121,23 @@ model Devis {
 // ─── FACTURES ─────────────────────────────────────────────────────────────────
 
 model Facture {
-  id              String         @id @default(cuid())
-  numero          String         @unique // FACT-2026-001
-  clientId        String
-  client          Client         @relation(fields: [clientId], references: [id])
-  devisId         String?        @unique
-  devis           Devis?         @relation(fields: [devisId], references: [id])
-  lignes          Json
-  montantHT       Float
-  tva             Float          @default(16)
-  montantTTC      Float
-  acomptePercu    Float          @default(0)
-  statutPaiement  FactureStatut  @default(IMPAYEE)
-  echeanceDate    DateTime?
-  pdfUrl          String?
-  lienPaiement    String?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id             String    @id @default(cuid())
+  numero         String    @unique // FACT-2026-001
+  clientId       String
+  client         Client    @relation(fields: [clientId], references: [id])
+  devisId        String?   @unique
+  devis          Devis?    @relation(fields: [devisId], references: [id])
+  lignes         String    // JSON
+  montantHT      Float
+  tva            Float     @default(16)
+  montantTTC     Float
+  acomptePercu   Float     @default(0)
+  statutPaiement String    @default("IMPAYEE") // IMPAYEE | ACOMPTE_PERCU | PARTIELLE | PAYEE
+  echeanceDate   DateTime?
+  pdfUrl         String?
+  lienPaiement   String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   reglements Reglement[]
   projets    Projet[]
@@ -148,16 +148,16 @@ model Facture {
 // ─── RÈGLEMENTS ───────────────────────────────────────────────────────────────
 
 model Reglement {
-  id              String         @id @default(cuid())
-  factureId       String
-  facture         Facture        @relation(fields: [factureId], references: [id])
-  montant         Float
-  dateReglement   DateTime       @default(now())
-  moyenPaiement   MoyenPaiement
-  reference       String?
-  orderNumber     String?        // FlexPay order number
-  statut          String         @default("CONFIRME") // PENDING | CONFIRME | ECHEC
-  createdAt       DateTime       @default(now())
+  id            String   @id @default(cuid())
+  factureId     String
+  facture       Facture  @relation(fields: [factureId], references: [id])
+  montant       Float
+  dateReglement DateTime @default(now())
+  moyenPaiement String   // BANK | CARTE | MTN_MONEY | AIRTEL_MONEY | ORANGE_MONEY
+  reference     String?
+  orderNumber   String?
+  statut        String   @default("CONFIRME") // PENDING | CONFIRME | ECHEC
+  createdAt     DateTime @default(now())
 
   @@map("reglements")
 }
@@ -165,26 +165,26 @@ model Reglement {
 // ─── PROJETS ──────────────────────────────────────────────────────────────────
 
 model Projet {
-  id               String       @id @default(cuid())
-  numero           String       @unique // PROJ-2026-001
-  clientId         String
-  client           Client       @relation(fields: [clientId], references: [id])
-  factureId        String?
-  facture          Facture?     @relation(fields: [factureId], references: [id])
-  objet            String
-  typeProjet       String       // gestion_carriere | camp | stage
-  dateDebut        DateTime
-  dateFin          DateTime?
-  budgetTotal      Float
-  statut           ProjetStatut @default(TODO)
-  tauxAvancement   Int          @default(0)
-  notes            String?
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  id             String    @id @default(cuid())
+  numero         String    @unique // PROJ-2026-001
+  clientId       String
+  client         Client    @relation(fields: [clientId], references: [id])
+  factureId      String?
+  facture        Facture?  @relation(fields: [factureId], references: [id])
+  objet          String
+  typeProjet     String    // gestion_carriere | camp | stage
+  dateDebut      DateTime
+  dateFin        DateTime?
+  budgetTotal    Float
+  statut         String    @default("TODO") // TODO | EN_COURS | EN_ATTENTE | TERMINE
+  tauxAvancement Int       @default(0)
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  taches   Tache[]
-  jalons   Jalon[]
-  contrats Contrat[]
+  taches    Tache[]
+  jalons    Jalon[]
+  contrats  Contrat[]
   activites Activite[]
 
   @@map("projets")
@@ -193,21 +193,21 @@ model Projet {
 // ─── TÂCHES ───────────────────────────────────────────────────────────────────
 
 model Tache {
-  id                   String   @id @default(cuid())
-  projetId             String
-  projet               Projet   @relation(fields: [projetId], references: [id])
-  titre                String
-  description          String?
-  colonne              String   @default("TODO") // TODO | EN_COURS | EN_ATTENTE | TERMINE
-  position             Int      @default(0)
-  assigneeId           String?
-  assignee             User?    @relation("AssigneeTaches", fields: [assigneeId], references: [id])
-  dateEcheance         DateTime?
-  priorite             String   @default("NORMALE") // BASSE | NORMALE | HAUTE | URGENTE
-  pourcentageAvancement Int     @default(0)
-  tags                 Json?    // string[]
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  id                    String    @id @default(cuid())
+  projetId              String
+  projet                Projet    @relation(fields: [projetId], references: [id])
+  titre                 String
+  description           String?
+  colonne               String    @default("TODO") // TODO | EN_COURS | EN_ATTENTE | TERMINE
+  position              Int       @default(0)
+  assigneeId            String?
+  assignee              User?     @relation("AssigneeTaches", fields: [assigneeId], references: [id])
+  dateEcheance          DateTime?
+  priorite              String    @default("NORMALE") // BASSE | NORMALE | HAUTE | URGENTE
+  pourcentageAvancement Int       @default(0)
+  tags                  String?   // JSON: string[]
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   @@map("taches")
 }
@@ -215,14 +215,14 @@ model Tache {
 // ─── JALONS ───────────────────────────────────────────────────────────────────
 
 model Jalon {
-  id          String   @id @default(cuid())
-  projetId    String
-  projet      Projet   @relation(fields: [projetId], references: [id])
-  nom         String
-  datePrevis  DateTime
-  dateReelle  DateTime?
-  statut      String   @default("planifie") // planifie | en_cours | termine | retard
-  createdAt   DateTime @default(now())
+  id         String    @id @default(cuid())
+  projetId   String
+  projet     Projet    @relation(fields: [projetId], references: [id])
+  nom        String
+  datePrevis DateTime
+  dateReelle DateTime?
+  statut     String    @default("planifie") // planifie | en_cours | termine | retard
+  createdAt  DateTime  @default(now())
 
   @@map("jalons")
 }
@@ -230,23 +230,23 @@ model Jalon {
 // ─── CONTRATS ─────────────────────────────────────────────────────────────────
 
 model Contrat {
-  id                   String        @id @default(cuid())
-  numero               String        @unique // CONT-2026-001
-  clientId             String
-  client               Client        @relation(fields: [clientId], references: [id])
-  projetId             String?
-  projet               Projet?       @relation(fields: [projetId], references: [id])
-  athleteId            String?
-  athlete              Athlete?      @relation(fields: [athleteId], references: [id])
-  typeContrat          String
-  contenu              Json          // {article1: "...", article2: "...", ...}
-  statut               ContratStatut @default(EN_PREPARATION)
-  signeParClient       Boolean       @default(false)
-  signeParPrestataire  Boolean       @default(false)
-  dateSignature        DateTime?
-  pdfUrl               String?
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
+  id                  String    @id @default(cuid())
+  numero              String    @unique // CONT-2026-001
+  clientId            String
+  client              Client    @relation(fields: [clientId], references: [id])
+  projetId            String?
+  projet              Projet?   @relation(fields: [projetId], references: [id])
+  athleteId           String?
+  athlete             Athlete?  @relation(fields: [athleteId], references: [id])
+  typeContrat         String
+  contenu             String    // JSON: {article1: "...", ...}
+  statut              String    @default("EN_PREPARATION") // EN_PREPARATION | SIGNE | EN_COURS | EXPIRE
+  signeParClient      Boolean   @default(false)
+  signeParPrestataire Boolean   @default(false)
+  dateSignature       DateTime?
+  pdfUrl              String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   @@map("contrats")
 }
@@ -254,20 +254,20 @@ model Contrat {
 // ─── ACTIVITÉS ────────────────────────────────────────────────────────────────
 
 model Activite {
-  id              String   @id @default(cuid())
-  clientId        String
-  client          Client   @relation(fields: [clientId], references: [id])
-  projetId        String?
-  projet          Projet?  @relation(fields: [projetId], references: [id])
-  userId          String
-  user            User     @relation(fields: [userId], references: [id])
-  type            String   // APPEL | RENCONTRE | EMAIL
-  dateActivite    DateTime
-  statut          String   @default("PLANIFIE") // PLANIFIE | REALISE | ANNULE
-  resultat        String?
-  nextAction      String?
-  dateNextAction  DateTime?
-  createdAt       DateTime @default(now())
+  id             String   @id @default(cuid())
+  clientId       String
+  client         Client   @relation(fields: [clientId], references: [id])
+  projetId       String?
+  projet         Projet?  @relation(fields: [projetId], references: [id])
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  type           String   // APPEL | RENCONTRE | EMAIL
+  dateActivite   DateTime
+  statut         String   @default("PLANIFIE") // PLANIFIE | REALISE | ANNULE
+  resultat       String?
+  nextAction     String?
+  dateNextAction DateTime?
+  createdAt      DateTime @default(now())
 
   @@map("activites")
 }
@@ -275,15 +275,15 @@ model Activite {
 // ─── RAPPORTS ─────────────────────────────────────────────────────────────────
 
 model Rapport {
-  id             String   @id @default(cuid())
-  nom            String
-  type           String   // financier | activites | performance
-  periodeDebut   DateTime
-  periodeFin     DateTime
-  donnees        Json
-  createdById    String
-  createdBy      User     @relation(fields: [createdById], references: [id])
-  createdAt      DateTime @default(now())
+  id           String   @id @default(cuid())
+  nom          String
+  type         String   // financier | activites | performance
+  periodeDebut DateTime
+  periodeFin   DateTime
+  donnees      String   // JSON
+  createdById  String
+  createdBy    User     @relation(fields: [createdById], references: [id])
+  createdAt    DateTime @default(now())
 
   @@map("rapports")
 }
@@ -308,56 +308,4 @@ model Sequence {
   valeur  Int    @default(0)
 
   @@map("sequences")
-}
-
-// ─── ENUMS ────────────────────────────────────────────────────────────────────
-
-enum Role {
-  ADMIN
-  MANAGER
-  COMMERCIAL
-  COACH
-  COMPTABLE
-}
-
-enum Niveau {
-  AMATEUR
-  SEMI_PRO
-  PRO
-}
-
-enum DevisStatut {
-  EN_ATTENTE
-  VALIDE
-  REFUSE
-  CONVERTI
-}
-
-enum FactureStatut {
-  IMPAYEE
-  ACOMPTE_PERCU
-  PARTIELLE
-  PAYEE
-}
-
-enum ProjetStatut {
-  TODO
-  EN_COURS
-  EN_ATTENTE
-  TERMINE
-}
-
-enum ContratStatut {
-  EN_PREPARATION
-  SIGNE
-  EN_COURS
-  EXPIRE
-}
-
-enum MoyenPaiement {
-  BANK
-  CARTE
-  MTN_MONEY
-  AIRTEL_MONEY
-  ORANGE_MONEY
 }

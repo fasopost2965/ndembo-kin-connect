@@ -32,7 +32,7 @@ export async function contratRoutes(server: FastifyInstance) {
     };
 
     const contrat = await prisma.contrat.create({
-      data: { ...body, numero, contenu },
+      data: { ...body, numero, contenu: JSON.stringify(contenu) },
       include: { client: true },
     });
     return reply.status(201).send(contrat);

@@ -25,7 +25,7 @@ export async function clientRoutes(server: FastifyInstance) {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 20;
     const where = {
-      ...(query.search && { nom: { contains: query.search, mode: 'insensitive' as const } }),
+      ...(query.search && { nom: { contains: query.search } }),
       ...(query.type && { type: query.type }),
     };
     const [data, total] = await Promise.all([
