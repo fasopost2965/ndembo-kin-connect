@@ -579,6 +579,14 @@ export default function ContratsPage() {
   return (
     <div className="flex flex-col min-h-screen" style={{ background: '#F0F2F5' }}>
 
+      {/* Success banner */}
+      {successBanner && (
+        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 100, background: '#07101A', color: '#FCD116', fontSize: 13.5, fontWeight: 700, padding: '12px 24px', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', gap: 10, pointerEvents: 'none' }}>
+          <MI name="check_circle" size={18} style={{ color: '#34D399' }} />
+          {successBanner}
+        </div>
+      )}
+
       {/* Topbar */}
       <div className="flex items-center gap-4 px-7 shrink-0"
         style={{ background: '#fff', borderBottom: '1px solid #E8ECF1', height: 60 }}>
@@ -676,9 +684,9 @@ export default function ContratsPage() {
               <div key={c.id}
                 onClick={() => { setSelectedId(c.id); setDrawerOpen(true); }}
                 className="cursor-pointer transition-colors"
-                style={{ display: 'grid', gridTemplateColumns: COL, gap: 8, padding: '13px 22px', borderBottom: '1px solid #F8FAFC', alignItems: 'center' }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#F8FAFC')}
-                onMouseLeave={e => (e.currentTarget.style.background = '')}
+                style={{ display: 'grid', gridTemplateColumns: COL, gap: 8, padding: '13px 22px', borderBottom: '1px solid #F8FAFC', alignItems: 'center', background: newContratId === c.id ? '#FFFBEB' : undefined, outline: newContratId === c.id ? '2px solid #FCD116' : undefined, outlineOffset: newContratId === c.id ? '-2px' : undefined }}
+                onMouseEnter={e => { if (newContratId !== c.id) e.currentTarget.style.background = '#F8FAFC'; }}
+                onMouseLeave={e => { if (newContratId !== c.id) e.currentTarget.style.background = ''; }}
               >
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', fontFamily: 'monospace' }}>{c.numero}</div>
                 <div className="flex items-center gap-2.5">
@@ -792,7 +800,22 @@ export default function ContratsPage() {
       {showGenModal && (
         <GenerateModal
           onClose={() => setShowGenModal(false)}
-          onDone={() => { setShowGenModal(false); load(); }}
+          onDone={(numero) => {
+            setShowGenModal(false);
+            if (numero) setSuccessBanner(`Contrat ${numero} généré avec succès`);
+            load();
+            // After a brief delay highlight the new contract row
+            if (numero) {
+              setTimeout(() => {
+                setRows(prev => {
+                  const found = prev.find(r => r.numero === numero);
+                  if (found) { setNewContratId(found.id); setSelectedId(found.id); }
+                  return prev;
+                });
+              }, 600);
+            }
+            setTimeout(() => { setSuccessBanner(''); setNewContratId(null); }, 4000);
+          }}
         />
       )}
     </div>
